@@ -1,0 +1,12 @@
+crowdxblock/__init__.py
+crowdxblock/crowdxblock.py
+crowdxblock/static/README.txt
+crowdxblock/static/css/crowdxblock.css
+crowdxblock/static/html/crowdxblock.html
+crowdxblock/static/js/src/crowdxblock.js
+crowdxblock_xblock.egg-info/PKG-INFO
+crowdxblock_xblock.egg-info/SOURCES.txt
+crowdxblock_xblock.egg-info/dependency_links.txt
+crowdxblock_xblock.egg-info/entry_points.txt
+crowdxblock_xblock.egg-info/requires.txt
+crowdxblock_xblock.egg-info/top_level.txt
