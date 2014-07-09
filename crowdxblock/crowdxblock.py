@@ -36,11 +36,10 @@ class CrowdXBlock(XBlock):
 	answer = data["submittedanswer"]
 	if data["submittedanswer"] not in self.WrongAnswers:
 	    self.WrongAnswers.append(data["submittedanswer"]) #add user's incorrect answer to WrongAnswers
-	if data["submittedanswer"] not in self.hints:
+	if str(data["submittedanswer"]) not in self.hints:
 	    self.hints[data["submittedanswer"]] = {} #add user's incorrect answer to WrongAnswers
         for key in self.hints:
 	    try:
-    	        print("key" + str(key))
 	        temphints = str(self.hints[str(key)[0]]) #perhaps a better way to do this exists, but for now this works
 	        if str(key) == str(data["submittedanswer"]):
 		    self.HintsToUse = {}
@@ -54,7 +53,6 @@ class CrowdXBlock(XBlock):
          #   self.HintsToUse = self.DefaultHints.copy()
 	if max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
             self.Used.append(max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0]) #Highest rated hint is shown first
-	    print self.HintsToUse
 	    return {'HintsToUse': max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0]}
 	else:
 	    NotUsed = random.choice(self.HintsToUse.keys())
@@ -62,7 +60,6 @@ class CrowdXBlock(XBlock):
    	        while NotUsed in self.Used:
 		    NotUsed = random.choice(self.HintsToUse.keys()) #Choose random hint that hasn't already been Used
 	    self.Used.append(NotUsed)
-	    print self.HintsToUse
 	    return {'HintsToUse': NotUsed} #note to self dont let python get into endless notused loop
    
     @XBlock.json_handler
@@ -83,30 +80,27 @@ class CrowdXBlock(XBlock):
         for key in self.hints:
 	    tempdict = str(self.hints[str(key)[0]]) #rate hint that is in hints 
 	    tempdict = (ast.literal_eval(tempdict))
-	    if key == self.WrongAnswers[data['ansnum']]: #ansnum will the the answer/hint pair that is selected 
-		tempdict[self.Used[data['ansnum']]] += int(data["rating"])
-		self.hints[str(key)[0]] = tempdict
+	    if str(key) == str(self.WrongAnswers[data['ansnum']]): #ansnum will the the answer/hint pair that is selected 
+		tempdict[self.Used[int(data['ansnum'])]] += int(data["rating"])
+		self.hints[str(key)] = tempdict
+		print("TESTING AGAIN HI")
+		print("hints are " + str(self.hints[str(key)]))
+		print("otherstuff " + str(self.hints))
         for key in self.DefaultHints:	
-            if key == self.Used[data['ansnum']]: #rating for hints in DefaultHints
-	        self.DefaultHints[key] += int(data["rating"])
-	return {'wngans': self.WrongAnswers[data["ansnum"]], 'hntusd': self.Used[data["ansnum"]]}#
-
-    @XBlock.json_handler
-    def get_data(self, data, suffix=''): #pass hint/answer text to js to see in html
-	return {'wngans': self.WrongAnswers[data["ansnum"]], 'hntusd': self.Used[data["ansnum"]]}
+            if key == self.Used[int(data['ansnum'])]: #rating for hints in DefaultHints
+	        self.DefaultHints[str(key)] += int(data["rating"])
 
     @XBlock.json_handler
     def give_hint(self, data, suffix=''): #add student-made hint into hints
-	for key in self.hints:
-	    if key == self.WrongAnswers[data['ansnum']]:
-                for y in self.hints[self.WrongAnswers[data['ansnum']]]:
-                    if y == data['submission']: #if the exact hint already exists, +1 rate
-	                self.hints[self.WrongAnswers[data['ansnum']][y]] += int(data["rating"])
-			return {'wngans': self.WrongAnswers[data["ansnum"]], 'hntusd': self.Used[data["ansnum"]]}
-	            else:
-                        self.hints[key[data['submission']]] = 0 #add with default rating of 0
-                        return {'wngans': self.WrongAnswers[data["ansnum"]], 'hntusd': self.Used[data["ansnum"]]}
-	return {'wngans': self.WrongAnswers[data["ansnum"]], 'hntusd': self.Used[data["ansnum"]]}
+        for key in self.hints:
+	    if str(key) == str(self.WrongAnswers[0]):
+		if str(data['submission']) not in self.hints[str(key)]:
+    	            tempdict = str(self.hints[str(key)[0]]) #rate hint that is in hints 
+	            tempdict = (ast.literal_eval(tempdict))
+	            tempdict.update({data['submission']: 0})
+	            self.hints[str(key)] = tempdict
+		else:
+		    self.hints[str(key)[str(data['submission'])]] += 1
 
     @staticmethod
     def workbench_scenarios():

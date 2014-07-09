@@ -14,12 +14,31 @@
 <p>
 <span class='Thankyou'></span>
 </p>
-<p>
-<span class='WrongAnswer'></span>
+<div id="pair0" style="background-color:#FFA500;height:60px;width:400px"> <p>
+<span class='WrongAnswer0'></span>
 </p>
 <p>
-<span class='HintUsed'></span>
+<span class='HintUsed0'></span>
+</p> </div>
+<div id="pair1" style="background-color:#FFA500;height:60px;width:400px"><p>
+<span class='WrongAnswer1'></span>
 </p>
+<p>
+<span class='HintUsed1'></span>
+</p> </div>
+<div id="pair2" style="background-color:#FFA500;height:60px;width:400px"><p>
+<span class='WrongAnswer2'></span>
+</p>
+<p>
+<span class='HintUsed2'></span>
+</p> </div>
+<div id="pair3" style="background-color:#FFA500;height:60px;width:400px"><p>
+<span class='WrongAnswer3'></span>
+</p>
+<p>
+<span class='HintUsed3'></span>
+</p> </div>
+
 
         <section class="solution-span"><span id="solution_i4x-Me-19_002-problem-Numerical_Input_solution_1"></span></section></div>
 
@@ -29,7 +48,7 @@
         <input id="upvote" type="button" value="Upvote">
         <input id="downvote" type="button" value="Downvote">
     <section class="problem">
-      <span><br><span> I'm sure something will go here.</span></span>
+      <span><br><span> Enter and submit your own hint!</span></span>
           <section id="studentinput" class="textinput">
               <input type="text" name="studentinput" id="answer" class="math" size="40">
 	<input id="submit" type="button" value="Submit Hint">

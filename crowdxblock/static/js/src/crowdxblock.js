@@ -1,35 +1,4 @@
 
-/*
-    function updateCount(result) {
-        $('.count', element).text(result.count);
-    }
-    function checktheanswer(result) {
-        // capture the information from server and render your screen to show the submission result
-        $('.studentanswer', element).text(result.studentanswer);
-    }
-
-    var handlerUrl = runtime.handlerUrl(element, 'increment_count');
-    var handlerUrlcheck = runtime.handlerUrl(element, 'checkanswer');
-
-    $('#check').click(function(eventObject) {
-	capture what the user types
-
-
-        $.ajax({
-            type: "POST",
-            url: handlerUrlcheck,
-            data: JSON.stringify({"submittedanswer": $('#answer').val()}),
-            success: checktheanswer
-        });
-        $.ajax({
-            type: "POST",
-            url: handlerUrl,
-            data: JSON.stringify({"hello": "world"}),  // pass what user types to server
-            success: updateCount 
-        });
-    });
-*/
-
 //my coding attemps start here i guess
     /*this.url = this.el.data('url');
     Logger.listen('problem_graded', this.el.data('child-id'), this.capture_problem);
@@ -46,12 +15,25 @@ function CrowdXBlock(runtime, element){
     var whichanswer = 0.0;
     var WrongAnswer = [];
     var HintUsed = [];
+    $("#pair0").hide();
+    $("#pair3").hide();
+    $("#pair2").hide();
+    $("#pair1").hide();
 
     function seehint(result){//use html to show these results somewhere i guess
         $('.HintsToUse', element).text(result.HintsToUse); //text(result.self.hints?)
     }
 
     function getfeedback(result){
+	if(result.wngans0 != undefined){
+	    $("#pair0").show();
+	}if(result.wngans1 != undefined){
+	    $("#pair1").show();
+	}if(result.wngans2 != undefined){
+	    $("#pair2").show();
+	}if(result.wngans3 != undefined){
+	    $("#pair3").show();
+	}
         $('.WrongAnswer0', element).text("For your incorrect answer of: " + result.wngans0);
         $('.HintUsed0', element).text("You recieved the hint: " + result.hntusd0);
         $('.WrongAnswer1', element).text("For your incorrect answer of: " + result.wngans1);
@@ -63,53 +45,50 @@ function CrowdXBlock(runtime, element){
 	
     }
 
-    function morefeedback(result){
-	    if(whichanswer != (howmany - 1)){
-		whichanswer += 1;
-	    }
-	    console.log(howmany);
-	    console.log(whichanswer);
-	    $('.WrongAnswer', element).text("For your incorrect answer of: " + result.wngans);
-	    $('.HintUsed', element).text("You recieved the hint: " + result.hntusd);
-	    $('.Thankyou', element).text("Thankyou for your help!");
- 	}
 
-    $('#upvote', element).click(function(eventObject) {
-	if(whichanswer != howmany){
+    $('#pair0', element).click(function(eventObject) { //upvote pair0
 	$.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"rating": 1, "ansnum": whichanswer}), //return answer data to py /*answers*/
-            success: morefeedback
-        });} else{
-		$('.WrongAnswer', element).text();
-		$('.HintUsed', element).text();
-		$('.Thankyou', element).text("You're all done.");}
-    })
-    $('#downvote', element).click(function(eventObject) {
-	if(whichanswer != howmany){
+            data: JSON.stringify({"rating": 1, "ansnum": 0}),
+            success: finish
+        });})
+    $('#pair1', element).click(function(eventObject) { //upvote pair0
 	$.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"rating": -1, "ansnum": whichanswer}), //return answer data to py /*answers*/
-            success: morefeedback
-        });} else{
-		$('.WrongAnswer', element).text();
-		$('.HintUsed', element).text();
-		$('.Thankyou', element).text("You're all done.");}
-    })
+            data: JSON.stringify({"rating": 1, "ansnum": 1}),
+            success: finish
+        });})
+    $('#pair2', element).click(function(eventObject) { //upvote pair0
+	$.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'rate_hint'),
+            data: JSON.stringify({"rating": 1, "ansnum": 2}),
+            success: finish
+        });})
+    $('#pair3', element).click(function(eventObject) { //upvote pair0
+	$.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'rate_hint'),
+            data: JSON.stringify({"rating": 1, "ansnum": 3}),
+            success: finish
+        });})
     $('#submit', element).click(function(eventObject) {
-	if(whichanswer != howmany){
 	$.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'give_hint'),
-            data: JSON.stringify({"submission": $('#answer').val(), "ansnum": whichanswer}), //return answer data to py /*answers*/
-            success: morefeedback
-        });} else{
-		$('.WrongAnswer', element).text();
-		$('.HintUsed', element).text();
-		$('.Thankyou', element).text("You're all done.");}
-    })
+            data: JSON.stringify({"submission": $('#answer').val()}), //give hin for first incorrect answer
+            success: finish
+        });})
+    function finish(){
+        $("#pair0").hide();
+        $("#pair3").hide();
+        $("#pair2").hide();
+        $("#pair1").hide();
+	$('.Thankyou', element).text("Thankyou for your help!");
+	$('.correct', element).hide();
+    }
 
     $('p', element).click(function(eventObject) { //for test
       a += 1 
@@ -121,7 +100,7 @@ function CrowdXBlock(runtime, element){
             success: seehint
         });
       } else { //answer is correct
-	$('.correct', element).text("You're correct.");
+	$('.correct', element).text("You're correct! Please choose the best hint, or provide us with one of your own!");
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'get_feedback'),
