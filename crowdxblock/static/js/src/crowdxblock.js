@@ -52,14 +52,15 @@ function CrowdXBlock(runtime, element){
     }
 
     function getfeedback(result){
-	howmany = result;
-	console.log(howmany);
-	$.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'get_data'),
-            data: JSON.stringify({"ansnum": whichanswer}),
-            success: morefeedback
-        });
+        $('.WrongAnswer0', element).text("For your incorrect answer of: " + result.wngans0);
+        $('.HintUsed0', element).text("You recieved the hint: " + result.hntusd0);
+        $('.WrongAnswer1', element).text("For your incorrect answer of: " + result.wngans1);
+        $('.HintUsed1', element).text("You recieved the hint: " + result.hntusd1);
+        $('.WrongAnswer2', element).text("For your incorrect answer of: " + result.wngans2);
+        $('.HintUsed2', element).text("You recieved the hint: " + result.hntusd2);
+        $('.WrongAnswer3', element).text("For your incorrect answer of: " + result.wngans3);
+        $('.HintUsed3', element).text("You recieved the hint: " + result.hntusd3);
+	
     }
 
     function morefeedback(result){
@@ -112,7 +113,7 @@ function CrowdXBlock(runtime, element){
 
     $('p', element).click(function(eventObject) { //for test
       a += 1 
-      if (a != 5) { //when answer is incorrect        /*response.search(/class="correct/) === -1*/
+      if (a != 4) { //when answer is incorrect        /*response.search(/class="correct/) === -1*/
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'get_hint'),
