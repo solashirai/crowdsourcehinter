@@ -1,8 +1,8 @@
-
 import pkg_resources
 import logging
 import operator
 import random
+import ast
 
 from xblock.core import XBlock
 from xblock.fields import Scope, Integer, Boolean, String, Dict, List
@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 #get_hint and get_feedback are in 
 class CrowdXBlock(XBlock):
 
-    hints = Dict(default={}, scope=Scope.content) #All hints. sorted by type of mistake. type_of_incorrect_answer{"hint":rating, "hint":rating}
+    hints = Dict(default={"1": {"hint1":10, "hint2":0, "hint3":0, "hint4":0}, "2": {"hint12":0, "hint22":0, "hints32":0}}, scope=Scope.content) #All hints. sorted by type of mistake. type_of_incorrect_answer{"hint":rating, "hint":rating}
     HintsToUse = Dict(default={}, scope=Scope.user_state) #Dict of hints to provide user
     WrongAnswers = List(default=[], scope=Scope.user_state) #List of mistakes made by user
     DefaultHints = Dict(default={"hint": 100, "hinttwo": 10, "hintthree": 0, "hintasdf": 50, "aas;dklfj?": 1000, "SuperDuperBestHint": 10000}, scope=Scope.content) #Default hints in case no incorrect answers in hints match the user's mistake
@@ -39,15 +39,17 @@ class CrowdXBlock(XBlock):
 	if data["submittedanswer"] not in self.hints:
 	    self.hints[data["submittedanswer"]] = {} #add user's incorrect answer to WrongAnswers
         for key in self.hints:
+	    print("key" + str(key))
+	    temphints = str(self.hints[str(key)[0]]) #perhaps a better way to do this exists, but for now this works
 	    if key == data["submittedanswer"]:
-   	        for y in self.hints[key]:
-		    self.HintsToUse[y] += self.hints[key[y]] #If the user's incorrect answre has precedence in hints, add hints listed under
-        if len(self.HintsToUse) < 2:                         #incorrect answer to HintsToUse
+		self.HintsToUse.update(ast.literal_eval(temphints))
+        if len(self.HintsToUse) <= 2:                         #incorrect answer to HintsToUse
             self.HintsToUse.update(self.DefaultHints) #Use DefaultHints if there aren't enough other hints
-	else:
-            self.HintsToUse = self.DefaultHints.copy()
+	#else:
+         #   self.HintsToUse = self.DefaultHints.copy()
 	if len(self.WrongAnswers) == 1:
             self.Used.append(max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0]) #Highest rated hint is shown first
+	    print self.HintsToUse
 	    return {'HintsToUse': max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0]}
 	else:
 	    NotUsed = random.choice(self.HintsToUse.keys())
@@ -55,6 +57,7 @@ class CrowdXBlock(XBlock):
    	        while NotUsed in self.Used:
 		    NotUsed = random.choice(self.HintsToUse.keys()) #Choose random hint that hasn't already been Used
 	    self.Used.append(NotUsed)
+	    print self.HintsToUse
 	    return {'HintsToUse': NotUsed} #note to self dont let python get into endless notused loop
    
     @XBlock.json_handler
@@ -103,3 +106,9 @@ class CrowdXBlock(XBlock):
                 </vertical_demo>
              """),
         ]
+'''
+		print ("answer" + str(data["submittedanswer"]))
+   	        for keys in self.hints[key]:
+		    print ("other key" + y)
+		    self.HintsToUse[keys] = self.hints[key[keys]] #If the user's incorrect answre has precedence in hints, add hints listed under
+     		    print("hintstouse: " + str(self.HintsToUse[keys]))'''
