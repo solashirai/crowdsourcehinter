@@ -18,6 +18,7 @@ class CrowdXBlock(XBlock):
     WrongAnswers = List(default=[], scope=Scope.user_state) #List of mistakes made by user
     DefaultHints = Dict(default={"hint": 100, "hinttwo": 10, "hintthree": 0, "hintasdf": 50, "aas;dklfj?": 1000, "SuperDuperBestHint": 10000}, scope=Scope.content) #Default hints in case no incorrect answers in hints match the user's mistake
     Used = List(default=[], scope=Scope.user_state)#List of used hints from HintsToUse
+    Voted = Integer(default=0, scope=Scope.user_state)
 
     def student_view(self, context=None):
         html = self.resource_string("static/html/crowdxblock.html")
@@ -77,30 +78,36 @@ class CrowdXBlock(XBlock):
     
     @XBlock.json_handler #add 1 or -1 to rating of a hint
     def rate_hint(self, data, suffix=''):
-        for key in self.hints:
-	    tempdict = str(self.hints[str(key)[0]]) #rate hint that is in hints 
-	    tempdict = (ast.literal_eval(tempdict))
-	    if str(key) == str(self.WrongAnswers[data['ansnum']]): #ansnum will the the answer/hint pair that is selected 
-		tempdict[self.Used[int(data['ansnum'])]] += int(data["rating"])
-		self.hints[str(key)] = tempdict
-		print("TESTING AGAIN HI")
-		print("hints are " + str(self.hints[str(key)]))
-		print("otherstuff " + str(self.hints))
-        for key in self.DefaultHints:	
-            if key == self.Used[int(data['ansnum'])]: #rating for hints in DefaultHints
-	        self.DefaultHints[str(key)] += int(data["rating"])
+	if self.Voted == 0:
+            for key in self.hints:
+	        tempdict = str(self.hints[str(key)[0]]) #rate hint that is in hints 
+	        tempdict = (ast.literal_eval(tempdict))
+	        if str(key) == str(self.WrongAnswers[data['ansnum']]): #ansnum will the the answer/hint pair that is selected 
+		    tempdict[self.Used[int(data['ansnum'])]] += int(data["rating"])
+		    self.hints[str(key)] = tempdict
+		    print("TESTING AGAIN HI")
+		    print("hints are " + str(self.hints[str(key)]))
+		    print("otherstuff " + str(self.hints))
+		    self.Voted = 1
+            for key in self.DefaultHints:	
+                if key == self.Used[int(data['ansnum'])]: #rating for hints in DefaultHints
+	            self.DefaultHints[str(key)] += int(data["rating"])
+		    self.Voted = 1
 
     @XBlock.json_handler
     def give_hint(self, data, suffix=''): #add student-made hint into hints
-        for key in self.hints:
-	    if str(key) == str(self.WrongAnswers[0]):
-		if str(data['submission']) not in self.hints[str(key)]:
-    	            tempdict = str(self.hints[str(key)[0]]) #rate hint that is in hints 
-	            tempdict = (ast.literal_eval(tempdict))
-	            tempdict.update({data['submission']: 0})
-	            self.hints[str(key)] = tempdict
-		else:
-		    self.hints[str(key)[str(data['submission'])]] += 1
+	if self.Voted == 0:
+            for key in self.hints:
+	        if str(key) == str(self.WrongAnswers[0]):
+		    if str(data['submission']) not in self.hints[str(key)]:
+    	                tempdict = str(self.hints[str(key)[0]]) #rate hint that is in hints 
+	                tempdict = (ast.literal_eval(tempdict))
+	                tempdict.update({data['submission']: 0})
+	                self.hints[str(key)] = tempdict
+		        self.Voted = 1
+		    else:
+		        self.hints[str(key)[str(data['submission'])]] += 1
+		        self.Voted = 1
 
     @staticmethod
     def workbench_scenarios():
