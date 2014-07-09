@@ -66,11 +66,17 @@ class CrowdXBlock(XBlock):
 	    return {'HintsToUse': NotUsed} #note to self dont let python get into endless notused loop
    
     @XBlock.json_handler
-    def get_feedback(self, data, suffix=''): #feedback, either rating or making a hint, starts here
+    def get_feedback(self, data, suffix=''): #start feedback, sent hint/answer data 
+	feedbackdict = {}
 	if len(self.WrongAnswers) == 0:
 	    return #Do nothing if no mistakes were made
 	else:      #lenth of Used will be used to dictate flow of feedback
-	    return {'lenused': int(len(self.Used))}
+	    for i in range(0, len(self.Used)):
+		ans = str('wngans' + str(i))
+		hnt = str('hntusd' + str(i))
+		feedbackdict[ans] = str(self.WrongAnswers[i])
+		feedbackdict[hnt] = str(self.Used[i])
+	    return feedbackdict
     
     @XBlock.json_handler #add 1 or -1 to rating of a hint
     def rate_hint(self, data, suffix=''):
