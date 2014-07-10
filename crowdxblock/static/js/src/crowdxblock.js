@@ -10,21 +10,22 @@
       response = data[1];*/ //use this snippet for actual code? maybe?
 
 function CrowdXBlock(runtime, element){
-    var a = 0 //test
-    var howmany = 0.0;
-    var whichanswer = 0.0;
     var WrongAnswer = [];
     var HintUsed = [];
     $("#pair0").hide();
     $("#pair3").hide();
     $("#pair2").hide();
     $("#pair1").hide();
+    $("#answer").hide();
+    $(".problem").hide();
 
     function seehint(result){//use html to show these results somewhere i guess
         $('.HintsToUse', element).text(result.HintsToUse); //text(result.self.hints?)
     }
 
     function getfeedback(result){
+        $("#answer").show();
+        $(".problem").show();
 	if(result.wngans0 != undefined){
 	    $("#pair0").show();
 	}if(result.wngans1 != undefined){
@@ -81,6 +82,15 @@ function CrowdXBlock(runtime, element){
             data: JSON.stringify({"submission": $('#answer').val()}), //give hin for first incorrect answer
             success: finish
         });})
+
+    $('#caus', element).click(function(eventObject) {
+	console.debug("ca working");
+	$.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'clear_states'),
+            data: JSON.stringify({"hello": "world"}), //give hin for first incorrect answer
+            success: clearstates
+        });})
     function finish(){
         $("#pair0").hide();
         $("#pair3").hide();
@@ -89,17 +99,26 @@ function CrowdXBlock(runtime, element){
 	$('.Thankyou', element).text("Thankyou for your help!");
 	$('.correct', element).hide();
     }
+    function clearstates(){
+	$("#pair0").hide();
+        $("#pair3").hide();
+        $("#pair2").hide();
+        $("#pair1").hide();
+        $("#answer").hide();
+        $(".problem").hide();
+        $('.WrongAnswer0', element).text();
+        $('.HintUsed0', element).text();
+        $('.WrongAnswer1', element).text();
+        $('.HintUsed1', element).text();
+        $('.WrongAnswer2', element).text();
+        $('.HintUsed2', element).text();
+        $('.WrongAnswer3', element).text();
+        $('.HintUsed3', element).text();
+    }
 
-    $('p', element).click(function(eventObject) { //for test
-      a += 1 
-      if (a != 4) { //when answer is incorrect        /*response.search(/class="correct/) === -1*/
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'get_hint'),
-            data: JSON.stringify({"submittedanswer": a}), //return student's incorrect answer here
-            success: seehint
-        });
-      } else { //answer is correct
+    function checkreply(result){
+	if(result.correct == 1){ 
+        console.debug("yay");
 	$('.correct', element).text("You're correct! Please choose the best hint, or provide us with one of your own!");
         $.ajax({
             type: "POST",
@@ -107,6 +126,27 @@ function CrowdXBlock(runtime, element){
             data: JSON.stringify({"hello": "world"}), 
             success: getfeedback
         });
-      };
+        }else{
+	console.debug("nay");
+	seehint(result)
+        }
+    }
+    $('#studentanswer', element).click(function(eventObject) { //for test //when answer is incorrect        /*response.search(/class="correct/) === -1*/
+	console.debug($('#studentsubmit').val()); //currently data is passed to python and then returned whether it is correct or not
+        $.ajax({                                  //that probably will be changed once i use response.search or something?
+            type: "POST",                         //if/when that is changed, remove checkreply and uncomment the else statement below
+            url: runtime.handlerUrl(element, 'get_hint'),
+            data: JSON.stringify({"submittedanswer": $('#studentsubmit').val()}), //return student's incorrect answer here
+            success: checkreply
+        });
+     /* } else { //answer is correct
+	$('.correct', element).text("You're correct! Please choose the best hint, or provide us with one of your own!");
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'get_feedback'),
+            data: JSON.stringify({"hello": "world"}), 
+            success: getfeedback
+        });
+      };*/
     }
 )}
