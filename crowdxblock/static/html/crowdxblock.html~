@@ -1,14 +1,13 @@
 <div class="crowdxblock_block"> <!--most stuff just for testing purposes-->
-<p>CrowdXBlock:  hints here? <span class='HintsToUse'>{self.HintsToUse}</span>
+<p>CrowdXBlock:  HINT! <span class='HintsToUse'>{self.HintsToUse}</span>
 </p>
+      <span><br><span> Dummy Answer Input Here</span></span>
+          <section id="studentinput" class="textinput">
+              <input type="text" name="studentanswer" id="studentsubmit" class="math" size="40">
+	<input id="studentanswer" type="button" value="Submit Answer">
+
 </div>
 <div class="crowdxblock_block">
-<p>CrowdXBlock: Your last answer:
-</p>
-
-    <h2 class="problem-header">
-      Numerical Input
-    </h2>
 
     <section class="correct"></section>
 <p>
@@ -45,15 +44,16 @@
       <section class="action">
         <input type="hidden" name="problem_id" value="Numerical Input">
 
-        <input id="upvote" type="button" value="Upvote">
-        <input id="downvote" type="button" value="Downvote">
     <section class="problem">
       <span><br><span> Enter and submit your own hint!</span></span>
           <section id="studentinput" class="textinput">
               <input type="text" name="studentinput" id="answer" class="math" size="40">
 	<input id="submit" type="button" value="Submit Hint">
-        </div></section></span>
 
+        </div></section></span><p>
+<input id="cu" type="button" value="clearUsed"><input id="cw" type="button" value="clearWrong"><input id="cv" type="button" value="clearVoted"><input id="ch" type="button" value="clearHintsToUse">
+<input id="caus" type="button" value="clearAllUserState">
+</p>
       </section>
 
     </section>
