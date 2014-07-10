@@ -1,5 +1,5 @@
-<div class="crowdxblock_block"> <!--most stuff just for testing purposes-->
-<p>CrowdXBlock:  HINT! <span class='HintsToUse'>{self.HintsToUse}</span>
+<div class="crowdxblock_block" style="background-color:#00FFFF;">  <!--most stuff just for testing purposes-->
+<p>It's Hintin' Time! Here's your hint! <span class='HintsToUse'>{self.HintsToUse}</span>
 </p>
       <span><br><span> Dummy Answer Input Here</span></span>
           <section id="studentinput" class="textinput">
@@ -37,6 +37,9 @@
 <p>
 <span class='HintUsed3'></span>
 </p> </div>
+<p>
+<input id="caus" type="button" value="clearAllUserState">
+</p>
 
 
         <section class="solution-span"><span id="solution_i4x-Me-19_002-problem-Numerical_Input_solution_1"></span></section></div>
@@ -50,10 +53,7 @@
               <input type="text" name="studentinput" id="answer" class="math" size="40">
 	<input id="submit" type="button" value="Submit Hint">
 
-        </div></section></span><p>
-<input id="cu" type="button" value="clearUsed"><input id="cw" type="button" value="clearWrong"><input id="cv" type="button" value="clearVoted"><input id="ch" type="button" value="clearHintsToUse">
-<input id="caus" type="button" value="clearAllUserState">
-</p>
+        </div></section></span>
       </section>
 
     </section>

@@ -4,7 +4,7 @@
     font-weight: bold;
 }
 
-.crowdxblock_block p {
+.crowdxblock_block button {
     cursor: pointer;
 }
 
@@ -14,7 +14,7 @@
   display: none;
   margin-top: 20px;
   padding: (15px);
-  background: rgb(253, 248, 235);
+  background: rgb(50, 50, 235);
 }
 
 .crowdxblock_block .hint-inner-container {
