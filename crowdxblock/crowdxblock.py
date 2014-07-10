@@ -112,8 +112,23 @@ class CrowdXBlock(XBlock):
 		        print("hints are " + str(self.hints[str(key)]))
 		        print("otherstuff " + str(self.hints))
 		    else:
-		        self.hints[str(key)[str(data['submission'])]] += 1
-		        self.Voted = 1
+			ansnum = self.Used.index(data['submission'])
+		        for key in self.DefaultHints:	
+                            if key == self.Used[int(ansnum)]: #rating for hints in DefaultHints
+	            		self.DefaultHints[str(key)] += int(1)
+		    		self.Voted = 1
+		    		print str(self.DefaultHints)
+		   		return
+            		for key in self.hints:
+	        	    tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
+	        	    tempdict = (ast.literal_eval(tempdict))
+	        	    if str(key) == str(self.WrongAnswers[int(ansnum)]): #ansnum will the the answer/hint pair that is selected 
+		    		tempdict[self.Used[int(ansnum)]] += int(1)
+		    		self.hints[str(key)] = tempdict
+		    		print("TESTING AGAIN HI")
+		    		print("hints are " + str(self.hints[str(key)]))
+		    		print("otherstuff " + str(self.hints))
+		    		self.Voted = 1
 
     @XBlock.json_handler
     def clear_states(self, data, suffix=''):
