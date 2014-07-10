@@ -12,13 +12,13 @@ log = logging.getLogger(__name__)
 
 #get_hint and get_feedback are in 
 class CrowdXBlock(XBlock):
-    correctanswer = String(default="42", scope=Scope.content)
+    correctanswer = String(default="42", scope=Scope.content) #should be irrelevant for completed version
     hints = Dict(default={"75": {"hint12":10, "hint22":0, "hints32":0}, "1": {"hint1":1, "hint2":1, "hint3":0}, "roflcopter": {"HighFyve":1000}}, scope=Scope.content) #All hints. sorted by type of mistake. type_of_incorrect_answer{"hint":rating, "hint":rating}
     HintsToUse = Dict(default={}, scope=Scope.user_state) #Dict of hints to provide user
     WrongAnswers = List(default=[], scope=Scope.user_state) #List of mistakes made by user
     DefaultHints = Dict(default={"hint": 100, "hinttwo": 10, "hintthree": 0, "hintasdf": 50, "aas;dklfj?": 1000, "SuperDuperBestHint": 10000}, scope=Scope.content) #Default hints in case no incorrect answers in hints match the user's mistake
     Used = List(default=[], scope=Scope.user_state)#List of used hints from HintsToUse
-    Voted = Integer(default=0, scope=Scope.user_state)
+    Voted = Integer(default=0, scope=Scope.user_state)#prevent multiple votes/hint submission
 
     def student_view(self, context=None):
         html = self.resource_string("static/html/crowdxblock.html")

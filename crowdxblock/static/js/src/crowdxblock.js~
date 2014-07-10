@@ -81,7 +81,9 @@ function CrowdXBlock(runtime, element){
             url: runtime.handlerUrl(element, 'give_hint'),
             data: JSON.stringify({"submission": $('#answer').val()}), //give hin for first incorrect answer
             success: finish
-        });})
+        });
+	$("#answer").val('');})
+
     $('#caus', element).click(function(eventObject) {
 	console.debug("ca working");
 	$.ajax({
@@ -89,7 +91,9 @@ function CrowdXBlock(runtime, element){
             url: runtime.handlerUrl(element, 'clear_states'),
             data: JSON.stringify({"hello": "world"}), //give hin for first incorrect answer
             success: clearstates
-        });})
+        });
+	$("#studentsubmit").val('');
+	$("#answer").val('');})
     function finish(){
         $("#pair0").hide();
         $("#pair3").hide();
@@ -138,6 +142,7 @@ function CrowdXBlock(runtime, element){
             data: JSON.stringify({"submittedanswer": $('#studentsubmit').val()}), //return student's incorrect answer here
             success: checkreply
         });
+        $("#studentsubmit").val('');
      /* } else { //answer is correct
 	$('.correct', element).text("You're correct! Please choose the best hint, or provide us with one of your own!");
         $.ajax({
