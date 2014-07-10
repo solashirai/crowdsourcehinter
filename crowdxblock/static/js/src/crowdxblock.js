@@ -18,6 +18,7 @@ function CrowdXBlock(runtime, element){
     $("#pair1").hide();
     $("#answer").hide();
     $(".problem").hide();
+    $("#feedback").hide();
 
     function seehint(result){//use html to show these results somewhere i guess
         $('.HintsToUse', element).text(result.HintsToUse); //text(result.self.hints?)
@@ -26,53 +27,21 @@ function CrowdXBlock(runtime, element){
     function getfeedback(result){
         $("#answer").show();
         $(".problem").show();
-	if(result.wngans0 != undefined){
-	    $("#pair0").show();
-	}if(result.wngans1 != undefined){
-	    $("#pair1").show();
-	}if(result.wngans2 != undefined){
-	    $("#pair2").show();
-	}if(result.wngans3 != undefined){
-	    $("#pair3").show();
-	}
-        $('.WrongAnswer0', element).text("For your incorrect answer of: " + result.wngans0);
-        $('.HintUsed0', element).text("You recieved the hint: " + result.hntusd0);
-        $('.WrongAnswer1', element).text("For your incorrect answer of: " + result.wngans1);
-        $('.HintUsed1', element).text("You recieved the hint: " + result.hntusd1);
-        $('.WrongAnswer2', element).text("For your incorrect answer of: " + result.wngans2);
-        $('.HintUsed2', element).text("You recieved the hint: " + result.hntusd2);
-        $('.WrongAnswer3', element).text("For your incorrect answer of: " + result.wngans3);
-        $('.HintUsed3', element).text("You recieved the hint: " + result.hntusd3);
-	
-    }
+	$("#feedback").show();
+	$.each(result, function(index, value) {
+	console.log( index + ": " + value );
+	$('.hintansarea').append("<p> For your incorrect answer of:" + " " + value + "</p> <p> You received the hint:" + " " + index + " <input id\"" + index + "\" type=\"button\" class=\"hintbutton\" value=\"Upvote this Hint\"> </p>");
+	});
+};
 
-
-    $('#pair0', element).click(function(eventObject) { //upvote pair0
+    $(document).on('click', '.hintbutton', function(){ //upvote
+	console.log("please show me something");
+	id = this.id;
+	console.log($(this).id());
 	$.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"rating": 1, "ansnum": 0}),
-            success: finish
-        });})
-    $('#pair1', element).click(function(eventObject) { //upvote pair0
-	$.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"rating": 1, "ansnum": 1}),
-            success: finish
-        });})
-    $('#pair2', element).click(function(eventObject) { //upvote pair0
-	$.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"rating": 1, "ansnum": 2}),
-            success: finish
-        });})
-    $('#pair3', element).click(function(eventObject) { //upvote pair0
-	$.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"rating": 1, "ansnum": 3}),
+            data: JSON.stringify({"rating": 1, "ansnum": $(this).attr('id')}),
             success: finish
         });})
     $('#submit', element).click(function(eventObject) {

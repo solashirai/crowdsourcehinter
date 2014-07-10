@@ -1,10 +1,11 @@
+
 <div class="crowdxblock_block">  <!--most stuff just for testing purposes-->
 <p>It's Hintin' Time! Here's your hint! <span class='HintsToUse'>{self.HintsToUse}</span>
 </p>
       <span><br><span> Dummy Answer Input Here</span></span>
           <section id="studentinput" class="textinput">
               <input type="text" name="studentanswer" id="studentsubmit" class="math" size="40">
-	<input id="studentanswer" type="button" value="Submit Answer">
+	<input id="studentanswer" type="button" class="button" value="Submit Answer">
 
 </div>
 <div class="crowdxblock_block">
@@ -13,32 +14,14 @@
 <p>
 <span class='Thankyou'></span>
 </p>
-<div id="pair0" style="background-color:#FFA500;height:60px;width:400px"> <p>
-<span class='WrongAnswer0'></span>
-</p>
+
+<script id="feedback">
+var hintused = []
+var wronganswer = []
+</script>
+
 <p>
-<span class='HintUsed0'></span>
-</p> </div>
-<div id="pair1" style="background-color:#FFA500;height:60px;width:400px"><p>
-<span class='WrongAnswer1'></span>
-</p>
-<p>
-<span class='HintUsed1'></span>
-</p> </div>
-<div id="pair2" style="background-color:#FFA500;height:60px;width:400px"><p>
-<span class='WrongAnswer2'></span>
-</p>
-<p>
-<span class='HintUsed2'></span>
-</p> </div>
-<div id="pair3" style="background-color:#FFA500;height:60px;width:400px"><p>
-<span class='WrongAnswer3'></span>
-</p>
-<p>
-<span class='HintUsed3'></span>
-</p> </div>
-<p>
-<input id="caus" type="button" value="clearAllUserState">
+<input id="caus" type="button" class="button" value="clearAllUserState">
 </p>
 
 
@@ -51,7 +34,7 @@
       <span><br><span> Enter and submit your own hint!</span></span>
           <section id="studentinput" class="textinput">
               <input type="text" name="studentinput" id="answer" class="math" size="40">
-	<input id="submit" type="button" value="Submit Hint">
+	<input id="submit" type="button" class="button" value="Submit Hint">
 
         </div></section></span>
       </section>
