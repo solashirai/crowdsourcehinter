@@ -71,21 +71,23 @@ function CrowdXBlock(runtime, element){
 	$("#studentsubmit").val('');
 	$("#answer").val('');})
     function finish(){
-        $(".hintbutton").hide();
 	$('.Thankyou', element).text("Thankyou for your help!");
 	$('.correct', element).hide();
-	$(".hintansarea").hide();
+        $( ".hintansarea" ).empty();
     }
     function clearstates(){
-	$(".hintansarea").hide();
-        $(".hintbutton").hide();
+	$('.Thankyou', element).text();
+	$('.correct', element).hide();
+        $( ".hintansarea" ).empty();
         $("#answer").hide();
         $(".problem").hide();
     }
 
     function checkreply(result){
+	
 	if(result.correct == 1){ 
         console.debug("yay");
+	$('.correct', element).show();
 	$('.correct', element).text("You're correct! Please choose the best hint, or provide us with one of your own!");
         $.ajax({
             type: "POST",
