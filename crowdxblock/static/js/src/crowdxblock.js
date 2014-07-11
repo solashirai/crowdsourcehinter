@@ -30,25 +30,32 @@ function CrowdXBlock(runtime, element){
 	$("#feedback").show();
 	$.each(result, function(index, value) {
 	console.log( index + ": " + value );
-	$('.hintansarea').append("<p> For your incorrect answer of:" + " " + value + "</p> <p> You received the hint:" + " " + index + " <input id\"" + index + "\" type=\"button\" class=\"hintbutton\" value=\"Upvote this Hint\"> </p>");
+	$('.hintansarea').append("<p id=\"submit" + index + "\"> For your incorrect answer of:" + " " + value + "</p> <p> You received the hint:" + " " + index + " <input id=\"" + index + "\" type=\"button\" class=\"hintbutton\" value=\"Upvote this Hint\"> </p><p> <input id=\"" + index + "\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint for this problem\">");
 	});
 };
 
     $(document).on('click', '.hintbutton', function(){ //upvote
-	console.log("please show me something");
+	console.log("the first id" + this.id);
 	id = this.id;
-	console.log($(this).id());
+	console.log($(this).attr('id'));
 	$.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
             data: JSON.stringify({"rating": 1, "ansnum": $(this).attr('id')}),
             success: finish
         });})
-    $('#submit', element).click(function(eventObject) {
+    $(document).on('click', '.submitbutton', function(){ //upvote
+	console.log("submitbutton hit");
+	id = this.id;
+	console.log("this id " + $(this).attr('id'));
+	$('#submit' + id).append("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><<input id=\"submit\" type=\"button\" class=\"button\" value=\"Submit Hint\"> </p>");})
+    $(document).on('click', '#submit', function(){
+        console.log("the other id thing" + this.id);
+        console.log("thisthing" + $(".math").attr('id'));
 	$.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'give_hint'),
-            data: JSON.stringify({"submission": $('#answer').val()}), //give hin for first incorrect answer
+            data: JSON.stringify({"submission": $('.math').val(), "id": $(".math").attr('id')}), //give hin for first incorrect answer
             success: finish
         });
 	$("#answer").val('');})
@@ -64,28 +71,16 @@ function CrowdXBlock(runtime, element){
 	$("#studentsubmit").val('');
 	$("#answer").val('');})
     function finish(){
-        $("#pair0").hide();
-        $("#pair3").hide();
-        $("#pair2").hide();
-        $("#pair1").hide();
+        $(".hintbutton").hide();
 	$('.Thankyou', element).text("Thankyou for your help!");
 	$('.correct', element).hide();
+	$(".hintansarea").hide();
     }
     function clearstates(){
-	$("#pair0").hide();
-        $("#pair3").hide();
-        $("#pair2").hide();
-        $("#pair1").hide();
+	$(".hintansarea").hide();
+        $(".hintbutton").hide();
         $("#answer").hide();
         $(".problem").hide();
-        $('.WrongAnswer0', element).text();
-        $('.HintUsed0', element).text();
-        $('.WrongAnswer1', element).text();
-        $('.HintUsed1', element).text();
-        $('.WrongAnswer2', element).text();
-        $('.HintUsed2', element).text();
-        $('.WrongAnswer3', element).text();
-        $('.HintUsed3', element).text();
     }
 
     function checkreply(result){
