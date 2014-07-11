@@ -34,110 +34,113 @@ class CrowdXBlock(XBlock):
 
     @XBlock.json_handler
     def get_hint(self, data, suffix=''): #get hints into HintsToUse dict, pass on to user
-	answer = str(data["submittedanswer"])
-	if str(data["submittedanswer"]) == self.correctanswer:
-	    return{"correct": 1}
-	hintsarehere = 0
-	self.WrongAnswers.append(str(data["submittedanswer"])) #add user's incorrect answer to WrongAnswers
+        answer = str(data["submittedanswer"])
+        if str(data["submittedanswer"]) == self.correctanswer:
+            return{"correct": 1}
+        hintsarehere = 0
+        self.WrongAnswers.append(str(data["submittedanswer"])) #add user's incorrect answer to WrongAnswers
         for key in self.hints:
-	    temphints = str(self.hints[str(key)]) #perhaps a better way to do this exists, but for now this works
-	    if str(key) == str(data["submittedanswer"]):
-		print("HI HEllO")
-		self.HintsToUse = {}
-		self.HintsToUse.update(ast.literal_eval(temphints))
-		for key in self.HintsToUse:
-		    if key not in self.Used:
-         		hintsarehere = 1
-	if hintsarehere == 0:
-	    print("PLSDONTHAPPENDOE")
+            temphints = str(self.hints[str(key)]) #perhaps a better way to do this exists, but for now this works
+            if str(key) == str(data["submittedanswer"]):
+                print("HI HEllO")
+                self.HintsToUse = {}
+                self.HintsToUse.update(ast.literal_eval(temphints))
+        for key in self.HintsToUse:
+            if key not in self.Used:
+                 hintsarehere = 1
+                 print("hints are here doe")
+        if hintsarehere == 0:
+            print("PLSDONTHAPPENDOE")
             self.HintsToUse.update(self.DefaultHints) #Use DefaultHints if there aren't enough other hints
-	if str(data["submittedanswer"]) not in self.hints:
-	    self.hints[str(data["submittedanswer"])] = {} #add user's incorrect answer to WrongAnswers
-	if max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
+        if str(data["submittedanswer"]) not in self.hints:
+            self.hints[str(data["submittedanswer"])] = {} #add user's incorrect answer to WrongAnswers
+        if max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
             self.Used.append(max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0]) #Highest rated hint is shown first
-	    return {'HintsToUse': max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0]}
-	else:
-	    NotUsed = random.choice(self.HintsToUse.keys())
-	    if len(NotUsed) != len(self.Used):
-   	        while NotUsed in self.Used:
-		    NotUsed = random.choice(self.HintsToUse.keys()) #Choose random hint that hasn't already been Used
-	    self.Used.append(NotUsed)
-	    return {'HintsToUse': NotUsed} #note to self dont let python get into endless notused loop
+            return {'HintsToUse': max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0]}
+        else:
+            NotUsed = random.choice(self.HintsToUse.keys())
+            if len(NotUsed) != len(self.Used):
+                while NotUsed in self.Used:
+                    NotUsed = random.choice(self.HintsToUse.keys()) #Choose random hint that hasn't already been Used
+            self.Used.append(NotUsed)
+            return {'HintsToUse': NotUsed} #note to self dont let python get into endless notused loop
    
     @XBlock.json_handler
     def get_feedback(self, data, suffix=''): #start feedback, sent hint/answer data 
-	feedbackdict = {}
-	if len(self.WrongAnswers) == 0:
-	    return #Do nothing if no mistakes were made
-	else:      #lenth of Used will be used to dictate flow of feedback
-	    for i in range(0, len(self.Used)):
-		ans = str('wngans' + str(i))
-		hnt = str('hntusd' + str(i))
-		feedbackdict[str(self.Used[i])] = str(self.WrongAnswers[i])
-	    print str(feedbackdict)
-	    return feedbackdict
+        feedbackdict = {}
+        if len(self.WrongAnswers) == 0:
+            return #Do nothing if no mistakes were made
+        else:      #lenth of Used will be used to dictate flow of feedback
+            for i in range(0, len(self.Used)):
+                ans = str('wngans' + str(i))
+                hnt = str('hntusd' + str(i))
+                feedbackdict[str(self.Used[i])] = str(self.WrongAnswers[i])
+            print str(feedbackdict)
+            return feedbackdict
     
     @XBlock.json_handler #add 1 or -1 to rating of a hint
     def rate_hint(self, data, suffix=''):
-	ansnum = self.Used.index(str(data['ansnum']))
-	print("ansnum is" +  ansnum)
-	if self.Voted == 0:
+        ansnum = self.Used.index(str(data['ansnum']))
+        print("ansnum is" +  str(ansnum))
+        if self.Voted == 0:
             for key in self.DefaultHints:	
                 if key == self.Used[int(ansnum)]: #rating for hints in DefaultHints
-	            self.DefaultHints[str(key)] += int(data["rating"])
-		    self.Voted = 1
-		    print str(self.DefaultHints)
-		    return
+                    self.DefaultHints[str(key)] += int(data["rating"])
+                    self.Voted = 1
+                    print str(self.DefaultHints)
+                    return
             for key in self.hints:
-	        tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
-	        tempdict = (ast.literal_eval(tempdict))
-	        if str(key) == str(self.WrongAnswers[ansnum]): #ansnum will the the answer/hint pair that is selected 
-		    tempdict[self.Used[int(ansnum)]] += int(data["rating"])
-		    self.hints[str(key)] = tempdict
-		    print("TESTING AGAIN HI")
-		    print("hints are " + str(self.hints[str(key)]))
-		    print("otherstuff " + str(self.hints))
-		    self.Voted = 1
+                tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
+                tempdict = (ast.literal_eval(tempdict))
+                if str(key) == str(self.WrongAnswers[ansnum]): #ansnum will the the answer/hint pair that is selected 
+                    tempdict[self.Used[int(ansnum)]] += int(data["rating"])
+                    self.hints[str(key)] = tempdict
+                    print("TESTING AGAIN HI")
+                    print("hints are " + str(self.hints[str(key)]))
+                    print("otherstuff " + str(self.hints))
+                    self.Voted = 1
 
     @XBlock.json_handler
     def give_hint(self, data, suffix=''): #add student-made hint into hints
-	if self.Voted == 0:
+        if self.Voted == 0:
             for key in self.hints:
-	        if str(key) == str(self.WrongAnswers[0]):
-		    if str(data['submission']) not in self.hints[str(key)]:
-    	                tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
-	                tempdict = (ast.literal_eval(tempdict))
-	                tempdict.update({data['submission']: 0})
-	                self.hints[str(key)] = tempdict
-		        self.Voted = 1
-		        print("TESTING AGAIN HI")
-		        print("hints are " + str(self.hints[str(key)]))
-		        print("otherstuff " + str(self.hints))
-		    else:
-			ansnum = self.Used.index(data['submission'])
-		        for key in self.DefaultHints:	
+                print(str(key))
+                print("still working here")
+                if str(key) == self.WrongAnswers[self.Used.index(str(data['id']))]:
+                    if str(data['submission']) not in self.hints[str(key)]:
+                        tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
+                        tempdict = (ast.literal_eval(tempdict))
+                        tempdict.update({data['submission']: 0})
+                        self.hints[str(key)] = tempdict
+                        self.Voted = 1
+                        print("TESTING AGAIN HI")
+                        print("hints are " + str(self.hints[str(key)]))
+                        print("otherstuff " + str(self.hints))
+                    else:
+                        ansnum = self.Used.index(data['submission'])
+                        for key in self.DefaultHints:	
                             if key == self.Used[int(ansnum)]: #rating for hints in DefaultHints
-	            		self.DefaultHints[str(key)] += int(1)
-		    		self.Voted = 1
-		    		print str(self.DefaultHints)
-		   		return
-            		for key in self.hints:
-	        	    tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
-	        	    tempdict = (ast.literal_eval(tempdict))
-	        	    if str(key) == str(self.WrongAnswers[int(ansnum)]): #ansnum will the the answer/hint pair that is selected 
-		    		tempdict[self.Used[int(ansnum)]] += int(1)
-		    		self.hints[str(key)] = tempdict
-		    		print("TESTING AGAIN HI")
-		    		print("hints are " + str(self.hints[str(key)]))
-		    		print("otherstuff " + str(self.hints))
-		    		self.Voted = 1
+                                self.DefaultHints[str(key)] += int(1)
+                                self.Voted = 1
+                                print str(self.DefaultHints)
+                                return
+                        for key in self.hints:
+                            tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
+                            tempdict = (ast.literal_eval(tempdict))
+                            if str(key) == str(self.WrongAnswers[int(ansnum)]): #ansnum will the the answer/hint pair that is selected 
+                                tempdict[self.Used[int(ansnum)]] += int(1)
+                                self.hints[str(key)] = tempdict
+                                print("TESTING AGAIN HI")
+                                print("hints are " + str(self.hints[str(key)]))
+                                print("otherstuff " + str(self.hints))
+                                self.Voted = 1
 
     @XBlock.json_handler
     def clear_states(self, data, suffix=''):
-	self.Used = []
-	self.HintsToUse = {}
-	self.Voted = 0
-	self.WrongAnswers = []
+        self.Used = []
+        self.HintsToUse = {}
+        self.Voted = 0
+        self.WrongAnswers = []
 
     @staticmethod
     def workbench_scenarios():
