@@ -6,6 +6,7 @@
 
 .crowdxblock_block button {
     cursor: pointer;
+    background: rgb(0,0,200);
 }
 
 .crowdxblock_block .crowdsource-wrapper {
@@ -28,3 +29,12 @@
   padding-bottom: 0px !important;
 }
 
+.crowdxblock_block .hintbutton {
+  background: rgb(230, 250,230);
+}
+.crowdxblock_block .hintsarea {
+    width: 220px;
+    padding: 10px;
+    border: 5px solid gray;
+    margin: 0px;
+}
