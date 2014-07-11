@@ -15,10 +15,9 @@
 <span class='Thankyou'></span>
 </p>
 
-<script id="feedback">
-var hintused = []
-var wronganswer = []
-</script>
+<div class="hintansarea">
+
+</div>
 
 <p>
 <input id="caus" type="button" class="button" value="clearAllUserState">
@@ -31,10 +30,6 @@ var wronganswer = []
         <input type="hidden" name="problem_id" value="Numerical Input">
 
     <section class="problem">
-      <span><br><span> Enter and submit your own hint!</span></span>
-          <section id="studentinput" class="textinput">
-              <input type="text" name="studentinput" id="answer" class="math" size="40">
-	<input id="submit" type="button" class="button" value="Submit Hint">
 
         </div></section></span>
       </section>
