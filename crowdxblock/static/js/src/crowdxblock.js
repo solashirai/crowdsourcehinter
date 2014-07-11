@@ -30,7 +30,10 @@ function CrowdXBlock(runtime, element){
 	$("#feedback").show();
 	$.each(result, function(index, value) {
 	console.log( index + ": " + value );
-	$('.hintansarea').append("<p id=\"submit" + index + "\"> For your incorrect answer of:" + " " + value + "</p> <p> You received the hint:" + " " + index + " <input id=\"" + index + "\" type=\"button\" class=\"hintbutton\" value=\"Upvote this Hint\"> </p><p> <input id=\"" + index + "\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint for this problem\">");
+        if($("#submit"+value).length == 0){
+	    $('.hintansarea').append("<p id=\"submit" + value + "\" class=\"hintsarea\"> </p>");
+	    $('#submit'+value).append("For your incorrect answer of:" + " " + value + " <p id=\"hintstoshow" + value + "\"> The following hints exist: </p><p> <input id=\"" + index + "\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint for this problem\">");
+        }$('#hintstoshow'+value).append("<p>" + index + "<input data-value=\"" + value + "\" id=\"" + index + "\" type=\"button\" class=\"hintbutton\" value=\"Upvote this Hint\"></p>");
 	});
 };
 
@@ -41,14 +44,15 @@ function CrowdXBlock(runtime, element){
 	$.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"rating": 1, "ansnum": $(this).attr('id')}),
+            data: JSON.stringify({"rating": 1, "ansnum": $(this).attr('id'), "value": $(this).attr('data-value')}),
             success: finish
         });})
     $(document).on('click', '.submitbutton', function(){ //upvote
 	console.log("submitbutton hit");
 	id = this.id;
+        value = $('#'+id).attr('data-value');
 	console.log("this id " + $(this).attr('id'));
-	$('#submit' + id).append("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><<input id=\"submit\" type=\"button\" class=\"button\" value=\"Submit Hint\"> </p>");})
+	$('#submit' + value).append("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><<input id=\"submit\" type=\"button\" class=\"button\" value=\"Submit Hint\"> </p>");})
     $(document).on('click', '#submit', function(){
         console.log("the other id thing" + this.id);
         console.log("thisthing" + $(".math").attr('id'));
