@@ -29,6 +29,9 @@ class CrowdXBlock(XBlock):
         frag.initialize_js('CrowdXBlock')
         return frag
 
+    def studio_view(self, context=None):
+        html = self.resource_string("static/html/studioview.html")
+
     def resource_string(self, path):
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
