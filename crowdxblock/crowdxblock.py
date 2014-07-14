@@ -10,10 +10,10 @@ from xblock.fragment import Fragment
 
 log = logging.getLogger(__name__)
 
-#get_hint and get_feedback are in 
+#get_hint and get_feedback are in
 class CrowdXBlock(XBlock):
     correctanswer = String(default="42", scope=Scope.content) #should be irrelevant for completed version
-    hints = Dict(default={"2": {"hint6for2":0, "hint5for2":0, "hint4for2":0, "hint1for2":0, "hint2for2":0, "hint3for2":0}, "1": {"hint1for1":0, "hint2for1":0, "hint3for1":0}, "3": {"hint1for3":0, "hint2for3":0, "hint3for3":0}}, scope=Scope.content)
+    hints = Dict(default={"2": {"hint1for2":0, "hint2for2":0, "hint3for2":0}, "1": {"hint1for1":0, "hint2for1":0, "hint3for1":0}, "3": {"hint1for3":0, "hint2for3":0, "hint3for3":0}}, scope=Scope.content)
 #All hints. sorted by type of mistake. type_of_incorrect_answer{"hint":rating, "hint":rating}
     HintsToUse = Dict(default={}, scope=Scope.user_state) #Dict of hints to provide user
     WrongAnswers = List(default=[], scope=Scope.user_state) #List of mistakes made by user
@@ -72,12 +72,12 @@ class CrowdXBlock(XBlock):
             return {'HintsToUse': NotUsed} #note to self dont let python get into endless notused loop
    
     @XBlock.json_handler
-    def get_feedback(self, data, suffix=''): #start feedback, sent hint/answer data 
+    def get_feedback(self, data, suffix=''): #start feedback, sent hint/answer data
         feedbackdict = {}
         feedbacklist = []
         if len(self.WrongAnswers) == 0:
             return #Do nothing if no mistakes were made
-        else:      #lenth of Used will be used to dictate flow of feedback
+        else: #lenth of Used will be used to dictate flow of feedback
             for i in range(0, len(self.Used)):
                 ans = str('wngans' + str(i))
                 hnt = str('hntusd' + str(i))
@@ -101,7 +101,7 @@ class CrowdXBlock(XBlock):
                                 nextkey = random.choice(self.DefaultHints.keys())
                                 if str(nextkey) not in feedbacklist:
                                     thiskeycount += 1
-                                    feedbacklist.append(str(nextkey))   
+                                    feedbacklist.append(str(nextkey))
                                     feedbackdict[str(nextkey)] = str(self.WrongAnswers[i])
                             if thiskeycount == 2:
                                     feedbacklist = []
@@ -115,7 +115,7 @@ class CrowdXBlock(XBlock):
         for usdkey in self.Used:
             if str(usdkey) == str(data['ansnum']):
                 ansnum = self.Used.index(str(data['ansnum']))
-                print("ansnum is" +  str(ansnum))
+                print("ansnum is" + str(ansnum))
                 if self.Voted == 0:
                     for key in self.DefaultHints:	
                         if key == self.Used[int(ansnum)]: #rating for hints in DefaultHints
@@ -124,9 +124,9 @@ class CrowdXBlock(XBlock):
                             print str(self.DefaultHints)
                             return
                     for key in self.hints:
-                        tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
+                        tempdict = str(self.hints[str(key)]) #rate hint that is in hints
                         tempdict = (ast.literal_eval(tempdict))
-                        if str(key) == str(self.WrongAnswers[ansnum]): #ansnum will the the answer/hint pair that is selected 
+                        if str(key) == str(self.WrongAnswers[ansnum]): #ansnum will the the answer/hint pair that is selected
                             tempdict[self.Used[int(ansnum)]] += int(data["rating"])
                             self.hints[str(key)] = tempdict
                             print("TESTING AGAIN HI")
@@ -139,7 +139,7 @@ class CrowdXBlock(XBlock):
                 for nextkey in self.hints[key]:
                     if str(nextkey) == str(data['ansnum']):
                         ansnum = self.hints[str(key)[str(nextkey)]]
-                        tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
+                        tempdict = str(self.hints[str(key)]) #rate hint that is in hints
                         tempdict = (ast.literal_eval(tempdict))
                         tempdict[self.hints[str(key)[ansnum]]] += 1
                         selff.hints[str(key)] = tempdict
@@ -154,7 +154,7 @@ class CrowdXBlock(XBlock):
                 print("still working here")
                 if str(key) == self.WrongAnswers[self.Used.index(str(data['id']))]:
                     if str(data['submission']) not in self.hints[str(key)]:
-                        tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
+                        tempdict = str(self.hints[str(key)]) #rate hint that is in hints
                         tempdict = (ast.literal_eval(tempdict))
                         tempdict.update({data['submission']: 0})
                         self.hints[str(key)] = tempdict
@@ -171,9 +171,9 @@ class CrowdXBlock(XBlock):
                                 print str(self.DefaultHints)
                                 return
                         for key in self.hints:
-                            tempdict = str(self.hints[str(key)]) #rate hint that is in hints 
+                            tempdict = str(self.hints[str(key)]) #rate hint that is in hints
                             tempdict = (ast.literal_eval(tempdict))
-                            if str(key) == str(self.WrongAnswers[int(ansnum)]): #ansnum will the the answer/hint pair that is selected 
+                            if str(key) == str(self.WrongAnswers[int(ansnum)]): #ansnum will the the answer/hint pair that is selected
                                 tempdict[self.Used[int(ansnum)]] += int(1)
                                 self.hints[str(key)] = tempdict
                                 print("TESTING AGAIN HI")
@@ -198,13 +198,13 @@ class CrowdXBlock(XBlock):
         return [
             ("CrowdXBlock",
              """<vertical_demo>
-                <crowdxblock/>
-                </vertical_demo>
-             """),
+<crowdxblock/>
+</vertical_demo>
+"""),
         ]
 '''
-		print ("answer" + str(data["submittedanswer"]))
-   	        for keys in self.hints[key]:
-		    print ("other key" + y)
-		    self.HintsToUse[keys] = self.hints[key[keys]] #If the user's incorrect answre has precedence in hints, add hints listed under
-     		    print("hintstouse: " + str(self.HintsToUse[keys]))'''
+print ("answer" + str(data["submittedanswer"]))
+for keys in self.hints[key]:
+print ("other key" + y)
+self.HintsToUse[keys] = self.hints[key[keys]] #If the user's incorrect answre has precedence in hints, add hints listed under
+print("hintstouse: " + str(self.HintsToUse[keys]))'''

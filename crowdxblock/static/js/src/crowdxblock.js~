@@ -17,10 +17,6 @@
 function CrowdXBlock(runtime, element){
     var WrongAnswer = [];
     var HintUsed = [];
-    $("#pair0").hide();
-    $("#pair3").hide();
-    $("#pair2").hide();
-    $("#pair1").hide();
     $("#answer").hide();
     $(".problem").hide();
     $("#feedback").hide();
