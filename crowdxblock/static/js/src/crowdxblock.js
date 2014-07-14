@@ -9,6 +9,11 @@
       answers = data[0];
       response = data[1];*/ //use this snippet for actual code? maybe?
 
+
+//**FOR CHECKING ANSWER CORRECT/NOT**
+//check for event problem_check
+//Check for success == "incorrect" or success == "correct" to determine? I think?
+
 function CrowdXBlock(runtime, element){
     var WrongAnswer = [];
     var HintUsed = [];
