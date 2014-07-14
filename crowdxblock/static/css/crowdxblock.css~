@@ -33,7 +33,7 @@
   background: rgb(230, 250,230);
 }
 .crowdxblock_block .hintsarea {
-    width: 220px;
+    width: 300px;
     padding: 10px;
     border: 5px solid gray;
     margin: 0px;
