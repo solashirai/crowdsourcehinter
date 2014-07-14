@@ -67,7 +67,7 @@ class CrowdXBlock(XBlock):
                 while NotUsed in self.Used:
                     NotUsed = random.choice(self.HintsToUse.keys()) #Choose random hint that hasn't already been Used
             elif len(self.Used) > 0:
-                return
+                return {'HintsToUse': random.choice(self.HintsToUse.keys())}
             self.Used.append(NotUsed)
             return {'HintsToUse': NotUsed} #note to self dont let python get into endless notused loop
    
