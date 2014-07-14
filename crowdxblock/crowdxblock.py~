@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 #get_hint and get_feedback are in 
 class CrowdXBlock(XBlock):
     correctanswer = String(default="42", scope=Scope.content) #should be irrelevant for completed version
-    hints = Dict(default={"2": {"hint1for2":0, "hint2for2":0, "hint3for2":0}, "1": {"hint1for1":0, "hint2for1":0, "hint3for1":0}, "3": {"hint1for3":0, "hint2for3":0, "hint3for3":0}}, scope=Scope.content)
+    hints = Dict(default={"2": {"hint6for2":0, "hint5for2":0, "hint4for2":0, "hint1for2":0, "hint2for2":0, "hint3for2":0}, "1": {"hint1for1":0, "hint2for1":0, "hint3for1":0}, "3": {"hint1for3":0, "hint2for3":0, "hint3for3":0}}, scope=Scope.content)
 #All hints. sorted by type of mistake. type_of_incorrect_answer{"hint":rating, "hint":rating}
     HintsToUse = Dict(default={}, scope=Scope.user_state) #Dict of hints to provide user
     WrongAnswers = List(default=[], scope=Scope.user_state) #List of mistakes made by user
