@@ -12,12 +12,12 @@ log = logging.getLogger(__name__)
 
 #get_hint and get_feedback are in
 class CrowdXBlock(XBlock):
-    correctanswer = String(default="42", scope=Scope.content) #should be irrelevant for completed version
-    hints = Dict(default={"2": {"hint1for2":0, "hint2for2":0, "hint3for2":0}, "1": {"hint1for1":0, "hint2for1":0, "hint3for1":0}, "3": {"hint1for3":0, "hint2for3":0, "hint3for3":0}}, scope=Scope.content)
+    correctanswer = String(default="2.0", scope=Scope.content) #should be irrelevant for completed version
+    hints = Dict(default={"2": {"Keep significant figures in mind.":1, "So close yet so far.":0, "Try adding a .0.":0}, "8.6": {"You might have added all of the horizontal forces together to equal a total of 21 for the horizontal component of this object's force; the two forces are facing opposite direction, so you need to subtract them.":1, "Try 12-9 for the total horizontal force.":0}, "1.2": {"Did you remember to add in the vertical component of force for this object?":0},"1.0":{"dummy hint for debugs":0}, "one":{"dummy hint again for debugs":0}}, scope=Scope.content)
 #All hints. sorted by type of mistake. type_of_incorrect_answer{"hint":rating, "hint":rating}
     HintsToUse = Dict(default={}, scope=Scope.user_state) #Dict of hints to provide user
     WrongAnswers = List(default=[], scope=Scope.user_state) #List of mistakes made by user
-    DefaultHints = Dict(default={"defaulthint1": 0, "defaulthint2": 0, "defaulthint3": 0, "defaulthint4": 0, "defaulthint5": 0, "bestdefaulthint": 3}, scope=Scope.content) #Default hints in case no incorrect answers in hints match the user's mistake
+    DefaultHints = Dict(default={"Start with the equation F=ma":2, "This object has horizontal and vertical components of force. Solve for the total force in each direction, then compare it to the final acceleration":1, "A small example: If an object has a force of 10N applied to it in an upward direction and it's acceleration is 1m/s^2, the mass of that object is 10.0 kg. F=ma, 10N=m*(1m/s^2), m=10/1, m=10.":1}, scope=Scope.content) #Default hints in case no incorrect answers in hints match the user's mistake
     Used = List(default=[], scope=Scope.user_state)#List of used hints from HintsToUse
     Voted = Integer(default=0, scope=Scope.user_state)#prevent multiple votes/hint submission
 
@@ -43,13 +43,11 @@ class CrowdXBlock(XBlock):
         for key in self.hints:
             temphints = str(self.hints[str(key)]) #perhaps a better way to do this exists, but for now this works
             if str(key) == str(data["submittedanswer"]):
-                print("HI HEllO")
                 self.HintsToUse = {}
                 self.HintsToUse.update(ast.literal_eval(temphints))
         for key in self.HintsToUse:
             if key not in self.Used:
                  hintsarehere = 1
-                 print("hints are here doe")
         if hintsarehere == 0:
             self.HintsToUse.update(self.DefaultHints) #Use DefaultHints if there aren't enough other hints
         if str(data["submittedanswer"]) not in self.hints:
@@ -107,7 +105,7 @@ class CrowdXBlock(XBlock):
                                     feedbacklist = []
                 if str(self.WrongAnswers[i]) not in self.hints:
                     feedbackdict[str(random.choice(self.DefaultHints.keys()))] = str(self.WrongAnswers[i])
-            print ("feedback : " + str(feedbackdict))
+            print("feedbackdict is: " + str(feedbackdict))
             return feedbackdict
     
     @XBlock.json_handler #add 1 or -1 to rating of a hint
@@ -115,13 +113,11 @@ class CrowdXBlock(XBlock):
         for usdkey in self.Used:
             if str(usdkey) == str(data['ansnum']):
                 ansnum = self.Used.index(str(data['ansnum']))
-                print("ansnum is" + str(ansnum))
                 if self.Voted == 0:
                     for key in self.DefaultHints:	
                         if key == self.Used[int(ansnum)]: #rating for hints in DefaultHints
                             self.DefaultHints[str(key)] += int(data["rating"])
                             self.Voted = 1
-                            print str(self.DefaultHints)
                             return
                     for key in self.hints:
                         tempdict = str(self.hints[str(key)]) #rate hint that is in hints
@@ -129,9 +125,6 @@ class CrowdXBlock(XBlock):
                         if str(key) == str(self.WrongAnswers[ansnum]): #ansnum will the the answer/hint pair that is selected
                             tempdict[self.Used[int(ansnum)]] += int(data["rating"])
                             self.hints[str(key)] = tempdict
-                            print("TESTING AGAIN HI")
-                            print("hints are " + str(self.hints[str(key)]))
-                            print("otherstuff " + str(self.hints))
                             self.Voted = 1
                             return
         for key in self.hints:
@@ -159,16 +152,12 @@ class CrowdXBlock(XBlock):
                         tempdict.update({data['submission']: 0})
                         self.hints[str(key)] = tempdict
                         self.Voted = 1
-                        print("TESTING AGAIN HI")
-                        print("hints are " + str(self.hints[str(key)]))
-                        print("otherstuff " + str(self.hints))
                     else:
                         ansnum = self.Used.index(data['submission'])
                         for key in self.DefaultHints:	
                             if key == self.Used[int(ansnum)]: #rating for hints in DefaultHints
                                 self.DefaultHints[str(key)] += int(1)
                                 self.Voted = 1
-                                print str(self.DefaultHints)
                                 return
                         for key in self.hints:
                             tempdict = str(self.hints[str(key)]) #rate hint that is in hints
@@ -176,17 +165,10 @@ class CrowdXBlock(XBlock):
                             if str(key) == str(self.WrongAnswers[int(ansnum)]): #ansnum will the the answer/hint pair that is selected
                                 tempdict[self.Used[int(ansnum)]] += int(1)
                                 self.hints[str(key)] = tempdict
-                                print("TESTING AGAIN HI")
-                                print("hints are " + str(self.hints[str(key)]))
-                                print("otherstuff " + str(self.hints))
                                 self.Voted = 1
 
     @XBlock.json_handler
     def clear_states(self, data, suffix=''):
-        print("used: " + str(self.Used))
-        print("wronganswers: " + str(self.WrongAnswers))
-        print("hints: " + str(self.hints))
-        print("defaults: " + str(self.DefaultHints))
         self.Used = []
         self.HintsToUse = {}
         self.Voted = 0
