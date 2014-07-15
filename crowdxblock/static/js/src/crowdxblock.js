@@ -25,22 +25,49 @@ function CrowdXBlock(runtime, element){
         $(".problem").show();
         $("#feedback").show();
         $.each(result, function(index, value) {
+        valueid = value.replace(/\./g, 'ddeecciimmaallppooiinntt');
+        indexid = index.replace(/\./g, 'ddeecciimmaallppooiinntt');
+       // valueid = valueid.replace(/\?/g, 'qquueessttiioonnmmaarrkk');
+      //  indexid = indexid.replace(/\?/g, 'qquueessttiioonnmmaarrkk');
         console.log("the type of value is" + ' '+ typeof(value));
-        if($("#submit"+value).length == 0){
+        if($("#submit"+valueid).length == 0){
         console.log("#submit"+value);
-        $('.hintansarea').append("<p id=\"submit" + value + "\" class=\"hintsarea\"> </p>");
+        $('.hintansarea').append("<p id=\"submit" + valueid + "\" class=\"hintsarea\"> </p>");
         console.log('hintsarea made for ' + value);
-        $('#submit'+value).append("For your incorrect answer of:" + " " + value + " <p id=\"hintstoshow" + value + "\"> The following hints exist: </p><p> <input id=\"" + index + "\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint for this problem\">");
+        $('#submit'+valueid).append("For your incorrect answer of:" + " " + value + " <p id=\"hintstoshow" + valueid + "\"> The following hints exist: </p><p> <input id=\"" + indexid + "\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint for this problem\">");
         }
-        $('#hintstoshow'+value).append("<p>" + index + "<input data-value=\"" + value + "\" id=\"" + index + "\" type=\"button\" class=\"hintbutton\" value=\"Upvote this Hint\"></p>");
+        console.log('indexid' + indexid);
+        $('#hintstoshow'+valueid).append("<p>" + index + "<input data-value=\"" + valueid + "\" id=\"" + indexid + "\" type=\"button\" class=\"hintbutton\" value=\"Upvote this Hint\"></p>");
+        console.log('valueid' + valueid);
         console.log("the value is " + value);
         });
-};
+    }
+
+    $(document).on('click', '.submitbutton', function(){ //upvote
+        console.log("submitbutton hit");
+        console.log(this.id);
+        id = this.id;
+        value = $('#'+id).attr('data-value');
+      //  console.log($('#'+id).attr('data-value'));
+      //  valueid = $('#'+id).attr('data-value').replace(/\./g, 'ddeecciimmaallppooiinntt');
+      //  indexid = index.replace(/\./g, 'ddeecciimmaallppooiinntt');
+      //  valueid = valueid.replace(/\?/g, 'qquueessttiioonnmmaarrkk');
+      //  indexid = indexid.replace(/\?/g, 'qquueessttiioonnmmaarrkk');
+        console.log("this id " + $(this).attr('id'));
+        $('#submit' + valueid).append("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><<input id=\"submit\" type=\"button\" class=\"button\" value=\"Submit Hint\"> </p>");})
+    $(document).on('click', '#submit', function(){
+        console.log('submitid' + ' ' + '#submit' + valueid);
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'give_hint'),
+            data: JSON.stringify({"submission": $('.math').val(), "id": $(".math").attr('id')}), //give hin for first incorrect answer
+            success: finish
+        });
+        $("#answer").val('');})
 
     $(document).on('click', '.hintbutton', function(){ //upvote
-        console.log("the first id" + this.id);
         id = this.id;
-        console.log($(this).attr('id'));
+        console.log("the first id" + this.id);
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
@@ -49,9 +76,10 @@ function CrowdXBlock(runtime, element){
         });})
     $(document).on('click', '.submitbutton', function(){ //upvote
         console.log("submitbutton hit");
-        id = this.id;
+        id = $(this).attr('id');
         value = $('#'+id).attr('data-value');
         console.log("this id " + $(this).attr('id'));
+        console.log('#submit' + value);
         $('#submit' + value).append("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><<input id=\"submit\" type=\"button\" class=\"button\" value=\"Submit Hint\"> </p>");})
     $(document).on('click', '#submit', function(){
         console.log("the other id thing" + this.id);
@@ -89,7 +117,7 @@ function CrowdXBlock(runtime, element){
 
     function checkreply(result){
 
-if(result.correct == 1){
+    if(result.correct == 1){
         console.debug("yay");
         $('.correct', element).show();
         $('.correct', element).text("You're correct! Please choose the best hint, or provide us with one of your own!");
@@ -124,3 +152,6 @@ success: getfeedback
 };*/
     }
 )}
+
+
+
