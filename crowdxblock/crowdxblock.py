@@ -60,11 +60,11 @@ class CrowdXBlock(XBlock):
             return {'HintsToUse': max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0]}
         else:
             NotUsed = random.choice(self.HintsToUse.keys())
-            if len(self.HintsToUse) != len(self.Used):
+            if len(self.HintsToUse) > len(self.Used):
                 while NotUsed in self.Used:
                     NotUsed = random.choice(self.HintsToUse.keys()) #Choose random hint that hasn't already been Used
             elif len(self.Used) > 0:
-                return {'HintsToUse': random.choice(self.HintsToUse.keys())}
+                return {'HintsToUse': "Sorry, there are no more hints for this answer."}
             self.Used.append(NotUsed)
             return {'HintsToUse': NotUsed} #note to self dont let python get into endless notused loop
    
@@ -147,8 +147,6 @@ class CrowdXBlock(XBlock):
         data['id'] = data['id'].replace('ddeecciimmaallppooiinntt', '.')
         if self.Voted == 0:
             for key in self.hints:
-                print(str(key))
-                print("still working here")
                 if str(key) == self.WrongAnswers[self.Used.index(str(data['id']))]:
                     if str(data['submission']) not in self.hints[str(key)]:
                         tempdict = str(self.hints[str(key)]) #rate hint that is in hints
