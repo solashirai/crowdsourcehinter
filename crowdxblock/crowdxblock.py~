@@ -97,7 +97,7 @@ class CrowdXBlock(XBlock):
                             keysh = self.hints[str(key)].keys()
                             random.shuffle(keysh)
                             print('keysh is ' + str(keysh))
-                            for nextkey in self.hints[str(key)]:
+                            for nextkey in keysh:
                                 if howmanyhints < 3:
                                     howmanyhints += 1 #limit number of hints shown
                                     feedbackdict[str(nextkey)] = str(self.WrongAnswers[i])
@@ -115,6 +115,8 @@ class CrowdXBlock(XBlock):
     def rate_hint(self, data, suffix=''):
         data['ansnum'] = data['ansnum'].replace('ddeecciimmaallppooiinntt', '.')
         data['ansnum'] = data['ansnum'].replace('qquueessttiioonnmmaarrkk', '?')
+        data['ansnum'] = data['ansnum'].replace('ccoolloonn', ':')
+        data['ansnum'] = data['ansnum'].replace('sseemmiiccoolloonn', ';')
         for usdkey in self.Used:
             if str(usdkey) == str(data['ansnum']):
                 print str(self.Used)
