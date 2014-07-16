@@ -27,36 +27,25 @@ function CrowdXBlock(runtime, element){
         $.each(result, function(index, value) {
         valueid = value.replace(/\./g, 'ddeecciimmaallppooiinntt');
         indexid = index.replace(/\./g, 'ddeecciimmaallppooiinntt');
-       // valueid = valueid.replace(/\?/g, 'qquueessttiioonnmmaarrkk');
-      //  indexid = indexid.replace(/\?/g, 'qquueessttiioonnmmaarrkk');
-        console.log("the type of value is" + ' '+ typeof(value));
         if($("#submit"+valueid).length == 0){
-        console.log("#submit"+value);
-        $('.hintansarea').append("<p id=\"submit" + valueid + "\" class=\"hintsarea\"> </p>");
-        console.log('hintsarea made for ' + value);
-        $('#submit'+valueid).append("For your incorrect answer of:" + " " + value + " <p id=\"hintstoshow" + valueid + "\"> The following hints exist: </p><p> <input id=\"" + indexid + "\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint for this problem\">");
-        }
-        console.log('indexid' + indexid);
-        $('#hintstoshow'+valueid).append("<p>" + index + "<input data-value=\"" + valueid + "\" id=\"" + indexid + "\" type=\"button\" class=\"hintbutton\" value=\"Upvote this Hint\"></p>");
-        console.log('valueid' + valueid);
-        console.log("the value is " + value);
+            $('.hintansarea').append("<p id=\"submit" + valueid + "\" class=\"hintsarea\"> </p>");
+            $('#submit'+valueid).append("For your incorrect answer of:" + " " + value + " <p id=\"hintstoshow" + valueid + "\"> The following hints exist: </p><p> <input id=\"" + indexid + "\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint for this problem\">");
+            }
+          if(indexid.slice(0,22) != "There are no hints for"){
+            $('#hintstoshow'+valueid).append("<p>" + index + "<input data-value=\"" + valueid + "\" id=\"" + indexid + "\" type=\"button\" class=\"hintbutton\" value=\"Upvote this Hint\"></p>");
+            }else{
+              $('#hintstoshow'+valueid).empty();
+              $('#hintstoshow'+valueid).append("<p id=\"hintstoshow" + valueid + "\"> No hints exist in the database.</p> <p data-value=\"" + valueid + "\" id=\"" + indexid + "\"</p>");
+          }
         });
     }
 
     $(document).on('click', '.submitbutton', function(){ //upvote
-        console.log("submitbutton hit");
-        console.log(this.id);
         id = this.id;
-        value = $('#'+id).attr('data-value');
-      //  console.log($('#'+id).attr('data-value'));
-      //  valueid = $('#'+id).attr('data-value').replace(/\./g, 'ddeecciimmaallppooiinntt');
-      //  indexid = index.replace(/\./g, 'ddeecciimmaallppooiinntt');
-      //  valueid = valueid.replace(/\?/g, 'qquueessttiioonnmmaarrkk');
-      //  indexid = indexid.replace(/\?/g, 'qquueessttiioonnmmaarrkk');
-        console.log("this id " + $(this).attr('id'));
-        $('#submit' + valueid).append("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><<input id=\"submit\" type=\"button\" class=\"button\" value=\"Submit Hint\"> </p>");})
+        value = document.getElementById(this.id).getAttribute('data-value');
+        $(this).hide();
+        $('#submit' + value).append("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><<input id=\"submit\" type=\"button\" class=\"button\" value=\"Submit Hint\"> </p>");})
     $(document).on('click', '#submit', function(){
-        console.log('submitid' + ' ' + '#submit' + valueid);
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'give_hint'),
@@ -67,30 +56,12 @@ function CrowdXBlock(runtime, element){
 
     $(document).on('click', '.hintbutton', function(){ //upvote
         id = this.id;
-        console.log("the first id" + this.id);
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
             data: JSON.stringify({"rating": 1, "ansnum": $(this).attr('id'), "value": $(this).attr('data-value')}),
             success: finish
         });})
-    $(document).on('click', '.submitbutton', function(){ //upvote
-        console.log("submitbutton hit");
-        id = $(this).attr('id');
-        value = $('#'+id).attr('data-value');
-        console.log("this id " + $(this).attr('id'));
-        console.log('#submit' + value);
-        $('#submit' + value).append("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><<input id=\"submit\" type=\"button\" class=\"button\" value=\"Submit Hint\"> </p>");})
-    $(document).on('click', '#submit', function(){
-        console.log("the other id thing" + this.id);
-        console.log("thisthing" + $(".math").attr('id'));
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'give_hint'),
-            data: JSON.stringify({"submission": $('.math').val(), "id": $(".math").attr('id')}), //give hin for first incorrect answer
-            success: finish
-        });
-        $("#answer").val('');})
 
     $('#caus', element).click(function(eventObject) {
         console.debug("ca working this is edited");
@@ -128,7 +99,6 @@ function CrowdXBlock(runtime, element){
             success: getfeedback
         });
         }else{
-        console.debug("nay");
         seehint(result)
         }
     }
