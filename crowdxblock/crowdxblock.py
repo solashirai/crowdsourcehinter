@@ -92,10 +92,17 @@ class CrowdXBlock(XBlock):
                 for key in self.hints:
                     if str(key) == str(self.WrongAnswers[i]):
                         if len(self.hints[str(key)]) != 0:
-                            for nextkey in self.hints[str(key)]:
-                                feedbackdict[str(nextkey)] = str(self.WrongAnswers[i])
-                                self.WrongAnswers.append(str(self.WrongAnswers[i]))
-                                self.Used.append(str(nextkey))
+                            howmanyhints = 0
+                            print('hints are' + str(self.hints[str(key)]))
+                            keysh = self.hints[str(key)].keys()
+                            random.shuffle(keysh)
+                            print('keysh is ' + str(keysh))
+                            for nextkey in keysh:
+                                if howmanyhints < 3:
+                                    howmanyhints += 1 #limit number of hints shown
+                                    feedbackdict[str(nextkey)] = str(self.WrongAnswers[i])
+                                    self.WrongAnswers.append(str(self.WrongAnswers[i]))
+                                    self.Used.append(str(nextkey))
                         else:
                             feedbackdict[str("There are no hints for" + " " + str(self.WrongAnswers[i]))] = str(self.WrongAnswers[i])
                             self.WrongAnswers.append(str(self.WrongAnswers[i]))
