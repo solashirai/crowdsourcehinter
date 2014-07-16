@@ -27,6 +27,12 @@ function CrowdXBlock(runtime, element){
         $.each(result, function(index, value) {
         valueid = value.replace(/\./g, 'ddeecciimmaallppooiinntt');
         indexid = index.replace(/\./g, 'ddeecciimmaallppooiinntt');
+        valueid = valueid.replace(/\:/g, 'ccoolloonn');
+        indexid = indexid.replace(/\:/g, 'ccoolloonn');
+        valueid = valueid.replace(/\;/g, 'sseemmiiccoolloonn');
+        indexid = indexid.replace(/\;/g, 'sseemmiiccoolloonn');
+        valueid = valueid.replace(/\"/g, 'qquuoottaattiioonnmmaarrkkss');
+        indexid = indexid.replace(/\"/g, 'qquuoottaattiioonnmmaarrkkss');
         if($("#submit"+valueid).length == 0){
             $('.hintansarea').append("<p id=\"submit" + valueid + "\" class=\"hintsarea\"> </p>");
             $('#submit'+valueid).append("For your incorrect answer of:" + " " + value + " <p id=\"hintstoshow" + valueid + "\"> The following hints exist: </p><p> <input id=\"" + indexid + "\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint for this problem\">");
