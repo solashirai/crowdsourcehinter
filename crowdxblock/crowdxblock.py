@@ -115,6 +115,9 @@ class CrowdXBlock(XBlock):
     def rate_hint(self, data, suffix=''):
         data['ansnum'] = data['ansnum'].replace('ddeecciimmaallppooiinntt', '.')
         data['ansnum'] = data['ansnum'].replace('qquueessttiioonnmmaarrkk', '?')
+        data['ansnum'] = data['ansnum'].replace('ccoolloonn', ':')
+        data['ansnum'] = data['ansnum'].replace('sseemmiiccoolloonn', ';')
+        data['ansnum'] = data['ansnum'].replace('qquuoottaattiioonnmmaarrkkss', '"')
         for usdkey in self.Used:
             if str(usdkey) == str(data['ansnum']):
                 print str(self.Used)
