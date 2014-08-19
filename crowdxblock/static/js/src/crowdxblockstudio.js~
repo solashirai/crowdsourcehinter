@@ -1,0 +1,262 @@
+var returnpls = 0;
+var repeatcounter = 0;
+var canhint = 0;
+var issubmitting = 0;
+var issubmittinghint = 0;
+var gotstudio = 0;
+
+function CrowdXBlock(runtime, element){
+    var WrongAnswer = [];
+    var HintUsed = [];
+    var HintShown = [];
+    $("#answer").hide();
+    $(".problem").hide();
+    $("#feedback").hide();
+    vare = String;
+    varet = String;
+    vard = String;
+    $(".HintsToUse", element).text("Hints are enabled for this problem!");
+    console.debug('!!!!!!!!!!!!!!!!!!!!!!');
+    clearstufftoo();
+    repeatcounter += 1;
+    console.debug(repeatcounter);
+
+    Logger.listen('seq_next', null, clearstuff);
+    Logger.listen('seq_goto', null, clearstuff);
+    function clearstuff(event_type, data, element){
+        console.debug('next workt');
+        clearstufftoo(data);
+    }
+
+    function clearstufftoo(data){
+        HintUsed = [];
+        WrongAnswer = [];
+        returnpls = 0;
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'clear_stuff'),
+            data: JSON.stringify({"hello": "world"}),
+        });
+        console.log('cleartstuff');
+        console.debug(HintUsed)
+    }    
+
+    Logger.listen('problem_graded', null, dostuff);
+    function dostuff(event_type, data, element){
+        returnpls += 1;
+        if(returnpls != repeatcounter){
+        console.debug(returnpls);
+        }else{
+        console.debug(returnpls);
+        console.debug(HintUsed);
+        $("#studentsubmit").val('');
+        vare = element;
+        varet = event_type;
+        vard = data;
+        console.debug("HOW MANY TIMES IS THIS HAPPENING?");
+        senddata(varet, vard, vare);
+        }
+    }
+
+    $(document).on('click', '.check.Check', function(){
+        returnpls = 0;
+        console.debug('clickt'); 
+    });
+
+    function senddata(varet, vard, vare){
+        if (vard[1].search(/class="correct/) === -1){
+          console.log('ITISNT');
+          console.debug('hmmm senddata is here');
+        $.ajax({ //that probably will be changed once i use response.search or something?
+            type: "POST", //if/when that is changed, remove checkreply and uncomment the else statement below
+            url: runtime.handlerUrl(element, 'get_hint'),
+            data: JSON.stringify({"submittedanswer": vard[0]}), //return student's incorrect answer here
+            //from vard[1] check id (long thing) and get class (correct or incorrect)
+            success: seehint
+        });
+      }else{console.debug("yay");
+        $('.correct', element).show();
+        $('.correct', element).text("You're correct! Please help us improve our hints by voting on them, or submit your own hint!");
+        $(".HintsToUse", element).text(" ");
+        console.debug("this should also only show up once...");
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'get_feedback'),
+            data: JSON.stringify({"hello": "world"}),
+            success: getfeedback
+        });}
+        }
+
+    function seehint(result){//use html to show these results somewhere i guess
+        console.debug('seehint');
+        HintUsed.push(result.HintsToUse);
+        $('.HintsToUse', element).text("Hint:" + " " + result.HintsToUse); //text(result.self.hints?)
+        console.debug('hint:' + ' ' + result.HintsToUse);
+    }
+
+     $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'get_feedback'),
+            data: JSON.stringify({"hello": "world"}),
+            success: getfeedback
+        });
+      console.debug('aw');
+      $(".hinter_purge").append("yay");
+ 
+    function getfeedback(result){
+        $("#answer").show();
+        $(".problem").show();
+        $("#feedback").show();
+        $.each(result, function(index, value) {
+        valueid = value.replace(/\./g, 'ddeecciimmaallppooiinntt');
+        indexid = index.replace(/\./g, 'ddeecciimmaallppooiinntt');
+        valueid = valueid.replace(/\:/g, 'ccoolloonn');
+        indexid = indexid.replace(/\:/g, 'ccoolloonn');
+        valueid = valueid.replace(/\;/g, 'sseemmiiccoolloonn');
+        indexid = indexid.replace(/\;/g, 'sseemmiiccoolloonn');
+        valueid = valueid.replace(/\=/g, 'eeqquuaallss');
+        indexid = indexid.replace(/\=/g, 'eeqquuaallss');
+        if($("#submit"+valueid).length == 0){
+            $('.hintansarea').append("<p id=\"submit" + valueid + "\" class=\"hintsarea\"> </p>");
+            $('#submit'+valueid).append("<p> </p><b>Incorrect Answer: \b" + " " + value + "<p> <input id=\"submitbuttonfor" + indexid + "\" style=\"float: right; float: top;\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint\"> <p id=\"hintstoshow" + valueid + "\"> <b><u>Hints in the Data Base:</u>\b </p></div>");
+            }
+          if(indexid.slice(0,22) != "There are no hints for"){
+              if($.inArray(index, HintUsed) == -1){
+                if($.inArray(index, HintShown) == -1){
+                console.log('yis.'); //style=\"float: left;\" 
+                $('#hintstoshow'+valueid).append("<p \" id =\"thisparagraph" + indexid + "\">" + "<span style=\"display: inline-block;  \"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"width:20px; height:35px;padding-top: 3px;\" type=\"button\" class=\"hintbutton\" data-rate=\"1\" data-icon=\"arrow-u\" value=\"^\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"width:20px; height:35px; padding-top: 3px;\" type=\"button\" class=\"hintbutton\" data-rate=\"-1\" value=\"v\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"width:20px; height:35px;padding-top: 3px;\" type=\"button\" class=\"hintbutton\" data-rate=\"0\" value=\"!\"></span>" + index + "</p>");
+                HintShown.push(index);}
+              }else{ 
+                if($.inArray(index, HintShown) == -1){
+                console.log('YIESSSSS');
+                $('#hintstoshow'+valueid).prepend("<p \" id =\"thisparagraph" + indexid + "\">" + "<span style=\"display: inline-block;\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" type=\"button\" style=\"padding-top: 3px;width:20px; height:35px;\" class=\"hintbutton\" data-rate=\"1\" value=\"^\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"padding-top: 3px;width:20px; height:35px;\" type=\"button\" class=\"hintbutton\" data-rate=\"-1\" value=\"v\"><input data-value=\"" + valueid + "\" style=\"padding-top: 3px;width:20px; height:35px;\" id=\"" + indexid + "\" type=\"button\" class=\"hintbutton\" data-rate=\"0\" value=\"!\"></span><font color=\"blue\">" + index + "</font></p>");      
+                HintShown.push(index);
+              }}}else{
+              $('#hintstoshow'+valueid).empty();
+              console.log('index id is:' + indexid);
+              $('#hintstoshow'+valueid).append("<p style = \"color: blue;\" id=\"hintstoshow" + valueid + "\"data-value=\"" + valueid + "\"> <b>No hints exist in the database. (You received a default hint)</p> <p id=\"" + indexid + "\"data-value=\"" + valueid + "\" </p>");
+          }
+        });
+    }
+
+//"<p \" id =\"thisparagraph" + indexid + "\">" + "<span style=\"display: inline-block;  \"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"width:20px; height:20px;padding-top: 3px;\" type=\"button\" class=\"hintbutton\" data-rate=\"1\" data-icon=\"arrow-u\" value=\"^\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"width:20px; height:20px; padding-top: 3px;\" type=\"button\" class=\"hintbutton\" data-rate=\"-1\" value=\"v\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"width:20px; height:20px;padding-top: 3px;\" type=\"button\" class=\"hintbutton\" data-rate=\"0\" value=\"!\"></span><span class=\"thetextareahere\">" + index + "</span></p>"
+
+    /*function getridofdups(){ //duplicates occur whenever you shift between units within a section.
+      var seen = {};
+      $('p').each(function() {
+          var txt = String($(this).attr('id'));
+          console.debug(txt);
+          if(txt.slice(0,13) == 'thisparagraph'){
+            if (seen[txt]){
+                $(this).remove();
+            }else{
+                seen[txt] = true;}
+    }});}*/
+
+    $(document).on('click', '.submitbutton', function(){ //upvote
+        issubmittinghint = 0;
+        issubmitting += 1;
+        if(issubmitting != repeatcounter){
+        console.debug(returnpls);
+        }else{
+        id = this.id;
+        id = id.slice(15);
+        console.log(id);
+        value = document.getElementById(id).getAttribute('data-value');
+        $('.submitbutton').show();
+        $('.math').remove();
+        $('#submit').remove();
+        $(this).hide();
+        $('#hintstoshow' + value).prepend("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><input id=\"submit\" type=\"button\" data-is=\"" + id + "\" class=\"button\" value=\"Submit Hint\"> </p>");
+    }})
+
+    $(document).on('click', '#submit', function(){
+        issubmittinghint += 1;
+        if(issubmittinghint != repeatcounter){
+        console.debug(returnpls);
+        }else{
+        if($('.math').val() != null){
+          var valueid = String;
+          issubmitting = 0;
+          $('#submit').each(function(){
+              valueid = $(this).attr('data-is');
+          });
+          $('.submitbutton').show();
+          console.log('valueidworks' + valueid);
+          $.ajax({
+              type: "POST",
+              url: runtime.handlerUrl(element, 'give_hint'),
+              data: JSON.stringify({"submission": $('.math').val(), "id": valueid}), //give hin for first incorrect answer
+              success: finish
+          });
+           $("#answer").val('');
+          dataval = document.getElementById(valueid).getAttribute('data-value');
+          dataval = String('hintstoshow' + dataval);
+          $(this).remove();
+          $('.math').remove();
+          document.getElementById("submitbuttonfor" + valueid).remove();
+          $('#submitbuttonfor' + valueid).remove();
+          $('#'+valueid).remove();
+          console.log('pls');
+          value = document.getElementById(id).getAttribute('data-value');
+          $('#hintstoshow' + value).prepend("<p> Thankyou! </p>");
+          $('#submit'+valueid).prepend('Thankyou for your hint!');
+        }}})
+
+    $(document).on('click', '.hintbutton', function(){ //upvote
+        canhint = 0;
+        id = this.id;
+        console.log('hi world');
+        $(this).hide();
+        $('.hintbutton').each(function(){
+          if($(this).attr('id') == String(id)){
+            $(this).hide();}
+        });
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'rate_hint'),
+            data: JSON.stringify({"rating": $(this).attr('data-rate'), "ansnum": $(this).attr('id'), "value": $(this).attr('data-value')}),
+            success: finish
+        });})
+
+
+    function finish(result){
+        if(canhint != 0){
+          console.debug('canthint');
+        }else{
+        canhint = 1;
+        console.debug('plsdontbehappeningalot');
+        $('.Thankyou', element).text("Thankyou for your help!");
+        idtouse = String('thisparagraph' + result.origdata);
+        ratin = result.rating;
+        if(result.rating == "zzeerroo"){
+            ratin = 0;
+        }if(result.rating == "thiswasflaggedyo"){
+            ratin = 999;
+        }
+        //idtouse = idtouse.replace('ddeecciimmaallppooiinntt', /\./g);
+        //idtouse = idtouse.replace('ccoolloonn', /\:/g);
+        //idtouse = idtouse.replace('sseemmiiccoolloonn', /\;/g);
+        //idtouse = idtouse.replace('eeqquuaallss', /\=/g);
+        $('p').each(function(){
+          if($(this).attr('id') == idtouse){
+            if(ratin != "You have already voted on this hint!" && ratin != 999){
+            $(this).prepend("<div><p style=\"float: left;\"><b> This hint's rating is:" + " " + " " + ratin + "</p></div>");
+          }if (ratin == "You have already voted on this hint!"){
+            $(this).prepend("<div><p style=\"float: left;\"><b> You have already voted on this hint.</p></div>");
+          }if (ratin == 999){
+            $(this).prepend("<div><p style=\"float: left;\"><b><font color=\"red\"> This hint has been flagged for moderation.</font></p></div>");}
+        }
+        });}
+    }
+    function clearstates(){
+        $('.Thankyou', element).text();
+        $('.correct', element).hide();
+        $( ".hintansarea" ).empty();
+        $("#answer").hide();
+        $(".problem").hide();
+    }
+}
+
+
+
