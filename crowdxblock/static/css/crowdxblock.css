@@ -4,10 +4,10 @@
     font-weight: bold;
 }
 
-.crowdxblock_block button {
+/*.crowdxblock_block {
     cursor: pointer;
     background: rgb(0,0,200);
-}
+}*/
 
 .crowdxblock_block .crowdsource-wrapper {
   box-shadow: inset 0 1px 2px 1px rgba(0,0,0,0.1);
@@ -22,19 +22,31 @@
   padding-left: 15px;
   padding-right: 15px;
   font-size: 16px;
+  
 }
+
+.crowdxblock_block .hintsarea {
+  border-style: solid;
+  border-width: thin;
+  border-color: rgb(200,200,200);
+}
+
+
+/*.crowdxblock_block .hintbutton {
+    height: 10px;
+}*/
 
 .crowdxblock_block .vote {
   padding-top: 0px !important;
   padding-bottom: 0px !important;
 }
 
-.crowdxblock_block .hintbutton {
-  background: rgb(230, 250,230);
-}
-.crowdxblock_block .hintsarea {
+/*.crowdxblock_block .hintbutton {
+}*/
+
+/*.crowdxblock_block .hintsarea {
     width: 600px;
     padding: 10px;
     border: 5px solid gray;
     margin: 0px;
-}
+}*/

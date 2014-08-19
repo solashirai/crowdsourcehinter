@@ -1,23 +1,114 @@
-
-//my coding attemps start here i guess
-    /*this.url = this.el.data('url');
-Logger.listen('problem_graded', this.el.data('child-id'), this.capture_problem);
-this.render();*/
-    /*function capture_problem(event_type, data, element) {
-var answers, response,
-_this = this;
-answers = data[0];
-response = data[1];*/ //use this snippet for actual code? maybe?
+var repeating = 0;
+var repeatcounter = 0;
+var canhint = 0;
+var issubmitting = 0;
+var issubmittinghint = 0;
 
 function CrowdXBlock(runtime, element){
     var WrongAnswer = [];
     var HintUsed = [];
+    var HintShown = [];
     $("#answer").hide();
     $(".problem").hide();
     $("#feedback").hide();
+    vare = String;
+    varet = String;
+    vard = String;
+    $(".HintsToUse", element).text("Hints are enabled for this problem!");
+    clearvariables();
+    repeatcounter += 1;
+    console.debug(repeatcounter);
+
+    Logger.listen('seq_next', null, clearingvariables);
+    Logger.listen('seq_goto', null, clearingvariables);
+    function clearingvariables(event_type, data, element){
+        clearvariables(data);
+    }
+
+    function clearvariables(data){
+        HintUsed = [];
+        WrongAnswer = [];
+        repeating = 0;
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'clear_temp'),
+            data: JSON.stringify({"hello": "world"}),
+        });
+    }    
+
+    Logger.listen('problem_graded', null, dostuff);
+    function dostuff(event_type, data, element){
+        repeating += 1;
+        if(repeating != repeatcounter){
+        console.debug(repeating);
+        }else{
+        $("#studentsubmit").val('');
+        vare = element;
+        varet = event_type;
+        vard = data;
+        senddata(varet, vard, vare);
+        }
+    }
+
+    $(document).on('click', '.check.Check', function(){
+        repeating = 0;
+    });
+
+    function senddata(varet, vard, vare){
+        if (vard[1].search(/class="correct/) === -1){
+        $.ajax({ //that probably will be changed once i use response.search or something?
+            type: "POST", //if/when that is changed, remove checkreply and uncomment the else statement below
+            url: runtime.handlerUrl(element, 'get_hint'),
+            data: JSON.stringify({"submittedanswer": vard[0]}), //return student's incorrect answer here
+            //from vard[1] check id (long thing) and get class (correct or incorrect)
+            success: seehint
+        });
+      }else{
+        $('.correct', element).show();
+        $('.correct', element).text("You're correct! Please help us improve our hints by voting on them, or submit your own hint!");
+        $(".HintsToUse", element).text(" ");
+        console.debug("this should also only show up once...");
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'get_feedback'),
+            data: JSON.stringify({"hello": "world"}),
+            success: getfeedback
+        });}
+        }
+
+     $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'studiodata'),
+            data: JSON.stringify({"hello": "world"}),
+            success: studiodata
+       });
+
+    function studiodata(result){
+      $(".xblock-editor").append("confirm_working");
+      if($(".xblock-editor").length != 0){
+        $.each(result, function(index, value) {
+          console.debug(index);
+          $('.xblock-editor').append("<p id=\"" + value + "\"> The hint<b>" + " " + index + " " + "</b>was flagged for the submission<b>" + " " + value + "</b></p>");
+          $('#'+value).prepend("<input data-value=\"" + value + "\" id=\"" + index + "\" style=\"height:35px;padding-top: 3px;\" type=\"button\" class=\"flagbutton\" data-rate=\"dismiss\" value=\"Dismiss Hint\"><input data-value=\"" + value + "\" id=\"" + index + "\" style=\"height:35px; padding-top: 3px;\" type=\"button\" class=\"flagbutton\" data-rate=\"purge\" value=\"Purge Hint\">");
+          });
+      }
+    }
+    $(document).on('click', '.flagbutton', function(){
+        answer_wrong = $(this).attr('id');
+        hint = $(this).attr('data-value');
+        rating = $(this).attr('data-rate');
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'moderate_hint'),
+            data: JSON.stringify({"answer_wrong":answer_wrong, "hint": hint, "rating":rating}),
+       });
+    });
 
     function seehint(result){//use html to show these results somewhere i guess
-        $('.HintsToUse', element).text(result.HintsToUse); //text(result.self.hints?)
+        console.debug('seehint');
+        HintUsed.push(result.HintsToUse);
+        $('.HintsToUse', element).text("Hint:" + " " + result.HintsToUse); //text(result.self.hints?)
+        console.debug('hint:' + ' ' + result.HintsToUse);
     }
 
     function getfeedback(result){
@@ -31,105 +122,118 @@ function CrowdXBlock(runtime, element){
         indexid = indexid.replace(/\:/g, 'ccoolloonn');
         valueid = valueid.replace(/\;/g, 'sseemmiiccoolloonn');
         indexid = indexid.replace(/\;/g, 'sseemmiiccoolloonn');
-        valueid = valueid.replace(/\?/g, 'qquueessttiioonnmmaarrkk');
-        indexid = indexid.replace(/\?/g, 'qquueessttiioonnmmaarrkk');
-        valueid = valueid.replace(/\"/g, 'qquuoottaattiioonnmmaarrkkss');
-        indexid = indexid.replace(/\"/g, 'qquuoottaattiioonnmmaarrkkss');
+        valueid = valueid.replace(/\=/g, 'eeqquuaallss');
+        indexid = indexid.replace(/\=/g, 'eeqquuaallss');
         if($("#submit"+valueid).length == 0){
             $('.hintansarea').append("<p id=\"submit" + valueid + "\" class=\"hintsarea\"> </p>");
-            $('#submit'+valueid).append("For your incorrect answer of:" + " " + value + " <p id=\"hintstoshow" + valueid + "\"> The following hints exist: </p><p> <input id=\"" + indexid + "\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint for this problem\">");
+            $('#submit'+valueid).append("<p> </p><b>Incorrect Answer: \b" + " " + value + "<p> <input id=\"submitbuttonfor" + indexid + "\" style=\"float: right; float: top;\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint\"> <p id=\"hintstoshow" + valueid + "\"> <b><u>Hints in the Data Base:</u>\b </p></div>");
             }
           if(indexid.slice(0,22) != "There are no hints for"){
-            $('#hintstoshow'+valueid).append("<p>" + index + "<input data-value=\"" + valueid + "\" id=\"" + indexid + "\" type=\"button\" class=\"hintbutton\" value=\"Upvote this Hint\"></p>");
-            }else{
+              if($.inArray(index, HintUsed) == -1){
+                if($.inArray(index, HintShown) == -1){
+                console.log('yis.'); //style=\"float: left;\" 
+                $('#hintstoshow'+valueid).append("<p \" id =\"thisparagraph" + indexid + "\">" + "<span style=\"display: inline-block;  \"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"width:20px; height:35px;padding-top: 3px;\" type=\"button\" class=\"hintbutton\" data-rate=\"1\" data-icon=\"arrow-u\" value=\"^\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"width:20px; height:35px; padding-top: 3px;\" type=\"button\" class=\"hintbutton\" data-rate=\"-1\" value=\"v\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"width:20px; height:35px;padding-top: 3px;\" type=\"button\" class=\"hintbutton\" data-rate=\"0\" value=\"!\"></span>" + index + "</p>");
+                HintShown.push(index);}
+              }else{ 
+                if($.inArray(index, HintShown) == -1){
+                console.log('YIESSSSS');
+                $('#hintstoshow'+valueid).prepend("<p \" id =\"thisparagraph" + indexid + "\">" + "<span style=\"display: inline-block;\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" type=\"button\" style=\"padding-top: 3px;width:20px; height:35px;\" class=\"hintbutton\" data-rate=\"1\" value=\"^\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"padding-top: 3px;width:20px; height:35px;\" type=\"button\" class=\"hintbutton\" data-rate=\"-1\" value=\"v\"><input data-value=\"" + valueid + "\" style=\"padding-top: 3px;width:20px; height:35px;\" id=\"" + indexid + "\" type=\"button\" class=\"hintbutton\" data-rate=\"0\" value=\"!\"></span><font color=\"blue\">" + index + "</font></p>");      
+                HintShown.push(index);
+              }}}else{
               $('#hintstoshow'+valueid).empty();
-              $('#hintstoshow'+valueid).append("<p id=\"hintstoshow" + valueid + "\"> No hints exist in the database.</p> <p data-value=\"" + valueid + "\" id=\"" + indexid + "\"</p>");
+              console.log('index id is:' + indexid);
+              $('#hintstoshow'+valueid).append("<p style = \"color: blue;\" id=\"hintstoshow" + valueid + "\"data-value=\"" + valueid + "\"> <b>No hints exist in the database. (You received a default hint)</p> <p id=\"" + indexid + "\"data-value=\"" + valueid + "\" </p>");
           }
         });
     }
 
     $(document).on('click', '.submitbutton', function(){ //upvote
+        issubmittinghint = 0;
+        issubmitting += 1;
+        if(issubmitting == repeatcounter){
         id = this.id;
-        value = document.getElementById(this.id).getAttribute('data-value');
+        id = id.slice(15);
+        value = document.getElementById(id).getAttribute('data-value');
+        $('.submitbutton').show();
+        $('.math').remove();
+        $('#submit').remove();
         $(this).hide();
-        $('#submit' + value).append("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><<input id=\"submit\" type=\"button\" class=\"button\" value=\"Submit Hint\"> </p>");})
+        $('#hintstoshow' + value).prepend("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><input id=\"submit\" type=\"button\" data-is=\"" + id + "\" class=\"button\" value=\"Submit Hint\"> </p>");
+    }})
+
     $(document).on('click', '#submit', function(){
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'give_hint'),
-            data: JSON.stringify({"submission": $('.math').val(), "id": $(".math").attr('id')}), //give hin for first incorrect answer
-            success: finish
-        });
-        $("#answer").val('');})
+        issubmittinghint += 1;
+        if(issubmittinghint == repeatcounter){
+        if($('.math').val() != null){
+          var valueid = String;
+          issubmitting = 0;
+          $('#submit').each(function(){
+              valueid = $(this).attr('data-is');
+          });
+          $('.submitbutton').show();
+          console.log('valueidworks' + valueid);
+          $.ajax({
+              type: "POST",
+              url: runtime.handlerUrl(element, 'give_hint'),
+              data: JSON.stringify({"submission": $('.math').val(), "id": valueid}), //give hin for first incorrect answer
+              success: finish
+          });
+           $("#answer").val('');
+          data_value = document.getElementById(valueid).getAttribute('data-value');
+          data_value = String('hintstoshow' + data_value);
+          $(this).remove();
+          $('.math').remove();
+          document.getElementById("submitbuttonfor" + valueid).remove();
+          $('#submitbuttonfor' + valueid).remove();
+          $('#'+valueid).remove();
+          value = document.getElementById(id).getAttribute('data-value');
+          $('#hintstoshow' + value).prepend("<p> Thankyou! </p>");
+          $('#submit'+valueid).prepend('Thankyou for your hint!');
+        }}})
 
     $(document).on('click', '.hintbutton', function(){ //upvote
+        canhint = 0;
         id = this.id;
+        $(this).hide();
+        $('.hintbutton').each(function(){
+          if($(this).attr('id') == String(id)){
+            $(this).hide();}
+        });
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"rating": 1, "ansnum": $(this).attr('id'), "value": $(this).attr('data-value')}),
+            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "answer": $(this).attr('id'), "value": $(this).attr('data-value')}),
             success: finish
         });})
 
-    $('#caus', element).click(function(eventObject) {
-        console.debug("ca working this is edited");
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'clear_states'),
-            data: JSON.stringify({"hello": "world"}), //give hin for first incorrect answer
-            success: clearstates
-        });
-        $("#studentsubmit").val('');
-        $("#answer").val('');})
-    function finish(){
+
+    function finish(result){
+        if(canhint == 0){
+        canhint = 1;
         $('.Thankyou', element).text("Thankyou for your help!");
-        $('.correct', element).hide();
-        $( ".hintansarea" ).empty();
-    }
-    function clearstates(){
-        $('.Thankyou', element).text();
-        $('.correct', element).hide();
-        $( ".hintansarea" ).empty();
-        $("#answer").hide();
-        $(".problem").hide();
-    }
-
-    function checkreply(result){
-
-    if(result.correct == 1){
-        console.debug("yay");
-        $('.correct', element).show();
-        $('.correct', element).text("You're correct! Please choose the best hint, or provide us with one of your own!");
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'get_feedback'),
-            data: JSON.stringify({"hello": "world"}),
-            success: getfeedback
-        });
-        }else{
-        seehint(result)
+        idtouse = String('thisparagraph' + result.origdata);
+        hint_rating = result.rating;
+        if(result.rating == "zzeerroo"){
+            hint_rating = 0;
+        }if(result.rating == "thiswasflagged"){
+            hint_rating = 999;
         }
+        //idtouse = idtouse.replace('ddeecciimmaallppooiinntt', /\./g);
+        //idtouse = idtouse.replace('ccoolloonn', /\:/g);
+        //idtouse = idtouse.replace('sseemmiiccoolloonn', /\;/g);
+        //idtouse = idtouse.replace('eeqquuaallss', /\=/g);
+        $('p').each(function(){
+          if($(this).attr('id') == idtouse){
+            if(hint_rating != "You have already voted on this hint!" && hint_rating != 999){
+            $(this).prepend("<div><p style=\"float: left;\"><b> This hint's rating is:" + " " + " " + hint_rating + "</p></div>");
+          }if (hint_rating == "You have already voted on this hint!"){
+            $(this).prepend("<div><p style=\"float: left;\"><b> You have already voted on this hint.</p></div>");
+          }if (hint_rating == 999){
+            $(this).prepend("<div><p style=\"float: left;\"><b><font color=\"red\"> This hint has been flagged for moderation.</font></p></div>");}
+        }
+        });}
     }
-    $('#studentanswer', element).click(function(eventObject) { //for test //when answer is incorrect /*response.search(/class="correct/) === -1*/
-        console.debug($('#studentsubmit').val()); //currently data is passed to python and then returned whether it is correct or not
-        $.ajax({ //that probably will be changed once i use response.search or something?
-            type: "POST", //if/when that is changed, remove checkreply and uncomment the else statement below
-            url: runtime.handlerUrl(element, 'get_hint'),
-            data: JSON.stringify({"submittedanswer": $('#studentsubmit').val()}), //return student's incorrect answer here
-            success: checkreply
-        });
-        $("#studentsubmit").val('');
-     /* } else { //answer is correct
-$('.correct', element).text("You're correct! Please choose the best hint, or provide us with one of your own!");
-$.ajax({
-type: "POST",
-url: runtime.handlerUrl(element, 'get_feedback'),
-data: JSON.stringify({"hello": "world"}),
-success: getfeedback
-});
-};*/
-    }
-)}
+}
 
 
 
