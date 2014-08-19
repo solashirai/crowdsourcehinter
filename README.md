@@ -6,8 +6,11 @@ This XBlock is still under construction. Functionalities to set default hints, p
 
 backlog: https://docs.google.com/a/edx.org/document/d/1lOBLZWohwRmnfgwz53gc4b4GdfP4EER3UNohdYfcEJU/edit#
 
+An example of a student recieving a hint 
 ![CrowdSourcedHinter Hint Screenshot](crowdsourcedhinter_hint.png)
 
+
+An example of a hint giving feedback
 ![CrowdSourcedHinter Student Feedback Screenshot](crowdsourcedhinter_feedback.png)
 
 To bring the crowd sourced hinter into a demo course:
