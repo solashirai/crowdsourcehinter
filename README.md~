@@ -2,8 +2,15 @@ This is the Crowd Sourced Hinter XBlock. The Crowd Sourced Hinter provides stude
 with hints when they incorrectly answer a numerical-or text-input problem. Additionally,
 the hints that are provided to students are student-made hints.
 
+This XBlock is still under construction. Functionalities to set default hints, properly moderate flagged hints, and lots of improvements to user interface are to be done soon. 
+
+backlog: https://docs.google.com/a/edx.org/document/d/1lOBLZWohwRmnfgwz53gc4b4GdfP4EER3UNohdYfcEJU/edit#
+
+An example of a student recieving a hint 
 ![CrowdSourcedHinter Hint Screenshot](crowdsourcedhinter_hint.png)
 
+
+An example of a hint giving feedback
 ![CrowdSourcedHinter Student Feedback Screenshot](crowdsourcedhinter_feedback.png)
 
 To bring the crowd sourced hinter into a demo course:
