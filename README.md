@@ -20,7 +20,7 @@ The name of the module will be "crowdxblock" in advanced settings.
 
 After creating a new unit, add the crowdsourcedhinter xblock just like any other custom xblock. The name of the crowd sourced hinter may not show up for some reason, but an empty space where its name should be will be clickable. 
 
-Testing the functionality of the crowd sourced hinter works best when switching between different users and answering the same problem within a unit. 
+Testing the crowd sourced hinter's hint providng/storing works best when switching between different users and answering the same problem within a unit. Going back and forth between different problems within the same subsection might possibly cause problems. 
 
 
 After a student incorrectly answers a problem, a hint will be provided. This hint will either be a default hint or a hint that has been submitted specifically for that incorrect answer (if such a hint has previously been submitted). If multiple hints exist for a single incorrect answer, the current system will choose the highest rated hint to show the student. 
