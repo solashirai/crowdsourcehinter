@@ -426,3 +426,9 @@ class CrowdXBlock(XBlock):
 </vertical_demo>
 """),
         ]
+'''
+		print ("answer" + str(data["submittedanswer"]))
+   	        for keys in self.hints[key]:
+		    print ("other key" + y)
+		    self.HintsToUse[keys] = self.hints[key[keys]] #If the user's incorrect answre has precedence in hints, add hints listed under
+     		    print("hintstouse: " + str(self.HintsToUse[keys]))'''

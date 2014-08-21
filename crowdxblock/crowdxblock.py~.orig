@@ -14,6 +14,7 @@ from xblock.fragment import Fragment
 log = logging.getLogger(__name__)
 
 class CrowdXBlock(XBlock):
+<<<<<<< HEAD
     """
     This is the Crowd Sourced Hinter XBlock. This Xblock seeks to provide students with hints
     that specifically address their mistake. Additionally, the hints that this Xblock shows
@@ -44,6 +45,16 @@ class CrowdXBlock(XBlock):
     # this is a dictionary of hints that have been flagged. the keys represent the incorrect answer submission, and the
     # values are the hints the corresponding hints. even if a hint is flagged, if the hint shows up for a different
     # incorrect answer, i believe that the hint will still be able to show for a student
+=======
+    correctanswer = String(default="42", scope=Scope.content) #should be irrelevant for completed version
+    hints = Dict(default={"2": {"hint6for2":0, "hint5for2":0, "hint4for2":0, "hint1for2":0, "hint2for2":0, "hint3for2":0}, "1": {"hint1for1":0, "hint2for1":0, "hint3for1":0}, "3": {"hint1for3":0, "hint2for3":0, "hint3for3":0}}, scope=Scope.content)
+#All hints. sorted by type of mistake. type_of_incorrect_answer{"hint":rating, "hint":rating}
+    HintsToUse = Dict(default={}, scope=Scope.user_state) #Dict of hints to provide user
+    WrongAnswers = List(default=[], scope=Scope.user_state) #List of mistakes made by user
+    DefaultHints = Dict(default={"defaulthint1": 0, "defaulthint2": 0, "defaulthint3": 0, "defaulthint4": 0, "defaulthint5": 0, "bestdefaulthint": 3}, scope=Scope.content) #Default hints in case no incorrect answers in hints match the user's mistake
+    Used = List(default=[], scope=Scope.user_state)#List of used hints from HintsToUse
+    Voted = Integer(default=0, scope=Scope.user_state)#prevent multiple votes/hint submission
+>>>>>>> 9bf9384eb97feec5f771c984ee0510f675812ccc
 
     def student_view(self, context=None):
         """
@@ -57,6 +68,7 @@ class CrowdXBlock(XBlock):
         return frag
 
     def studio_view(self, context=None):
+<<<<<<< HEAD
         """
         This function defines which files to access when an instructor views this xblock through the
         studio view (and click "edit"). The only difference from student_view is the html script.
@@ -67,6 +79,9 @@ class CrowdXBlock(XBlock):
         frag.add_javascript(self.resource_string("static/js/src/crowdxblock.js"))
         frag.initialize_js('CrowdXBlock')
         return frag
+=======
+        
+>>>>>>> 9bf9384eb97feec5f771c984ee0510f675812ccc
 
     def resource_string(self, path):
         """
