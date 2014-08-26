@@ -1,8 +1,6 @@
-This is the Crowd Sourced Hinter XBlock. The Crowd Sourced Hinter provides students
-with hints when they incorrectly answer a numerical-or text-input problem. Additionally,
-the hints that are provided to students are student-made hints.
+This is the repository for the Crowd Sourced Hinter XBlock. The Crowd Sourced Hinter serves to provide students with hints when they incorrectly answer a problem within a course (currently tested for text and numerical input type questions).
 
-This XBlock is still under construction. Functionalities to set default hints, properly moderate flagged hints, and lots of improvements to user interface are to be done soon. 
+This XBlock is still under construction. Functionalities to set default hints, properly moderate flagged hints, and improvements to user interface are to be done soon. 
 
 backlog: https://docs.google.com/a/edx.org/document/d/1lOBLZWohwRmnfgwz53gc4b4GdfP4EER3UNohdYfcEJU/edit#
 
@@ -16,13 +14,15 @@ An example of a hint giving feedback
 To bring the crowd sourced hinter into a demo course:
 
 First, follow https://github.com/edx/edx-platform/blob/master/docs/en_us/developers/source/xblocks.rst#testing for general xblock creation.
-The name of the module will be "crowdxblock" in advanced settings.
+The name of the module to set in the advanced settings tab is "crowdxblock" (this will likely be changed in the near future to something like "crowd_sourced_hinter").
 
-After creating a new unit, add the crowdsourcedhinter xblock just like any other custom xblock. The name of the crowd sourced hinter may not show up for some reason, but an empty space where its name should be will be clickable. 
+After creating a new unit, add the crowdsourcedhinter XBlock into a course just like any other XBlock. The name of the crowd sourced hinter may not show up in studio for some unknown reason, but an empty space where its name should be will be clickable (problem to be identified/fixed...).
 
-Testing the crowd sourced hinter's hint providng/storing works best when switching between different users and answering the same problem within a unit. Going back and forth between different problems within the same subsection might possibly cause problems. 
+Testing the functionality of the crowd sourced hinter works best when switching between different users and answering the same problem.
 
+What It Does:
+The two key features of the crowd sourced hinter are the abilities to show students hints and to have the students themselves create hints to be shown to future students. 
 
-After a student incorrectly answers a problem, a hint will be provided. This hint will either be a default hint or a hint that has been submitted specifically for that incorrect answer (if such a hint has previously been submitted). If multiple hints exist for a single incorrect answer, the current system will choose the highest rated hint to show the student. 
+When a student incorrectly answers a text input type problem, the crowd sourced hinter will look through its database to search for a hint that has been stored for that exact incorrect answer input (i.e. when the database is large enough, two different incorrect answers would not receive the same hint). If hints exist for a student's incorrect answer, this hint is shown to the student. The student then may have the opportunity to input their answer again, which may prompt another hint to be displayed. 
 
-After a student has correctly answered the problem, they can give feedback on hints. Students can upvote, downvote, or flag the hint that they recieved for each aswer as well as 2 other hints that exist for that aswer (if these exist). Students also can submit new hints for their answer. 
+After a student re-submits an answer correctly, they can rate hints as well as submit new hints. Rating hints works by upvoting, downvoting, or flagging the hints (flagged hints are not shown to students). Students can submit new hints for each incorrect answer that has been made, and this hint will be stored only for that specific incorrect answer.

@@ -14,7 +14,7 @@ An example of a hint giving feedback
 To bring the crowd sourced hinter into a demo course:
 
 First, follow https://github.com/edx/edx-platform/blob/master/docs/en_us/developers/source/xblocks.rst#testing for general xblock creation.
-The name of the module to set in the advanced settings tab is "crowdxblock" (this will likely be changed in the near future to something like "crowd_sourced_hinter").
+The name of the module to set in the advanced settings tab is "crowdxblock" (this will likely be changed in the near future to something like "crowdsourced_hinter").
 
 After creating a new unit, add the crowdsourcedhinter XBlock into a course just like any other XBlock. The name of the crowd sourced hinter may not show up in studio for some unknown reason, but an empty space where its name should be will be clickable (problem to be identified/fixed...).
 
