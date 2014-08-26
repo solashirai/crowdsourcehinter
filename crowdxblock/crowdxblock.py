@@ -19,35 +19,36 @@ class CrowdXBlock(XBlock):
     that specifically address their mistake. Additionally, the hints that this Xblock shows
     are created by the students themselves. This doc string will probably be edited later.
     """
-    hint_database = Dict(default={: {}}, scope=Scope.user_state_summary)
-    # database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
+    # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
-    HintsToUse = Dict({}, scope=Scope.user_state)
-    # this is a dictionary of hints that will be used to determine what hints to show a student.
+    hint_database = Dict(default={: {}}, scope=Scope.user_state_summary)
+    # This is a dictionary of hints that will be used to determine what hints to show a student.
     # flagged hints are not included in this dictionary of hints
-    WrongAnswers = List([], scope=Scope.user_state)
-    # this is a list of incorrect answer submissions made by the student. this list is mostly used for
+    HintsToUse = Dict({}, scope=Scope.user_state)
+    # This is a list of incorrect answer submissions made by the student. this list is mostly used for
     # feedback, to find which incorrect answer's hint a student voted on.
-    DefaultHints = Dict(default={}, scope=Scope.content)
-    # a dictionary of default hints. default hints will be shown to students when there are no matches with the
+    WrongAnswers = List([], scope=Scope.user_state)
+    # A dictionary of default hints. default hints will be shown to students when there are no matches with the
     # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
     # particular incorrect answer)
-    Used = List([], scope=Scope.user_state)
-    # list of which hints from the HintsToUse dictionary have been shown to the student
+    DefaultHints = Dict(default={}, scope=Scope.content)
+    # List of which hints from the HintsToUse dictionary have been shown to the student
     # this list is used to prevent the same hint from showing up to a student (if they submit the same incorrect answers
     # multiple times)
-    Voted = List(default=[], scope=Scope.user_state)
-    # this list is used to prevent students from voting multiple times on the same hint during the feedback stage.
+    Used = List([], scope=Scope.user_state)
+    # This list is used to prevent students from voting multiple times on the same hint during the feedback stage.
     # i believe this will also prevent students from voting again on a particular hint if they were to return to
     # a particular problem later
-    Flagged = Dict(default={}, scope=Scope.user_state_summary)
-    # this is a dictionary of hints that have been flagged. the keys represent the incorrect answer submission, and the
+    Voted = List(default=[], scope=Scope.user_state)
+    # This is a dictionary of hints that have been flagged. the keys represent the incorrect answer submission, and the
     # values are the hints the corresponding hints. even if a hint is flagged, if the hint shows up for a different
     # incorrect answer, i believe that the hint will still be able to show for a student
+    Flagged = Dict(default={}, scope=Scope.user_state_summary)
 
     def student_view(self, context=None):
         """
-        This function defines which files to access when a student views this xblock. 
+        This view renders the hint view to the students. The HTML has the hints templated 
+        in, and most of the remaining functionality is in the JavaScript. 
         """
         html = self.resource_string("static/html/crowdxblock.html")
         frag = Fragment(html.format(self=self))
@@ -58,8 +59,9 @@ class CrowdXBlock(XBlock):
 
     def studio_view(self, context=None):
         """
-        This function defines which files to access when an instructor views this xblock through the
-        studio view (and click "edit"). The only difference from student_view is the html script.
+        This function defines a view for editing the XBlock when embedding it in a course. It will allow
+        one to define, for example, which problem the hinter is for. It is unfinished and does not currently
+        work.
         """
         html = self.resource_string("static/html/crowdxblockstudio.html")
         frag = Fragment(html.format(self=self))
@@ -70,17 +72,17 @@ class CrowdXBlock(XBlock):
 
     def resource_string(self, path):
         """
-        This function is used to get the path of static resources. 
+        This function is used to get the path of static resources.
         """
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
 
     @XBlock.json_handler
     def clear_temp(self, data, suffix=''):
-        """
-        this clears all temprorary lists/dictionaries. This may not be relevant any longer
+        """ TODO: Remove or fix.
+        This clears all temprorary lists/dictionaries. This may not be relevant any longer
         but is intended to prevent hints from messing up when changing between units within
-        a section
+        a section.
         """
         remove_list = []
         # a list is used to systematically remove all key/values from a dictionary.
