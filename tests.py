@@ -10,5 +10,4 @@ def test_rate_hint(self):
             'answer': 'answer
         }
     )
-    self.assertEqual(resp['Success'], True)
     self.assertEqual(resp['rating'], 2)
