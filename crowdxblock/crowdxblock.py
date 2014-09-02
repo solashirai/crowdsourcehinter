@@ -21,7 +21,7 @@ class CrowdXBlock(XBlock):
     """
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
-    hint_database = Dict(default={: {}}, scope=Scope.user_state_summary)
+    hint_database = Dict(default={'answer': {'hint': 1}, scope=Scope.user_state_summary)
     # This is a dictionary of hints that will be used to determine what hints to show a student.
     # flagged hints are not included in this dictionary of hints
     HintsToUse = Dict({}, scope=Scope.user_state)
