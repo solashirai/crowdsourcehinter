@@ -21,10 +21,11 @@ class CrowdXBlock(XBlock):
     """
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
-    hint_database = Dict(default={: {}}, scope=Scope.user_state_summary)
+    # Temporary values have been added into the hint_database for testing purposes (will be removed in the future)
+    hint_database = Dict(default={'answer': {'hint': 1}}, scope=Scope.user_state_summary)
     # This is a dictionary of hints that will be used to determine what hints to show a student.
     # flagged hints are not included in this dictionary of hints
-    HintsToUse = Dict({}, scope=Scope.user_state)
+    HintsToUse = Dict(}, scope=Scope.user_state)
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
     # feedback, to find which incorrect answer's hint a student voted on.
     WrongAnswers = List([], scope=Scope.user_state)
