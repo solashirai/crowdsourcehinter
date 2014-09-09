@@ -29,11 +29,6 @@ function CrowdXBlock(runtime, element){
         HintUsed = [];
         WrongAnswer = [];
         repeating = 0;
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'clear_temp'),
-            data: JSON.stringify({"hello": "world"}),
-        });
     }    
 
     Logger.listen('problem_graded', null, dostuff);

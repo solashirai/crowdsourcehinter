@@ -78,28 +78,6 @@ class CrowdXBlock(XBlock):
         return data.decode("utf8")
 
     @XBlock.json_handler
-    def clear_temp(self, data, suffix=''):
-        """ TODO: Remove or fix.
-        This clears all temprorary lists/dictionaries. This may not be relevant any longer
-        but is intended to prevent hints from messing up when changing between units within
-        a section.
-        """
-        remove_list = []
-        # a list is used to systematically remove all key/values from a dictionary.
-        # there may be a much cleaner way to do this but I could not find one very easily.
-        # This whole function will probably be removed if scopes are corrected later.
-        for used_hints in self.Used:
-            remove_list.append(used_hints)
-        for items in remove_list:
-            self.Used.remove(items)
-        remove_list = []
-        for wrong_answers in self.WrongAnswers:
-            remove_list.append(wrong_answers)
-        for items in remove_list:
-            self.WrongAnswers.remove(items)
-        self.HintsToUse.clear()
-
-    @XBlock.json_handler
     def get_hint(self, data, suffix=''):
         """
         Returns hints to students. Hints are placed into the HintsToUse dictionary if it is found that they
@@ -141,16 +119,13 @@ class CrowdXBlock(XBlock):
                 self.Used.append(max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0])
                 return {'HintsToUse': max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0]}
         else:
-            # choose another random hint for the answer. 
-            not_used = random.choice(self.HintsToUse.keys())
-            for used_hints in self.Used:
-                if used_hints in self.HintsToUse.keys():
-                    hints_used += 1
-            if str(len(self.HintsToUse)) > str(hints_used):
-                while not_used in self.Used:
-                    # loop through hints to ensure no hint is shown twice
-                    while not_used in self.Flagged.keys():
-                        not_used = random.choice(self.HintsToUse.keys())
+            # choose another random hint for the answer.
+            temporary_hints_list = []
+            for hint_keys in self.HintsToUse:
+                if hint_keys not in self.Used and hint_keys not in self.Flagged:
+                    temporary_hints_list.append(str(hint_keys))
+            if len(temporary_hints_list) != 0:
+                not_used = random.choice(temporary_hints_list)
             else:
                 # if there are no more hints left in either the database or defaults
                 self.Used.append(str("There are no hints for" + " " + answer))
@@ -236,6 +211,8 @@ class CrowdXBlock(XBlock):
                         else:
                             self.no_hints(index)
                             feedback_data[str("There are no hints for" + " " + str(self.WrongAnswers[index]))] = str(self.WrongAnswers[index])
+        self.Used = []
+        self.WrongAnswers = []
         return feedback_data
 
     def no_hints(self, index):
@@ -322,21 +299,6 @@ class CrowdXBlock(XBlock):
         temporary_dictionary[str(data_value)] += int(data_rating)
         self.hint_database[str(answer_data)] = temporary_dictionary
         return str(temporary_dictionary[str(data_value)])
-#        for hint_keys in self.Used:
-#            if str(hint_keys) == str(answer_data):
-#               # use index of hint used to find the hint within self.hint_database
-#                answer = self.Used.index(str(answer_data))
-#                for answer_keys in self.hint_database:
-#                    temporary_dictionary = str(self.hint_database[str(answer_keys)])
-#                    temporary_dictionary = (ast.literal_eval(temporary_dictionary))
-##                    # if I remember correctly, changing the rating values in self.hint_database
- #                   # didn't work correctly for some reason, so instead I manipulated this
- #                   # temporary dictionary and then set self.hint_database to equal it.
- #                   # probably due to scope error (which also is affecting the studio interactions)
- #                   if str(answer_keys) == str(self.WrongAnswers[answer]):
- #                       temporary_dictionary[self.Used[int(answer)]] += int(data_rating)
- #                       self.hint_database[str(answer_keys)] = temporary_dictionary
- #                       return str(temporary_dictionary[self.Used[int(answer)]])
 
     def remove_symbols(self, answer_data):
         """
