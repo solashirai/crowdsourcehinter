@@ -95,7 +95,7 @@ class CrowdXBlock(XBlock):
         answer = str(data["submittedanswer"])
         answer = answer.lower() # for analyzing the student input string I make it lower case.
         found_equal_sign = 0
-        hints_used = 0
+        remaining_hints = int(0)
         # the string returned by the event problem_graded is very messy and is different
         # for each problem, but after all of the numbers/letters there is an equal sign, after which the
         # student's input is shown. I use the function below to remove everything before the first equal
@@ -105,33 +105,39 @@ class CrowdXBlock(XBlock):
                 found_equal_sign = 1
                 eqplace = answer.index("=") + 1
                 answer = answer[eqplace:]
-        self.find_hints(answer)
-        # add hints to the self.HintsToUse dictionary. Will likely be replaced
-        # soon by simply looking within the self.hint_database for hints.
-        if str(answer) not in self.hint_database:
-            # add incorrect answer to hint_database if no precedent exists
-            self.hint_database[str(answer)] = {}
-            self.HintsToUse.clear()
-            self.HintsToUse.update(self.DefaultHints)
-        if max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
-            # choose highest rated hint for the incorrect answer
-            if max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0] not in self.Flagged.keys():
-                self.Used.append(max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0])
-                return {'HintsToUse': max(self.HintsToUse.iteritems(), key=operator.itemgetter(1))[0]}
-        else:
-            # choose another random hint for the answer.
-            temporary_hints_list = []
-            for hint_keys in self.HintsToUse:
-                if hint_keys not in self.Used and hint_keys not in self.Flagged:
-                    temporary_hints_list.append(str(hint_keys))
-            if len(temporary_hints_list) != 0:
-                not_used = random.choice(temporary_hints_list)
+        remaining_hints = int(self.find_hints(answer))
+        if remaining_hints != int(0):
+            if max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
+                # choose highest rated hint for the incorrect answer
+                if max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0] not in self.Flagged.keys():
+                    self.Used.append(max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0])
+                    return {'HintsToUse': max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0]}
             else:
-                # if there are no more hints left in either the database or defaults
-                self.Used.append(str("There are no hints for" + " " + answer))
-                return {'HintsToUse': "Sorry, there are no more hints for this answer."}
-            self.Used.append(not_used)
-            return {'HintsToUse': not_used}
+                # choose another random hint for the answer.
+                temporary_hints_list = []
+                for hint_keys in self.hint_database[str(answer)]:
+                    if hint_keys not in self.Used and hint_keys not in self.Flagged:
+                        temporary_hints_list.append(str(hint_keys))
+                        not_used = random.choice(temporary_hints_list)
+        else:
+            if max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
+                # choose highest rated hint for the incorrect answer
+                if max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0] not in self.Flagged.keys():
+                    self.Used.append(max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0])
+                    return {'HintsToUse': max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0]}
+            else:
+                temporary_hitns_list = []
+                for hint_keys in self.DefaultHints:
+                    if hint_keys not in self.Used:
+                        temporary_hints_list.append(str(hint_keys))
+                    if len(temporary_hints_list) != 0:
+                        not_used = random.choice(temporary_hints_list)
+                    else:
+                        # if there are no more hints left in either the database or defaults
+                        self.Used.append(str("There are no hints for" + " " + answer))
+                        return {'HintsToUse': "Sorry, there are no more hints for this answer."}
+        self.Used.append(not_used)
+        return {'HintsToUse': not_used}
 
     def find_hints(self, answer):
         """
@@ -141,28 +147,25 @@ class CrowdXBlock(XBlock):
         Args:
           answer: This is equal to answer from get_hint, the answer the student submitted
         """
-        hints_exist = 0
         isflagged = []
+        isused = 0
         self.WrongAnswers.append(str(answer)) # add the student's input to the temporary list, for later use
-        for answer_keys in self.hint_database:
-            # look through answer keys to find a match with the student's answer, and add
-            # the hints that exist for said answer into the HintsToUse dict.
-            hints = str(self.hint_database[str(answer_keys)])
-            if str(answer_keys) == str(answer):
-                self.HintsToUse.clear()
-                self.HintsToUse.update(ast.literal_eval(hints))
-        for hint_keys in self.HintsToUse:
+        # add hints to the self.HintsToUse dictionary. Will likely be replaced
+        # soon by simply looking within the self.hint_database for hints.
+        if str(answer) not in self.hint_database:
+            # add incorrect answer to hint_database if no precedent exists
+            self.hint_database[str(answer)] = {}
+            return str(0)
+        for hint_keys in self.hint_database[str(answer)]:
             for flagged_keys in self.Flagged:
                 if str(hint_keys) == str(flagged_keys):
                     isflagged.append(hint_keys)
-        for flagged_keys in isflagged:
-            # remove flagged keys from the HintsToUse
-            del self.HintsToUse[flagged_keys]
-        for answer_keys in self.HintsToUse:
-            if answer_keys not in self.Used:
-                hints_exist = 1
-        if hints_exist == 0:
-            self.HintsToUse.update(self.DefaultHints)
+            if str(hint_keys) in self.Used:
+                isused += 1
+        if (len(self.hint_database[str(answer)]) - len(isflagged) - isused) > 0:
+            return str(1)
+        else:
+            return str(0)
 
     @XBlock.json_handler
     def get_feedback(self, data, suffix=''):
