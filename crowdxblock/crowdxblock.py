@@ -126,7 +126,7 @@ class CrowdXBlock(XBlock):
                     self.Used.append(max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0])
                     return {'HintsToUse': max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0]}
             else:
-                temporary_hitns_list = []
+                temporary_hints_list = []
                 for hint_keys in self.DefaultHints:
                     if hint_keys not in self.Used:
                         temporary_hints_list.append(str(hint_keys))
