@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 '''
 This is a test for the crowdxblock, attempting to copy test_recommender.py
 '''
@@ -123,3 +124,6 @@ class TestCrowdXBlock(ModuleStoreTestCase, LoginEnrollmentTestCase):
         return json.loads(resp.content)
 
 
+=======
+ 
+>>>>>>> a516fdcde03b0e9b01eb6618b4a24754e5b52783

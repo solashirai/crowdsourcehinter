@@ -21,7 +21,7 @@ class CrowdXBlock(XBlock):
     """
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
-    hint_database = Dict(default={'answer': {'hint': 1}, scope=Scope.user_state_summary)
+    hint_database = Dict(default={'answer': {'hint': 5}}, scope=Scope.user_state_summary)
     # This is a dictionary of hints that will be used to determine what hints to show a student.
     # flagged hints are not included in this dictionary of hints
     HintsToUse = Dict({}, scope=Scope.user_state)
@@ -31,7 +31,7 @@ class CrowdXBlock(XBlock):
     # A dictionary of default hints. default hints will be shown to students when there are no matches with the
     # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
     # particular incorrect answer)
-    DefaultHints = Dict(default={}, scope=Scope.content)
+    DefaultHints = Dict(default={'default_hint': 0}, scope=Scope.content)
     # List of which hints from the HintsToUse dictionary have been shown to the student
     # this list is used to prevent the same hint from showing up to a student (if they submit the same incorrect answers
     # multiple times)
@@ -317,21 +317,26 @@ class CrowdXBlock(XBlock):
           The rating associated with the hint is returned. This rating is identical
           to what would be found under self.hint_database[answer_string[hint_string]]
         """
-        for hint_keys in self.Used:
-            if str(hint_keys) == str(answer_data):
-                # use index of hint used to find the hint within self.hint_database
-                answer = self.Used.index(str(answer_data))
-                for answer_keys in self.hint_database:
-                    temporary_dictionary = str(self.hint_database[str(answer_keys)])
-                    temporary_dictionary = (ast.literal_eval(temporary_dictionary))
-                    # if I remember correctly, changing the rating values in self.hint_database
-                    # didn't work correctly for some reason, so instead I manipulated this
-                    # temporary dictionary and then set self.hint_database to equal it.
-                    # probably due to scope error (which also is affecting the studio interactions)
-                    if str(answer_keys) == str(self.WrongAnswers[answer]):
-                        temporary_dictionary[self.Used[int(answer)]] += int(data_rating)
-                        self.hint_database[str(answer_keys)] = temporary_dictionary
-                        return str(temporary_dictionary[self.Used[int(answer)]])
+        temporary_dictionary = str(self.hint_database[str(answer_data)])
+        temporary_dictionary = (ast.literal_eval(temporary_dictionary))
+        temporary_dictionary[str(data_value)] += int(data_rating)
+        self.hint_database[str(answer_data)] = temporary_dictionary
+        return str(temporary_dictionary[str(data_value)])
+#        for hint_keys in self.Used:
+#            if str(hint_keys) == str(answer_data):
+#               # use index of hint used to find the hint within self.hint_database
+#                answer = self.Used.index(str(answer_data))
+#                for answer_keys in self.hint_database:
+#                    temporary_dictionary = str(self.hint_database[str(answer_keys)])
+#                    temporary_dictionary = (ast.literal_eval(temporary_dictionary))
+##                    # if I remember correctly, changing the rating values in self.hint_database
+ #                   # didn't work correctly for some reason, so instead I manipulated this
+ #                   # temporary dictionary and then set self.hint_database to equal it.
+ #                   # probably due to scope error (which also is affecting the studio interactions)
+ #                   if str(answer_keys) == str(self.WrongAnswers[answer]):
+ #                       temporary_dictionary[self.Used[int(answer)]] += int(data_rating)
+ #                       self.hint_database[str(answer_keys)] = temporary_dictionary
+ #                       return str(temporary_dictionary[self.Used[int(answer)]])
 
     def remove_symbols(self, answer_data):
         """
@@ -383,9 +388,9 @@ class CrowdXBlock(XBlock):
           data['answer']: This is the incorrect answer for which the student is submitting a new hint.
         """
         submission = data['submission'].replace('ddeecciimmaallppooiinntt', '.')
-        hint_id = data['answer'].replace('ddeecciimmaallppooiinntt', '.')
+        answer = data['answer'].replace('ddeecciimmaallppooiinntt', '.')
         for answer_keys in self.hint_database:
-            if str(answer_keys) == self.WrongAnswers[self.Used.index(hint_id)]:
+            if str(answer_keys) == str(answer):
                 # find the answer for which a hint is being submitted
                 if str(submission) not in self.hint_database[str(answer_keys)]:
                     temporary_dictionary = str(self.hint_database[str(answer_keys)])
@@ -398,17 +403,15 @@ class CrowdXBlock(XBlock):
                     return
                 else:
                     # if the hint exists already, simply upvote the previously entered hint
-                    hint_index = self.Used.index(submission)
-                    for default_hints in self.DefaultHints:
-                        if default_hints == self.Used[int(hint_index)]:
-                            self.DefaultHints[str(default_hints)] += int(1)
-                            return
-                    for answer_keys in self.hint_database:
-                        temporary_dictionary = str(self.hint_database[str(answer_keys)])
+                    if str(submission) in self.DefaultHints:
+                        self.DefaultHints[str(submission)] += int(1)
+                        return
+                    else:
+                        temporary_dictionary = str(self.hint_database[str(answer)])
                         temporary_dictionary = (ast.literal_eval(temporary_dictionary))
-                        if str(answer_keys) == str(self.WrongAnswers[int(hint_index)]):
-                            temporary_dictionary[self.Used[int(hint_index)]] += int(data['rating'])
-                            self.hint_database[str(answer_keys)] = temporary_dictionary
+                        temporary_dictionary[str(submission)] += int(data['rating'])
+                        self.hint_database[str(answer)] = temporary_dictionary
+                        return
 
     @XBlock.json_handler
     def studiodata(self, data, suffix=''):
