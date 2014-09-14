@@ -206,7 +206,7 @@ function CrowdXBlock(runtime, element){
         if(canhint == 0){
         canhint = 1;
         $('.Thankyou', element).text("Thankyou for your help!");
-        idtouse = String('thisparagraph' + result.origdata);
+        idtouse = String('thisparagraph' + result.student_answer);
         hint_rating = result.rating;
         if(result.rating == "zzeerroo"){
             hint_rating = 0;

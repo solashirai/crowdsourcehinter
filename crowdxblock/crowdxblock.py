@@ -261,11 +261,11 @@ class CrowdXBlock(XBlock):
             rating = self.change_rating(data_hint, int(data_rating), answer_data) # change hint rating
             if str(rating) == str(0):
                 # if the rating is "0", return "zzeerroo" instead. "0" showed up as "null" in JS
-                return {"rating": str('zzeerroo'), 'origdata': original_data}
+                return {"rating": str('zzeerroo'), 'student_answer': original_data}
             else:
-                return {"rating": str(rating), 'origdata': original_data}
+                return {"rating": str(rating), 'student_answer': original_data}
         else:
-            return {"rating": str('You have already voted on this hint!'), 'origdata': original_data}
+            return {"rating": str('You have already voted on this hint!'), 'student_answer': original_data}
 
     def hint_flagged(self, data_hint, answer_data):
         """
