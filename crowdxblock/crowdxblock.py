@@ -256,16 +256,17 @@ class CrowdXBlock(XBlock):
             # if student flagged hint
             self.hint_flagged(data['used_hint'], answer_data)
             return {"rating": 'thiswasflagged', 'origdata': original_data}
+        print(str(self.Voted))
         if str(answer_data) not in self.Voted:
             self.Voted.append(str(answer_data)) # add data to Voted to prevent multiple votes
             rating = self.change_rating(data_hint, int(data_rating), answer_data) # change hint rating
             if str(rating) == str(0):
                 # if the rating is "0", return "zzeerroo" instead. "0" showed up as "null" in JS
-                return {"rating": str('zzeerroo'), 'student_answer': original_data}
+                return {"rating": str('zzeerroo'), 'used_hint': data_hint}
             else:
-                return {"rating": str(rating), 'student_answer': original_data}
+                return {"rating": str(rating), 'used_hint': data_hint}
         else:
-            return {"rating": str('You have already voted on this hint!'), 'student_answer': original_data}
+            return {"rating": str('You have already voted on this hint!'), 'used_hint': data_hint}
 
     def hint_flagged(self, data_hint, answer_data):
         """
