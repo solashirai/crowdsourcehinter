@@ -197,7 +197,7 @@ function CrowdXBlock(runtime, element){
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "answer": $(this).attr('id'), "value": $(this).attr('data-value')}),
+            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "student_answer": $(this).attr('id'), "used_hint": $(this).attr('data-value')}),
             success: finish
         });})
 
