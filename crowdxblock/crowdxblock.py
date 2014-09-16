@@ -21,7 +21,7 @@ class CrowdXBlock(XBlock):
     """
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
-    hint_database = Dict(default={'answer': {'hint': 5}}, scope=Scope.user_state_summary)
+    hint_database = Dict(default={'answer': {'hint': 5, 'hint_test': 0}}, scope=Scope.user_state_summary)
     # This is a dictionary of hints that will be used to determine what hints to show a student.
     # flagged hints are not included in this dictionary of hints
     HintsToUse = Dict({}, scope=Scope.user_state)
@@ -105,8 +105,8 @@ class CrowdXBlock(XBlock):
                 found_equal_sign = 1
                 eqplace = answer.index("=") + 1
                 answer = answer[eqplace:]
-        remaining_hints = int(self.find_hints(answer))
-        if remaining_hints != int(0):
+        remaining_hints = str(self.find_hints(answer))
+        if remaining_hints != str(0):
             if max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
                 # choose highest rated hint for the incorrect answer
                 if max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0] not in self.Flagged.keys():
@@ -149,6 +149,7 @@ class CrowdXBlock(XBlock):
         """
         isflagged = []
         isused = 0
+        testvar = 0
         self.WrongAnswers.append(str(answer)) # add the student's input to the temporary list, for later use
         # add hints to the self.HintsToUse dictionary. Will likely be replaced
         # soon by simply looking within the self.hint_database for hints.
@@ -162,6 +163,8 @@ class CrowdXBlock(XBlock):
                     isflagged.append(hint_keys)
             if str(hint_keys) in self.Used:
                 isused += 1
+        for hintkey in self.hint_database[str(answer)]:
+            testvar += 1
         if (len(self.hint_database[str(answer)]) - len(isflagged) - isused) > 0:
             return str(1)
         else:
@@ -256,7 +259,6 @@ class CrowdXBlock(XBlock):
             # if student flagged hint
             self.hint_flagged(data['used_hint'], answer_data)
             return {"rating": 'thiswasflagged', 'origdata': original_data}
-        print(str(self.Voted))
         if str(answer_data) not in self.Voted:
             self.Voted.append(str(answer_data)) # add data to Voted to prevent multiple votes
             rating = self.change_rating(data_hint, int(data_rating), answer_data) # change hint rating
