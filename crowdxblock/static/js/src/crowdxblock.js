@@ -29,11 +29,6 @@ function CrowdXBlock(runtime, element){
         HintUsed = [];
         WrongAnswer = [];
         repeating = 0;
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'clear_temp'),
-            data: JSON.stringify({"hello": "world"}),
-        });
     }    
 
     Logger.listen('problem_graded', null, dostuff);
@@ -136,7 +131,7 @@ function CrowdXBlock(runtime, element){
                 HintShown.push(index);}
               }else{ 
                 if($.inArray(index, HintShown) == -1){
-                console.log('YIESSSSS');
+                console.log('index is is' + indexid);
                 $('#hintstoshow'+valueid).prepend("<p \" id =\"thisparagraph" + indexid + "\">" + "<span style=\"display: inline-block;\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" type=\"button\" style=\"padding-top: 3px;width:20px; height:35px;\" class=\"hintbutton\" data-rate=\"1\" value=\"^\"><input data-value=\"" + valueid + "\" id=\"" + indexid + "\" style=\"padding-top: 3px;width:20px; height:35px;\" type=\"button\" class=\"hintbutton\" data-rate=\"-1\" value=\"v\"><input data-value=\"" + valueid + "\" style=\"padding-top: 3px;width:20px; height:35px;\" id=\"" + indexid + "\" type=\"button\" class=\"hintbutton\" data-rate=\"0\" value=\"!\"></span><font color=\"blue\">" + index + "</font></p>");      
                 HintShown.push(index);
               }}}else{
@@ -202,7 +197,7 @@ function CrowdXBlock(runtime, element){
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "answer": $(this).attr('id'), "value": $(this).attr('data-value')}),
+            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "used_hint": $(this).attr('id'), "student_answer": $(this).attr('data-value')}),
             success: finish
         });})
 
@@ -211,7 +206,8 @@ function CrowdXBlock(runtime, element){
         if(canhint == 0){
         canhint = 1;
         $('.Thankyou', element).text("Thankyou for your help!");
-        idtouse = String('thisparagraph' + result.origdata);
+        idtouse = String('thisparagraph' + result.used_hint);
+        console.log(idtouse)
         hint_rating = result.rating;
         if(result.rating == "zzeerroo"){
             hint_rating = 0;
