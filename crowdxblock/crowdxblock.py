@@ -107,6 +107,7 @@ class CrowdXBlock(XBlock):
                 answer = answer[eqplace:]
         remaining_hints = str(self.find_hints(answer))
         if remaining_hints != str(0):
+            print str(self.hint_database[str(answer)])
             if max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
                 # choose highest rated hint for the incorrect answer
                 if max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0] not in self.Flagged.keys():
@@ -116,9 +117,12 @@ class CrowdXBlock(XBlock):
                 # choose another random hint for the answer.
                 temporary_hints_list = []
                 for hint_keys in self.hint_database[str(answer)]:
-                    if hint_keys not in self.Used and hint_keys not in self.Flagged:
-                        temporary_hints_list.append(str(hint_keys))
-                        not_used = random.choice(temporary_hints_list)
+                    if hint_keys not in self.Used:
+                        if hint_keys not in self.Flagged:
+                            print str(self.Flagged)
+                            print str(hint_keys)
+                            temporary_hints_list.append(str(hint_keys))
+                            not_used = random.choice(temporary_hints_list)
         else:
             if max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
                 # choose highest rated hint for the incorrect answer
@@ -258,7 +262,8 @@ class CrowdXBlock(XBlock):
         if str(data['student_rating']) == str(0):
             # if student flagged hint
             self.hint_flagged(data['used_hint'], answer_data)
-            return {"rating": 'thiswasflagged', 'origdata': original_data}
+            print str(self.Flagged)
+            return {"rating": 'thiswasflagged', 'used_hint': data_hint}
         if str(answer_data) not in self.Voted:
             self.Voted.append(str(answer_data)) # add data to Voted to prevent multiple votes
             rating = self.change_rating(data_hint, int(data_rating), answer_data) # change hint rating
@@ -279,11 +284,11 @@ class CrowdXBlock(XBlock):
           data_hint: This is equal to the data['used_hint'] in self.rate_hint
           answer_data: This is equal to the data['student_answer'] in self.rate_hint
         """
-        for answer_keys in self.hint_database:
-            if answer_keys == data_hint:
-                for hint_keys in self.hint_database[str(answer_keys)]:
-                    if str(hint_keys) == answer_data:
-                        self.Flagged[str(hint_keys)] = str(answer_keys)
+#        for answer_keys in self.hint_database:
+#            if answer_keys == data_hint:
+#                for hint_keys in self.hint_database[str(answer_keys)]:
+#                    if str(hint_keys) == answer_data:
+        self.Flagged[str(data_hint)] = str(answer_data)
 
     def change_rating(self, data_hint, data_rating, answer_data):
         """
