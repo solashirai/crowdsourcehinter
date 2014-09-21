@@ -44,6 +44,10 @@ class CrowdXBlock(XBlock):
     # values are the hints the corresponding hints. even if a hint is flagged, if the hint shows up for a different
     # incorrect answer, i believe that the hint will still be able to show for a student
     Flagged = Dict(default={}, scope=Scope.user_state_summary)
+    # This string determines whether or not to show only the best (highest rated) hint to a student
+    # When set to 'True' only the best hint will be shown to the student.
+    # Details on operation when set to 'False' are to be finalized.
+    show_best = Dict(default={'showbest': 'True'}, scope=Scope.user_state_summary)
 
     def student_view(self, context=None):
         """
@@ -105,14 +109,21 @@ class CrowdXBlock(XBlock):
                 found_equal_sign = 1
                 eqplace = answer.index("=") + 1
                 answer = answer[eqplace:]
+        print ('***********************************************************************')
+        print str(self.show_best)
+        best_hint = max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0]
+        if self.show_best['showbest'] == 'True':
+            if best_hint not in self.Flagged.keys():
+                self.Used.append(best_hint)
+                return {'HintsToUse': best_hint}
         remaining_hints = str(self.find_hints(answer))
         if remaining_hints != str(0):
             print str(self.hint_database[str(answer)])
-            if max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
+            if best_hint not in self.Used:
                 # choose highest rated hint for the incorrect answer
-                if max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0] not in self.Flagged.keys():
-                    self.Used.append(max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0])
-                    return {'HintsToUse': max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0]}
+                if best_hint not in self.Flagged.keys():
+                    self.Used.append(best_hint)
+                    return {'HintsToUse': best_hint}
             else:
                 # choose another random hint for the answer.
                 temporary_hints_list = []
@@ -124,11 +135,11 @@ class CrowdXBlock(XBlock):
                             temporary_hints_list.append(str(hint_keys))
                             not_used = random.choice(temporary_hints_list)
         else:
-            if max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0] not in self.Used:
+            if best_hint not in self.Used:
                 # choose highest rated hint for the incorrect answer
-                if max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0] not in self.Flagged.keys():
-                    self.Used.append(max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0])
-                    return {'HintsToUse': max(self.DefaultHints.iteritems(), key=operator.itemgetter(1))[0]}
+                if best_hint not in self.Flagged.keys():
+                    self.Used.append(best_hint)
+                    return {'HintsToUse': best_hint}
             else:
                 temporary_hints_list = []
                 for hint_keys in self.DefaultHints:
