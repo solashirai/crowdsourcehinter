@@ -362,29 +362,26 @@ class CrowdXBlock(XBlock):
         """
         submission = data['submission'].replace('ddeecciimmaallppooiinntt', '.')
         answer = data['answer'].replace('ddeecciimmaallppooiinntt', '.')
-        for answer_keys in self.hint_database:
-            if str(answer_keys) == str(answer):
-                # find the answer for which a hint is being submitted
-                if str(submission) not in self.hint_database[str(answer_keys)]:
-                    temporary_dictionary = str(self.hint_database[str(answer_keys)])
-                    temporary_dictionary = (ast.literal_eval(temporary_dictionary))
-                    temporary_dictionary.update({submission: 0})
-                    # once again, manipulating temporary_dictionary and setting
-                    # self.hint_database equal to it due to being unable to directly
-                    # edit self.hint_databse. Most likely scope error
-                    self.hint_database[str(answer_keys)] = temporary_dictionary
-                    return
-                else:
-                    # if the hint exists already, simply upvote the previously entered hint
-                    if str(submission) in self.DefaultHints:
-                        self.DefaultHints[str(submission)] += int(1)
-                        return
-                    else:
-                        temporary_dictionary = str(self.hint_database[str(answer)])
-                        temporary_dictionary = (ast.literal_eval(temporary_dictionary))
-                        temporary_dictionary[str(submission)] += int(data['rating'])
-                        self.hint_database[str(answer)] = temporary_dictionary
-                        return
+        if str(submission) not in self.hint_database[str(answer)]:
+            temporary_dictionary = str(self.hint_database[str(answer)])
+            temporary_dictionary = (ast.literal_eval(temporary_dictionary))
+            temporary_dictionary.update({submission: 0})
+            # once again, manipulating temporary_dictionary and setting
+            # self.hint_database equal to it due to being unable to directly
+            # edit self.hint_databse. Most likely scope error
+            self.hint_database[str(answer)] = temporary_dictionary
+            return
+        else:
+            # if the hint exists already, simply upvote the previously entered hint
+            if str(submission) in self.DefaultHints:
+                self.DefaultHints[str(submission)] += int(1)
+                return
+            else:
+                temporary_dictionary = str(self.hint_database[str(answer)])
+                temporary_dictionary = (ast.literal_eval(temporary_dictionary))
+                temporary_dictionary[str(submission)] += int(data['rating'])
+                self.hint_database[str(answer)] = temporary_dictionary
+                return
 
     @XBlock.json_handler
     def studiodata(self, data, suffix=''):

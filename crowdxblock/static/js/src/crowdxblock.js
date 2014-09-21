@@ -121,7 +121,7 @@ function CrowdXBlock(runtime, element){
         indexid = indexid.replace(/\=/g, 'eeqquuaallss');
         if($("#submit"+valueid).length == 0){
             $('.hintansarea').append("<p id=\"submit" + valueid + "\" class=\"hintsarea\"> </p>");
-            $('#submit'+valueid).append("<p> </p><b>Incorrect Answer: \b" + " " + value + "<p> <input id=\"submitbuttonfor" + indexid + "\" style=\"float: right; float: top;\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint\"> <p id=\"hintstoshow" + valueid + "\"> <b><u>Hints in the Data Base:</u>\b </p></div>");
+            $('#submit'+valueid).append("<p> </p><b>Incorrect Answer: \b" + " " + value + "<p> <input id=\"submitbuttonfor" + valueid + "\" style=\"float: right; float: top;\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint\"> <p id=\"hintstoshow" + valueid + "\"> <b><u>Hints in the Data Base:</u>\b </p></div>");
             }
           if(indexid.slice(0,22) != "There are no hints for"){
               if($.inArray(index, HintUsed) == -1){
@@ -148,42 +148,43 @@ function CrowdXBlock(runtime, element){
         if(issubmitting == repeatcounter){
         id = this.id;
         id = id.slice(15);
-        value = document.getElementById(id).getAttribute('data-value');
+        //value = document.getElementById(id).getAttribute('data-value');
         $('.submitbutton').show();
         $('.math').remove();
         $('#submit').remove();
         $(this).hide();
-        $('#hintstoshow' + value).prepend("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><input id=\"submit\" type=\"button\" data-is=\"" + id + "\" class=\"button\" value=\"Submit Hint\"> </p>");
+        $('#hintstoshow' + id).prepend("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><input id=\"submit\" type=\"button\" data-is=\"" + id + "\" class=\"button\" value=\"Submit Hint\"> </p>");
     }})
 
     $(document).on('click', '#submit', function(){
         issubmittinghint += 1;
         if(issubmittinghint == repeatcounter){
         if($('.math').val() != null){
+          var answerdata = String;
           var valueid = String;
           issubmitting = 0;
           $('#submit').each(function(){
-              valueid = $(this).attr('data-is');
+              answerdata = $('.math').attr('id');
           });
           $('.submitbutton').show();
           console.log('valueidworks' + valueid);
           $.ajax({
               type: "POST",
               url: runtime.handlerUrl(element, 'give_hint'),
-              data: JSON.stringify({"submission": $('.math').val(), "answer": valueid}), //give hin for first incorrect answer
-              success: finish
+              data: JSON.stringify({"submission": $('.math').val(), "answer": answerdata}), //give hin for first incorrect answer
+              //success: finish
           });
            $("#answer").val('');
-          data_value = document.getElementById(valueid).getAttribute('data-value');
-          data_value = String('hintstoshow' + data_value);
+          //data_value = document.getElementById(valueid).getAttribute('data-value');
+           data_value = String('hintstoshow' + answerdata);
           $(this).remove();
           $('.math').remove();
-          document.getElementById("submitbuttonfor" + valueid).remove();
-          $('#submitbuttonfor' + valueid).remove();
-          $('#'+valueid).remove();
-          value = document.getElementById(id).getAttribute('data-value');
-          $('#hintstoshow' + value).prepend("<p> Thankyou! </p>");
-          $('#submit'+valueid).prepend('Thankyou for your hint!');
+          document.getElementById("submitbuttonfor" + answerdata).remove();
+          $('#submitbuttonfor' + answerdata).remove();
+          $('#'+answerdata).remove();
+          //value = document.getElementById(id).getAttribute('data-value');
+          //$('#hintstoshow' + value).prepend("<p> Thankyou! </p>");
+          $('#submit'+answerdata).prepend('Thankyou for your hint!');
         }}})
 
     $(document).on('click', '.hintbutton', function(){ //upvote
