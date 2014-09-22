@@ -100,6 +100,7 @@ class CrowdXBlock(XBlock):
         answer = answer.lower() # for analyzing the student input string I make it lower case.
         found_equal_sign = 0
         remaining_hints = int(0)
+        best_hint = ""
         # the string returned by the event problem_graded is very messy and is different
         # for each problem, but after all of the numbers/letters there is an equal sign, after which the
         # student's input is shown. I use the function below to remove everything before the first equal
@@ -109,16 +110,13 @@ class CrowdXBlock(XBlock):
                 found_equal_sign = 1
                 eqplace = answer.index("=") + 1
                 answer = answer[eqplace:]
-        print ('***********************************************************************')
-        print str(self.show_best)
-        best_hint = max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0]
-        if self.show_best['showbest'] == 'True':
-            if best_hint not in self.Flagged.keys():
-                self.Used.append(best_hint)
-                return {'HintsToUse': best_hint}
         remaining_hints = str(self.find_hints(answer))
         if remaining_hints != str(0):
-            print str(self.hint_database[str(answer)])
+            best_hint = max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0]
+            if self.show_best['showbest'] == 'True':
+                if best_hint not in self.Flagged.keys():
+                    self.Used.append(best_hint)
+                    return {'HintsToUse': best_hint}
             if best_hint not in self.Used:
                 # choose highest rated hint for the incorrect answer
                 if best_hint not in self.Flagged.keys():
