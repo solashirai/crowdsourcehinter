@@ -40,27 +40,18 @@
   background-color: #FF8;
 }
 
-.upvote_hint {
+.downvote_hint, .flag_hint, .upvote_hint {
   width: 100%;
   margin-left:auto;
   margin-right:auto;
   text-align:left;
 }
 
-.downvote_hint {
-  width: 100%;
-  margin-left:auto;
-  margin-right:auto;
-  text-align:left;
-}
-
-.flag_hint {
-  width: 100%;
-  margin-left:auto;
-  margin-right:auto;
-  text-align:left;
-}
-
-.upvote_hint, .downvote_hint, .flag_hint {cursor: pointer}
+.upvote_hint, .downvote_hint, .flag_hint { cursor: pointer }
 .upvote_hint, .downvote_hint, .flag_hint { color: #948f8f; }
+
+.hintsarea {
+  display: flex;
+  flex-direction: colomn;
+}
 
