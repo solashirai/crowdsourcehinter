@@ -31,22 +31,36 @@
   border-color: rgb(200,200,200);
 }
 
-
-/*.crowdxblock_block .hintbutton {
-    height: 10px;
-}*/
-
 .crowdxblock_block .vote {
   padding-top: 0px !important;
   padding-bottom: 0px !important;
 }
 
-/*.crowdxblock_block .hintbutton {
-}*/
+.crowdxblock_block .HintsToUse {
+  background-color: #FF8;
+}
 
-/*.crowdxblock_block .hintsarea {
-    width: 600px;
-    padding: 10px;
-    border: 5px solid gray;
-    margin: 0px;
-}*/
+.upvote_hint {
+  width: 100%;
+  margin-left:auto;
+  margin-right:auto;
+  text-align:left;
+}
+
+.downvote_hint {
+  width: 100%;
+  margin-left:auto;
+  margin-right:auto;
+  text-align:left;
+}
+
+.flag_hint {
+  width: 100%;
+  margin-left:auto;
+  margin-right:auto;
+  text-align:left;
+}
+
+.upvote_hint, .downvote_hint, .flag_hint {cursor: pointer}
+.upvote_hint, .downvote_hint, .flag_hint { color: #948f8f; }
+
