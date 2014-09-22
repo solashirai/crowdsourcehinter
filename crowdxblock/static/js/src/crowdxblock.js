@@ -122,7 +122,7 @@ function CrowdXBlock(runtime, element){
             $('#submit'+student_answer).append("<p> </p><b>Answer-specific hints for \b" + " " + student_answer + "<p> <p id=\"hintstoshow" + student_answer + "\"> </p></div>");
             }
           if(hint_used.slice(0,22) != "There are no hints for"){
-            $('#hintstoshow'+student_answer).append("<p \" id =\"thisparagraph" + hint_used + "\">" + "<div data-value=\"" + student_answer + "\" id=\"" + hint_used + "\" role=\"button\" class=\"upvote_hint\" data-rate=\"1\" data-icon=\"arrow-u\"  aria-label=\"upvote\"><b>↑</b></div><div class = \"" + hint_used + "rating\">" + hint_used + "</div> <div data-value=\"" + student_answer + "\" id=\"" + hint_used + "\" role=\"button\" class=\"downvote_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </p>");
+            $('#hintstoshow'+student_answer).append("<p \" id =\"thisparagraph" + hint_used + "\">" + "<div data-value=\"" + student_answer + "\" id=\"" + hint_used + "\" role=\"button\" class=\"upvote_hint\" data-rate=\"1\" data-icon=\"arrow-u\"  aria-label=\"upvote\"><b>↑</b></div> <div class = \"" + hint_used + "rating\">" + hint_used + "</div> <div data-value=\"" + student_answer + "\" id=\"" + hint_used + "\" role=\"button\" class=\"downvote_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </p>");
           //<div data-value=\"" + student_answer + "\" id=\"" + hint_used + "\" role=\"button\" class=\"flag_hint\" data-rate=\"0\" aria-label=\"report\"><b>!</b></div>
           $.ajax({
               type: "POST",
@@ -140,6 +140,7 @@ function CrowdXBlock(runtime, element){
 
     function show_ratings(result) {
         $.each(result, function(index, value) {
+        console.log(index)
         $("."+index+"rating").prepend(value + " ");})
     }
 
