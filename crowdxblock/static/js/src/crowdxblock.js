@@ -103,11 +103,11 @@ function CrowdXBlock(runtime, element){
         student_answer = value;
         hint_used = index;
         if (isStaff == true) {
-            $('.feedback', element).append("<p class=\"flagged_hints"\"</p>");
+            $('.feedback', element).append("<p class=\"flagged_hints\"</p>");
             if (student_answer == "Flagged") {
-                $(".flagged_hints", element).append("<p class=" + hint_used + "><div role=\"button\" class=\"return_hint\"" +
+                $(".flagged_hints", element).append("<div class=" + hint_used + "><div role=\"button\" class=\"return_hint\"" +
                     " aria-label=\"return\"><b>O</b></div><div>" + hint_used +
-                    "</div> <div role=\"button\" class=\"purge_hint\" aria-label=\"purge\"><b>X</b></div></p>
+                    "</div> <div role=\"button\" class=\"purge_hint\" aria-label=\"purge\"><b>X</b></div></div>")
             }
         }
         if($(".submit"+student_answer).length == 0){
