@@ -12,6 +12,7 @@ function CrowdXBlock(runtime, element){
     repeatcounter += 1;
     //use to determine whether or not to initialize hint feedback
     var hasReceivedHint = false;
+    var isStaff = false;
 
     Logger.listen('seq_next', null, clearingvariables);
     Logger.listen('seq_goto', null, clearingvariables);
@@ -65,11 +66,27 @@ function CrowdXBlock(runtime, element){
             //send empty data for ajax call because not having a data field causes error
             $.ajax({
                 type: "POST",
-                url: runtime.handlerUrl(element, 'get_feedback'),
-                //possibly send here if user is staff?
-                //doing so would be helpful to set up a "flagged" seciton for hints
-                data: JSON.stringify(""),
-                success: getFeedback
+                url: runtime.handlerUrl(element, 'is_user_staff'),
+                data: JSON.stringify({}),
+                success: function(result) {
+                    console.log(result);
+                    if (result['is_user_staff']) {
+                        ifStaff = true;
+                        $.ajax({
+                            type: "POST",
+                            url: runtime.handlerUrl(element, 'get_feedback'),
+                            data: JSON.stringify({"isStaff":"true"}),
+                            success: getFeedback
+                        });
+                    } else {
+                        $.ajax({
+                            type: "POST",
+                            url: runtime.handlerUrl(element, 'get_feedback'),
+                            data: JSON.stringify({"isStaff":"false"}),
+                            success: getFeedback
+                        });
+                    }
+                }
             });
         }  
     }
@@ -85,6 +102,14 @@ function CrowdXBlock(runtime, element){
         //so that when a button is clicked, the answer and hint can be sent to the python script
         student_answer = value;
         hint_used = index;
+        if (isStaff == true) {
+            $('.feedback', element).append("<p class=\"flagged_hints"\"</p>");
+            if (student_answer == "Flagged") {
+                $(".flagged_hints", element).append("<p class=" + hint_used + "><div role=\"button\" class=\"return_hint\"" +
+                    " aria-label=\"return\"><b>O</b></div><div>" + hint_used +
+                    "</div> <div role=\"button\" class=\"purge_hint\" aria-label=\"purge\"><b>X</b></div></p>
+            }
+        }
         if($(".submit"+student_answer).length == 0){
             $('.feedback', element).append("<p class=\"submit" + student_answer + "\"</p>");
             $(".submit"+student_answer, element).append("<b>Answer-specific hints for \b" + " " + student_answer + "<p><input id=\"submitbuttonfor" + student_answer + "\" style=\"float: right; float: top;\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint\"><p class=\"showHintsFor" + student_answer + "\"> </p></div>");
