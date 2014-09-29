@@ -5,19 +5,22 @@ var issubmitting = 0;
 var issubmittinghint = 0;
 
 function CrowdXBlock(runtime, element){
-    var WrongAnswer = [];
-    var HintUsed = [];
-    var HintShown = [];
-    $("#answer").hide();
-    $(".problem").hide();
-    $("#feedback").hide();
-    var_element = String;
-    var_event_type = String;
-    var_data = String;
-    //$(".HintsToUse", element).text("Hints are enabled for this problem!");
+    $(".HintsToUse", element).text("");
     clearvariables();
+    //repeat counter is used to counteract a bug caused by switching units
+    //after switching units all logger.listen events would trigger multiple times
     repeatcounter += 1;
-    console.debug(repeatcounter);
+    //use to determine whether or not to initialize hint feedback
+    var hasReceivedHint = false;
+    var is_staff = false;
+
+    var check_staff = $('#staffstatus').val();
+    if(check_staff == 'staff view');
+    {
+        console.log(check_staff);
+        console.log("is_staff");
+        is_staff = true;
+    }
 
     Logger.listen('seq_next', null, clearingvariables);
     Logger.listen('seq_goto', null, clearingvariables);
@@ -26,22 +29,18 @@ function CrowdXBlock(runtime, element){
     }
 
     function clearvariables(data){
-        HintUsed = [];
-        WrongAnswer = [];
         repeating = 0;
     }    
 
-    Logger.listen('problem_graded', null, dostuff);
-    function dostuff(event_type, data, element){
+    Logger.listen('problem_graded', null, get_event_data);
+
+    //read the data from the problem_graded event here
+    function get_event_data(event_type, data, element){
         repeating += 1;
         if(repeating != repeatcounter){
         console.debug(repeating);
         }else{
-        $("#studentsubmit").val('');
-        var_element = element;
-        var_event_type = event_type;
-        var_data = data;
-        senddata(var_event_type, var_data, var_element);
+        check_correct(event_type, data, element);
         }
     }
 
@@ -49,144 +48,118 @@ function CrowdXBlock(runtime, element){
         repeating = 0;
     });
 
-    function senddata(var_event_type, var_data, var_element){
+    function check_correct(var_event_type, var_data, var_element){
+        //check that problem wasn't correctly answered
         if (var_data[1].search(/class="correct/) === -1){
-        $.ajax({ //that probably will be changed once i use response.search or something?
-            type: "POST", //if/when that is changed, remove checkreply and uncomment the else statement below
-            url: runtime.handlerUrl(element, 'get_hint'),
-            data: JSON.stringify({"submittedanswer": var_data[0]}), //return student's incorrect answer here
-            //from var_data[1] check id (long thing) and get class (correct or incorrect)
-            success: seehint
-        });
-      }else{
-        $('.correct', element).show();
-        $('.correct', element).text("You're correct! Please help us improve our hints by voting on them, or submit your own hint!");
-        $(".HintsToUse", element).text(" ");
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'get_feedback'),
-            data: JSON.stringify({"hello": "world"}),
-            success: getfeedback
-        });}
-        }
-
-     $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'studiodata'),
-            data: JSON.stringify({"hello": "world"}),
-            success: studiodata
-       });
-
-    function studiodata(result){
-      $(".xblock-editor").append("confirm_working");
-      if($(".xblock-editor").length != 0){
-        $.each(result, function(index, value) {
-          console.debug(index);
-          $('.xblock-editor').append("<p id=\"" + value + "\"> The hint<b>" + " " + index + " " + "</b>was flagged for the submission<b>" + " " + value + "</b></p>");
-          $('#'+value).prepend("<input data-value=\"" + value + "\" id=\"" + index + "\" style=\"height:35px;padding-top: 3px;\" type=\"button\" class=\"flagbutton\" data-rate=\"dismiss\" value=\"Dismiss Hint\"><input data-value=\"" + value + "\" id=\"" + index + "\" style=\"height:35px; padding-top: 3px;\" type=\"button\" class=\"flagbutton\" data-rate=\"purge\" value=\"Purge Hint\">");
-          });
-      }
+            $.ajax({
+                type: "POST",
+                url: runtime.handlerUrl(element, 'get_hint'),
+                data: JSON.stringify({"submittedanswer": var_data[0]}),
+                success: seehint
+            });
+            hasReceivedHint = true;
+        }else if(hasReceivedHint == true){
+            $('.correct', element).show();
+            $('.correct', element).text("You're correct! Please help us improve our hints by voting on them, or submit your own hint!");
+            $(".HintsToUse", element).text(" ");
+            //send empty data for ajax call because not having a data field causes error
+            $.ajax({
+                type: "POST",
+                url: runtime.handlerUrl(element, 'get_feedback'),
+                data: JSON.stringify(""),
+                success: getFeedback
+            });
+        }else{
+            $(".HintsToUse", element).text("");
+        }    
     }
-    $(document).on('click', '.flagbutton', function(){
-        answer_wrong = $(this).attr('id');
-        hint = $(this).attr('data-value');
-        rating = $(this).attr('data-rate');
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'moderate_hint'),
-            data: JSON.stringify({"answer_wrong":answer_wrong, "hint": hint, "rating":rating}),
-       });
-    });
 
-    function seehint(result){//use html to show these results somewhere i guess
-        console.debug('seehint');
-        HintUsed.push(result.HintsToUse);
+    function seehint(result){
+        //show hint to student
         $('.HintsToUse', element).text(result.HintsToUse);
     }
 
-    function getfeedback(result){
-        $("#answer").show();
-        $(".problem").show();
-        $("#feedback").show();
+    function getFeedback(result){
         $.each(result, function(index, value) {
-        student_answer = value.replace(/\./g, 'ddeecciimmaallppooiinntt');
-        hint_used = index.replace(/\./g, 'ddeecciimmaallppooiinntt');
-        student_answer = student_answer.replace(/\:/g, 'ccoolloonn');
-        hint_used = hint_used.replace(/\:/g, 'ccoolloonn');
-        student_answer = student_answer.replace(/\;/g, 'sseemmiiccoolloonn');
-        hint_used = hint_used.replace(/\;/g, 'sseemmiiccoolloonn');
-        student_answer = student_answer.replace(/\=/g, 'eeqquuaallss');
-        hint_used = hint_used.replace(/\=/g, 'eeqquuaallss');
-        if($("#submit"+student_answer).length == 0){
-            $('.hintansarea').append("<p id=\"submit" + student_answer + "\" class=\"hintsarea\"> </p>");
-            $('#submit'+student_answer).append("<p> </p><b>Answer-specific hints for \b" + " " + student_answer + "<p> <p id=\"hintstoshow" + student_answer + "\"> </p></div>");
-            }
-          if(hint_used.slice(0,22) != "There are no hints for"){
-            $('#hintstoshow'+student_answer).append("<p \" id =\"thisparagraph" + hint_used + "\">" + "<div data-value=\"" + student_answer + "\" id=\"" + hint_used + "\" role=\"button\" class=\"upvote_hint\" data-rate=\"1\" data-icon=\"arrow-u\"  aria-label=\"upvote\"><b>↑</b></div> <div class = \"" + hint_used + "rating\">" + hint_used + "</div> <div data-value=\"" + student_answer + "\" id=\"" + hint_used + "\" role=\"button\" class=\"downvote_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </p>");
-          //<div data-value=\"" + student_answer + "\" id=\"" + hint_used + "\" role=\"button\" class=\"flag_hint\" data-rate=\"0\" aria-label=\"report\"><b>!</b></div>
-          $.ajax({
-              type: "POST",
-              url: runtime.handlerUrl(element, 'get_ratings'),
-              data: JSON.stringify({"student_answer": student_answer, "hint_used": hint_used}),
-              success: show_ratings
-          });
-            HintShown.push(index);
-          }else{
-              $('#hintstoshow'+student_answer).empty();
-              $('#hintstoshow'+student_answer).append("<p id=\"hintstoshow" + student_answer + "\"data-value=\"" + student_answer + "\"> <b>No hints exist in the database. (You received a default hint)</p> <p id=\"" + hint_used + "\"data-value=\"" + student_answer + "\" </p>");
-          }
+        //data of student answer and hints are stored in the paragraphs/buttons
+        //so that when a button is clicked, the answer and hint can be sent to the python script
+        student_answer = value;
+        hint_used = index;
+        if($(".submit"+student_answer).length == 0){
+            $('.feedback', element).append("<p class=\"submit" + student_answer + "\"</p>");
+            $(".submit"+student_answer, element).append("<b>Answer-specific hints for \b" + " " + student_answer + "<p><input id=\"submitbuttonfor" + student_answer + "\" style=\"float: right; float: top;\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint\"><p class=\"showHintsFor" + student_answer + "\"> </p></div>");
+        }
+        if(hint_used.slice(0,22) != "There are no hints for"){
+            $('.showHintsFor'+student_answer, element).append(
+                "<p \" class =\"votingFor" + hint_used + "\">" +
+                "<div data-value=\"" + student_answer + "\" id=\"" + hint_used +"\" role=\"button\" class=\"upvote_hint\"" +
+                    "data-rate=\"1\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
+                "<div class = \"" + hint_used + "rating\">" + hint_used + "</div>" +
+                "<div data-value=\"" + student_answer + "\" id=\"" + hint_used + "\" role=\"button\" class=\"downvote_hint\"" +
+                    "data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b>" +
+                "</div> </p>");
+            $.ajax({
+                type: "POST",
+                url: runtime.handlerUrl(element, 'get_ratings'),
+                data: JSON.stringify({"student_answer": student_answer, "hint_used": hint_used}),
+                success: show_ratings
+            });
+        }else{
+            $('.showHintsFor'+student_answer).empty();
+            $('.showHintsFor'+student_answer).append("<p class=\".showHintsFor" + student_answer + "\"data-value=\"" + student_answer + "\"> <b>No hints exist in the database. (You received a default hint)</p> <p id=\"" + hint_used + "\"data-value=\"" + student_answer + "\" </p>");
+        }
         });
     }
 
     function show_ratings(result) {
         $.each(result, function(index, value) {
-        console.log(index)
-        $("."+index+"rating").prepend(value + " ");})
+            console.log(index);
+            console.log(value);
+            $("."+index+"rating").append(value + " " + index);
+        })
     }
 
     $(document).on('click', '.submitbutton', function(){ //upvote
         issubmittinghint = 0;
         issubmitting += 1;
         if(issubmitting == repeatcounter){
-        id = this.id;
-        id = id.slice(15);
-        //value = document.getElementById(id).getAttribute('data-value');
-        $('.submitbutton').show();
-        $('.math').remove();
-        $('#submit').remove();
-        $(this).hide();
-        $('#hintstoshow' + id).prepend("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><input id=\"submit\" type=\"button\" data-is=\"" + id + "\" class=\"button\" value=\"Submit Hint\"> </p>");
-    }})
+            id = this.id;
+            id = id.slice(15);
+            //value = document.getElementById(id).getAttribute('data-value');
+            $('.submitbutton').show();
+            $('.math').remove();
+            $('#submit').remove();
+            $(this).hide();
+            $('.showHintsFor'+id, element).prepend("<p><input type=\"text\" name=\"studentinput\" id=\"" + id + "\" class=\"math\" size=\"40\"><input id=\"submit\" type=\"button\" data-is=\"" + id + "\" class=\"button\" value=\"Submit Hint\"> </p>");
+        }
+    })
 
     $(document).on('click', '#submit', function(){
         issubmittinghint += 1;
         if(issubmittinghint == repeatcounter){
         if($('.math').val() != null){
-          var answerdata = String;
-          var valueid = String;
-          issubmitting = 0;
-          $('#submit').each(function(){
-              answerdata = $('.math').attr('id');
-          });
-          $('.submitbutton').show();
-          $.ajax({
-              type: "POST",
-              url: runtime.handlerUrl(element, 'give_hint'),
-              data: JSON.stringify({"submission": $('.math').val(), "answer": answerdata}), //give hin for first incorrect answer
-              //success: finish
-          });
-           $("#answer").val('');
-          //data_value = document.getElementById(valueid).getAttribute('data-value');
-           data_value = String('hintstoshow' + answerdata);
-          $(this).remove();
-          $('.math').remove();
-          document.getElementById("submitbuttonfor" + answerdata).remove();
-          $('#submitbuttonfor' + answerdata).remove();
-          $('#'+answerdata).remove();
-          //value = document.getElementById(id).getAttribute('data-value');
-          //$('#hintstoshow' + value).prepend("<p> Thankyou! </p>");
-          $('#submit'+answerdata).prepend('Thankyou for your hint!');
-        }}})
+            var answerdata = String;
+            issubmitting = 0;
+            $('#submit').each(function(){
+                answerdata = $('.math').attr('id');
+            });
+            $('.submitbutton').show();
+            $.ajax({
+                type: "POST",
+                url: runtime.handlerUrl(element, 'give_hint'),
+                data: JSON.stringify({"submission": $('.math').val(), "answer": answerdata}), //give hin for first incorrect answer
+                //success: finish
+            });
+            $("#answer").val('');
+            $(this).remove();
+            $('.math').remove();
+            document.getElementById("submitbuttonfor" + answerdata).remove();
+            $('#submitbuttonfor' + answerdata).remove();
+            $('#'+answerdata).remove();
+            $('#submit'+answerdata).prepend('Thankyou for your hint!');
+            }
+        }
+    })
 
     $(document).on('click', '.upvote_hint', function(){ //upvote
         canhint = 0;
@@ -202,6 +175,7 @@ function CrowdXBlock(runtime, element){
             data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "used_hint": $(this).attr('id'), "student_answer": $(this).attr('data-value')}),
             success: finish
         });})
+
     $(document).on('click', '.downvote_hint', function(){ //upvote
         canhint = 0;
         id = this.id;
@@ -216,6 +190,7 @@ function CrowdXBlock(runtime, element){
             data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "used_hint": $(this).attr('id'), "student_answer": $(this).attr('data-value')}),
             success: finish
         });})
+
     $(document).on('click', '.flag_hint', function(){ //upvote
         canhint = 0;
         id = this.id;
@@ -236,17 +211,13 @@ function CrowdXBlock(runtime, element){
         if(canhint == 0){
         canhint = 1;
         $('.Thankyou', element).text("Thankyou for your help!");
-        idtouse = String('thisparagraph' + result.used_hint);
+        idtouse = String('votingFor' + result.used_hint);
         hint_rating = result.rating;
         if(result.rating == "zzeerroo"){
             hint_rating = 0;
         }if(result.rating == "thiswasflagged"){
             hint_rating = 999;
         }
-        //idtouse = idtouse.replace('ddeecciimmaallppooiinntt', /\./g);
-        //idtouse = idtouse.replace('ccoolloonn', /\:/g);
-        //idtouse = idtouse.replace('sseemmiiccoolloonn', /\;/g);
-        //idtouse = idtouse.replace('eeqquuaallss', /\=/g);
         $('p').each(function(){
           if($(this).attr('id') == idtouse){
             if(hint_rating != "You have already voted on this hint!" && hint_rating != 999){
@@ -263,7 +234,32 @@ function CrowdXBlock(runtime, element){
         }
         });}
     }
+
+
+    $.ajax({
+        type: "POST",
+        url: runtime.handlerUrl(element, 'studiodata'),
+        data: JSON.stringify(""),
+        success: studiodata
+    });
+
+    function studiodata(result){
+        if($(".xblock-editor").length != 0){
+            $.each(result, function(index, value) {
+                $('.xblock-editor').append("<p id=\"" + value + "\"> The hint<b>" + " " + index + " " + "</b>was flagged for the submission<b>" + " " + value + "</b></p>");
+                $('#'+value).prepend("<input data-value=\"" + value + "\" id=\"" + index + "\" style=\"height:35px;padding-top: 3px;\" type=\"button\" class=\"flagbutton\" data-rate=\"dismiss\" value=\"Dismiss Hint\"><input data-value=\"" + value + "\" id=\"" + index + "\" style=\"height:35px; padding-top: 3px;\" type=\"button\" class=\"flagbutton\" data-rate=\"purge\" value=\"Purge Hint\">");
+            });
+        }
+    }
+
+    $(document).on('click', '.flagbutton', function(){
+        answer_wrong = $(this).attr('id');
+        hint = $(this).attr('data-value');
+        rating = $(this).attr('data-rate');
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'moderate_hint'),
+            data: JSON.stringify({"answer_wrong":answer_wrong, "hint": hint, "rating":rating}),
+       });
+    });
 }
-
-
-

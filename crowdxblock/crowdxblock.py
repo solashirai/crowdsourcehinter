@@ -21,10 +21,8 @@ class CrowdXBlock(XBlock):
     """
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
-    hint_database = Dict(default={'answer': {'Try doing something new': 5, 'you should go review that lesson again': 0}}, scope=Scope.user_state_summary)
-    # This is a dictionary of hints that will be used to determine what hints to show a student.
-    # flagged hints are not included in this dictionary of hints
-    HintsToUse = Dict({}, scope=Scope.user_state)
+    # TODO: Remove default values once done testing
+    hint_database = Dict(default={'answer': {'Try doing something new': 5, 'you should go review that lesson again': 0}, "answer2": {'new answer hint': 3, "You should go look in your notes": 6, "This is a hint that should be flagged": -4}}, scope=Scope.user_state_summary)
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
     # feedback, to find which incorrect answer's hint a student voted on.
     WrongAnswers = List([], scope=Scope.user_state)
@@ -32,7 +30,7 @@ class CrowdXBlock(XBlock):
     # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
     # particular incorrect answer)
     DefaultHints = Dict(default={'default_hint': 0}, scope=Scope.content)
-    # List of which hints from the HintsToUse dictionary have been shown to the student
+    # List of which hints have been shown to the student
     # this list is used to prevent the same hint from showing up to a student (if they submit the same incorrect answers
     # multiple times)
     Used = List([], scope=Scope.user_state)
@@ -43,11 +41,16 @@ class CrowdXBlock(XBlock):
     # This is a dictionary of hints that have been flagged. the keys represent the incorrect answer submission, and the
     # values are the hints the corresponding hints. even if a hint is flagged, if the hint shows up for a different
     # incorrect answer, i believe that the hint will still be able to show for a student
-    Flagged = Dict(default={}, scope=Scope.user_state_summary)
+    Flagged = Dict(default={"answer2": "THis is a hint that should be flagged"}, scope=Scope.user_state_summary)
     # This string determines whether or not to show only the best (highest rated) hint to a student
     # When set to 'True' only the best hint will be shown to the student.
     # Details on operation when set to 'False' are to be finalized.
+    # TODO: make this into a boolean instead of a dict
     show_best = Dict(default={'showbest': 'True'}, scope=Scope.user_state_summary)
+    # This Dict determine whether or not the user is staff. This in turn will influence whether or not flagged hints
+    # will be shown. The method to actually determine whether or not the user is staff is not currently implemented.
+    # TODO: make this into a boolean instead of a dict
+    isStaff = Dict(default={'isStaff': 'true'}, scope=Scope.user_state_summary)
 
     def student_view(self, context=None):
         """
@@ -161,9 +164,7 @@ class CrowdXBlock(XBlock):
         isflagged = []
         isused = 0
         testvar = 0
-        self.WrongAnswers.append(str(answer)) # add the student's input to the temporary list, for later use
-        # add hints to the self.HintsToUse dictionary. Will likely be replaced
-        # soon by simply looking within the self.hint_database for hints.
+        self.WrongAnswers.append(str(answer)) # add the student's input to the temporary list
         if str(answer) not in self.hint_database:
             # add incorrect answer to hint_database if no precedent exists
             self.hint_database[str(answer)] = {}
@@ -192,12 +193,15 @@ class CrowdXBlock(XBlock):
                          for the question, all the hints the student recieved, as well as two
                          more random hints that exist for an incorrect answer in the hint_database
         """
-        feedback_data = {}
         # feedback_data is a dictionary of hints (or lack thereof) used for a
         # specific answer, as well as 2 other random hints that exist for each answer
         # that were not used. The keys are the used hints, the values are the
         # corresponding incorrect answer
+        feedback_data = {}
         number_of_hints = 0
+        if self.isStaff['isStaff'] == 'true':
+            feedback_data = get_staff_feedback()
+            return feedback_data
         if len(self.WrongAnswers) == 0:
             return
         else:
@@ -237,8 +241,31 @@ class CrowdXBlock(XBlock):
         This function is used when no hints exist for an answer. The feedback_data within
         get_feedback is set to "there are no hints for" + " " + str(self.WrongAnswers[index])
         """
-        self.WrongAnswers.append(str(self.WrongAnswers[index]))
         self.Used.append(str("There are no hints for" + " " + str(self.WrongAnswers[index])))
+        for answer_keys in self.hint_database:
+            if str(len(self.hint_database[str(answer_keys)])) != str(0):
+                hint_key = self.hint_database[str(answer_keys)].keys()
+                for hints in hint_key:
+                    if str(hints) not in self.Flagged.keys():
+                        feedback_data[str(hints)] = str(answer_keys)
+                    else:
+                        feedback_data[str(hints)] = str("Flagged Hint")
+            else:
+                    feedback_data[str("There are no hints for" + " " + str(hint_key))] = str(answer_keys)
+        self.WrongAnswers=[]
+        self.Used=[]
+        return feedback_data
+
+
+    def get_staff_feedback(self, index):
+        """
+        This function is the alternative to get_feedback if the user is staff.
+        The method to determine whether or not the user is staff has not yet been implemented.
+        """
+        # feedback_data is a dictionary of hints and corresponding answers
+        # The keys are the used hints, the values are the corresponding incorrect answer
+        # For flagged hints, the keys are used hints and the values are "flagged"
+        feedback_data = {}
 
     @XBlock.json_handler
     def get_ratings(self, data, suffix=''):
