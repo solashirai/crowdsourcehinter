@@ -254,7 +254,6 @@ class CrowdXBlock(XBlock):
                             feedback_data[str("There are no hints for" + " " + str(self.WrongAnswers[index]))] = str(self.WrongAnswers[index])
         self.WrongAnswers=[]
         self.Used=[]
-        print str(feedback_data)
         return feedback_data
 
     def no_hints(self, index):
