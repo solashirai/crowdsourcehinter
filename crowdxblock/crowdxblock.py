@@ -47,10 +47,6 @@ class CrowdXBlock(XBlock):
     # Details on operation when set to 'False' are to be finalized.
     # TODO: make this into a boolean instead of a dict
     show_best = Dict(default={'showbest': 'True'}, scope=Scope.user_state_summary)
-    # This Dict determine whether or not the user is staff. This in turn will influence whether or not flagged hints
-    # will be shown. The method to actually determine whether or not the user is staff is not currently implemented.
-    # TODO: make this into a boolean instead of a dict
-    isStaff = Dict(default={'isStaff': 'true'}, scope=Scope.user_state_summary)
 
     def student_view(self, context=None):
         """
@@ -83,6 +79,24 @@ class CrowdXBlock(XBlock):
         """
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
+
+    def get_user_is_staff(self):
+        """
+        Return self.xmodule_runtime.user_is_staff
+        This is not a supported part of the XBlocks API. User data is still
+        being defined. However, It's the only way to get the data right now.
+        """
+        return self.xmodule_runtime.user_is_staff
+
+    @XBlock.json_handler
+    def is_user_staff(self, _data, _suffix=''):
+        """
+        Return whether the user is staff.
+        Returns:
+        is_user_staff: indicator for whether the user is staff
+        """
+        result = {'is_user_staff': self.get_user_is_staff()}
+        return result
 
     @XBlock.json_handler
     def get_hint(self, data, suffix=''):
@@ -197,7 +211,7 @@ class CrowdXBlock(XBlock):
         feedback_data = {}
         number_of_hints = 0
         # TODO: possibly simply check here whether or not user is staff
-        if self.isStaff['isStaff'] == 'true':
+        if data['isStaff'] == 'true':
             for answer_keys in self.hint_database:
                 if str(len(self.hint_database[str(answer_keys)])) != str(0):
                     for hints in self.hint_database[str(answer_keys)]:
