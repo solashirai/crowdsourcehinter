@@ -23,6 +23,15 @@ function CrowdXBlock(runtime, element){
         repeating = 0;
     }    
 
+    function logError(details) {
+        $.ajax({
+            type: 'POST',
+            url: '/home/sola/crowdxblock',
+            data: JSON.stringify({context: navigator.userAgent, details: details}),
+            contentType: 'application/json; charset=utf-8'
+        });
+    }
+
     Logger.listen('problem_graded', null, get_event_data);
 
     //read the data from the problem_graded event here
@@ -57,6 +66,8 @@ function CrowdXBlock(runtime, element){
             $.ajax({
                 type: "POST",
                 url: runtime.handlerUrl(element, 'get_feedback'),
+                //possibly send here if user is staff?
+                //doing so would be helpful to set up a "flagged" seciton for hints
                 data: JSON.stringify(""),
                 success: getFeedback
             });
@@ -78,6 +89,8 @@ function CrowdXBlock(runtime, element){
             $('.feedback', element).append("<p class=\"submit" + student_answer + "\"</p>");
             $(".submit"+student_answer, element).append("<b>Answer-specific hints for \b" + " " + student_answer + "<p><input id=\"submitbuttonfor" + student_answer + "\" style=\"float: right; float: top;\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint\"><p class=\"showHintsFor" + student_answer + "\"> </p></div>");
         }
+        //get_feedback will send "There are no hints for" + student_answer if no hints exist
+        //slice to determine this
         if(hint_used.slice(0,22) != "There are no hints for"){
             $('.showHintsFor'+student_answer, element).append(
                 "<p \" class =\"votingFor" + hint_used + "\">" +
@@ -113,6 +126,9 @@ function CrowdXBlock(runtime, element){
         issubmitting += 1;
         if(issubmitting == repeatcounter){
             id = this.id;
+            //the id of the button is "submitbuttonfor"+student_answer
+            //slice to determine which answer for which a submission is being made
+            //this should be made more dynamic
             id = id.slice(15);
             //value = document.getElementById(id).getAttribute('data-value');
             $('.submitbutton').show();
@@ -153,47 +169,50 @@ function CrowdXBlock(runtime, element){
     $(document).on('click', '.upvote_hint', function(){ //upvote
         canhint = 0;
         id = this.id;
-        $(this).hide();
         $('.hintbutton').each(function(){
-          if($(this).attr('id') == String(id)){
-            $(this).hide();}
+            if($(this).attr('id') == String(id)){
+                $(this).hide();
+            }
         });
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
             data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "used_hint": $(this).attr('id'), "student_answer": $(this).attr('data-value')}),
             success: finish
-        });})
+        });
+    })
 
     $(document).on('click', '.downvote_hint', function(){ //upvote
         canhint = 0;
         id = this.id;
-        $(this).hide();
         $('.hintbutton').each(function(){
-          if($(this).attr('id') == String(id)){
-            $(this).hide();}
+            if($(this).attr('id') == String(id)){
+                $(this).hide();
+            }
         });
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
             data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "used_hint": $(this).attr('id'), "student_answer": $(this).attr('data-value')}),
             success: finish
-        });})
+        });
+    })
 
     $(document).on('click', '.flag_hint', function(){ //upvote
         canhint = 0;
         id = this.id;
-        $(this).hide();
         $('.hintbutton').each(function(){
-          if($(this).attr('id') == String(id)){
-            $(this).hide();}
+            if($(this).attr('id') == String(id)){
+                $(this).hide();
+            }
         });
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
             data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "used_hint": $(this).attr('id'), "student_answer": $(this).attr('data-value')}),
             success: finish
-        });})
+        });
+    })
 
 
     function finish(result){
