@@ -41,7 +41,7 @@ class CrowdXBlock(XBlock):
     # This is a dictionary of hints that have been flagged. the keys represent the incorrect answer submission, and the
     # values are the hints the corresponding hints. even if a hint is flagged, if the hint shows up for a different
     # incorrect answer, i believe that the hint will still be able to show for a student
-    Flagged = Dict(default={"answer2": "THis is a hint that should be flagged"}, scope=Scope.user_state_summary)
+    Flagged = Dict(default={"answer2": "This is a hint that should be flagged"}, scope=Scope.user_state_summary)
     # This string determines whether or not to show only the best (highest rated) hint to a student
     # When set to 'True' only the best hint will be shown to the student.
     # Details on operation when set to 'False' are to be finalized.
@@ -51,7 +51,6 @@ class CrowdXBlock(XBlock):
     # will be shown. The method to actually determine whether or not the user is staff is not currently implemented.
     # TODO: make this into a boolean instead of a dict
     isStaff = Dict(default={'isStaff': 'true'}, scope=Scope.user_state_summary)
-    HintsToUse = Dict({}, scope=Scope.user_state)
 
     def student_view(self, context=None):
         """
@@ -197,22 +196,20 @@ class CrowdXBlock(XBlock):
         # corresponding incorrect answer
         feedback_data = {}
         number_of_hints = 0
-        if len(self.WrongAnswers) == 0:
-            if self.isStaff['isStaff'] == 'false':
-                return
-        elif self.isStaff['isStaff'] == 'true':
+        # TODO: possibly simply check here whether or not user is staff
+        if self.isStaff['isStaff'] == 'true':
             for answer_keys in self.hint_database:
-                print str(answer_keys)
                 if str(len(self.hint_database[str(answer_keys)])) != str(0):
-                    hint_key = self.hint_database[str(answer_keys)].keys()
-                    for hints in hint_key:
-                        print str(hints)
-                        if str(hints) not in self.Flagged.keys():
-                            feedback_data[str(hints)] = str(answer_keys)
-                        else:
-                            feedback_data[str(hints)] = str("Flagged Hints")
+                    for hints in self.hint_database[str(answer_keys)]:
+                        for flagged_hints in self.Flagged:
+                            if str(hints) != self.Flagged[flagged_hints]:
+                                feedback_data[str(hints)] = str(answer_keys)
+                            else:
+                                feedback_data[str(hints)] = str("Flagged")
                 else:
                     feedback_data[str("There are no hints for" + " " + str(answer_keys))] = str(answer_keys)
+        elif len(self.WrongAnswers) == 0:
+            return
         else:
             for index in range(0, len(self.Used)):
                 # each index is a hint that was used, in order of usage
