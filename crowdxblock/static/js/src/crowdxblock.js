@@ -12,15 +12,6 @@ function CrowdXBlock(runtime, element){
     repeatcounter += 1;
     //use to determine whether or not to initialize hint feedback
     var hasReceivedHint = false;
-    var is_staff = false;
-
-    var check_staff = $('#staffstatus').val();
-    if(check_staff == 'staff view');
-    {
-        console.log(check_staff);
-        console.log("is_staff");
-        is_staff = true;
-    }
 
     Logger.listen('seq_next', null, clearingvariables);
     Logger.listen('seq_goto', null, clearingvariables);
@@ -58,7 +49,7 @@ function CrowdXBlock(runtime, element){
                 success: seehint
             });
             hasReceivedHint = true;
-        }else if(hasReceivedHint == true){
+        }else{
             $('.correct', element).show();
             $('.correct', element).text("You're correct! Please help us improve our hints by voting on them, or submit your own hint!");
             $(".HintsToUse", element).text(" ");
@@ -69,9 +60,7 @@ function CrowdXBlock(runtime, element){
                 data: JSON.stringify(""),
                 success: getFeedback
             });
-        }else{
-            $(".HintsToUse", element).text("");
-        }    
+        }  
     }
 
     function seehint(result){
