@@ -51,6 +51,7 @@ class CrowdXBlock(XBlock):
     # will be shown. The method to actually determine whether or not the user is staff is not currently implemented.
     # TODO: make this into a boolean instead of a dict
     isStaff = Dict(default={'isStaff': 'true'}, scope=Scope.user_state_summary)
+    HintsToUse = Dict({}, scope=Scope.user_state)
 
     def student_view(self, context=None):
         """
@@ -163,7 +164,6 @@ class CrowdXBlock(XBlock):
         """
         isflagged = []
         isused = 0
-        testvar = 0
         self.WrongAnswers.append(str(answer)) # add the student's input to the temporary list
         if str(answer) not in self.hint_database:
             # add incorrect answer to hint_database if no precedent exists
@@ -175,8 +175,6 @@ class CrowdXBlock(XBlock):
                     isflagged.append(hint_keys)
             if str(hint_keys) in self.Used:
                 isused += 1
-        for hintkey in self.hint_database[str(answer)]:
-            testvar += 1
         if (len(self.hint_database[str(answer)]) - len(isflagged) - isused) > 0:
             return str(1)
         else:
@@ -199,11 +197,22 @@ class CrowdXBlock(XBlock):
         # corresponding incorrect answer
         feedback_data = {}
         number_of_hints = 0
-        if self.isStaff['isStaff'] == 'true':
-            feedback_data = get_staff_feedback()
-            return feedback_data
         if len(self.WrongAnswers) == 0:
-            return
+            if self.isStaff['isStaff'] == 'false':
+                return
+        elif self.isStaff['isStaff'] == 'true':
+            for answer_keys in self.hint_database:
+                print str(answer_keys)
+                if str(len(self.hint_database[str(answer_keys)])) != str(0):
+                    hint_key = self.hint_database[str(answer_keys)].keys()
+                    for hints in hint_key:
+                        print str(hints)
+                        if str(hints) not in self.Flagged.keys():
+                            feedback_data[str(hints)] = str(answer_keys)
+                        else:
+                            feedback_data[str(hints)] = str("Flagged Hints")
+                else:
+                    feedback_data[str("There are no hints for" + " " + str(answer_keys))] = str(answer_keys)
         else:
             for index in range(0, len(self.Used)):
                 # each index is a hint that was used, in order of usage
@@ -234,6 +243,7 @@ class CrowdXBlock(XBlock):
                             feedback_data[str("There are no hints for" + " " + str(self.WrongAnswers[index]))] = str(self.WrongAnswers[index])
         self.WrongAnswers=[]
         self.Used=[]
+        print str(feedback_data)
         return feedback_data
 
     def no_hints(self, index):
@@ -241,31 +251,8 @@ class CrowdXBlock(XBlock):
         This function is used when no hints exist for an answer. The feedback_data within
         get_feedback is set to "there are no hints for" + " " + str(self.WrongAnswers[index])
         """
+        self.WrongAnswers.append(str(self.WrongAnswers[index]))
         self.Used.append(str("There are no hints for" + " " + str(self.WrongAnswers[index])))
-        for answer_keys in self.hint_database:
-            if str(len(self.hint_database[str(answer_keys)])) != str(0):
-                hint_key = self.hint_database[str(answer_keys)].keys()
-                for hints in hint_key:
-                    if str(hints) not in self.Flagged.keys():
-                        feedback_data[str(hints)] = str(answer_keys)
-                    else:
-                        feedback_data[str(hints)] = str("Flagged Hint")
-            else:
-                    feedback_data[str("There are no hints for" + " " + str(hint_key))] = str(answer_keys)
-        self.WrongAnswers=[]
-        self.Used=[]
-        return feedback_data
-
-
-    def get_staff_feedback(self, index):
-        """
-        This function is the alternative to get_feedback if the user is staff.
-        The method to determine whether or not the user is staff has not yet been implemented.
-        """
-        # feedback_data is a dictionary of hints and corresponding answers
-        # The keys are the used hints, the values are the corresponding incorrect answer
-        # For flagged hints, the keys are used hints and the values are "flagged"
-        feedback_data = {}
 
     @XBlock.json_handler
     def get_ratings(self, data, suffix=''):
