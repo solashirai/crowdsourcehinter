@@ -5,6 +5,7 @@ var issubmitting = 0;
 var issubmittinghint = 0;
 
 function CrowdXBlock(runtime, element){
+    var isStaff = false;
     $(".HintsToUse", element).text("");
     clearvariables();
     //repeat counter is used to counteract a bug caused by switching units
@@ -12,7 +13,6 @@ function CrowdXBlock(runtime, element){
     repeatcounter += 1;
     //use to determine whether or not to initialize hint feedback
     var hasReceivedHint = false;
-    var isStaff = false;
 
     Logger.listen('seq_next', null, clearingvariables);
     Logger.listen('seq_goto', null, clearingvariables);
@@ -69,9 +69,8 @@ function CrowdXBlock(runtime, element){
                 url: runtime.handlerUrl(element, 'is_user_staff'),
                 data: JSON.stringify({}),
                 success: function(result) {
-                    console.log(result);
                     if (result['is_user_staff']) {
-                        ifStaff = true;
+                        isStaff = true;
                         $.ajax({
                             type: "POST",
                             url: runtime.handlerUrl(element, 'get_feedback'),
@@ -95,52 +94,42 @@ function CrowdXBlock(runtime, element){
         //show hint to student
         $('.HintsToUse', element).text(result.HintsToUse);
     }
-
-    function showHintInfo(hint_used, student_answer){
-        var hint_rating = 0;
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'get_ratings'),
-            data: JSON.stringify({"student_answer": student_answer, "hint_used": hint_used}),
-            success: function (result) {
-                HintInfo = String("<div class=\"hint_value\" value = \"" + hint_used + "\">" +
+   
+    function appendHint(result){
+        $(".student_answer", element).each(function(){
+            if ($(this).find("span").text() == result.student_answer){
+                $(this).append("<div class=\"hint_value\" value = \"" + result.hint_used + "\">" +
                 "<div role=\"button\" class=\"upvote_hint\" data-rate=\"1\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
-                "<div class = \"rating\">" + result + hint_used + "</div>" +
+                "<div class = \"rating\">" + result.rating + "</div><div class=\"hint_used\">" + ""+result.hint_used+"</div>" +
                 "<div role=\"button\" class=\"downvote_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </div>");
             }
         });
-        return HintInfo;
-    }
-   
-    function appendHint(result){
-        $(".hints_for_"+result.student_answer, element).append("<div class=\"hint_value\" value = \"" + result.hint_used + "\">" +
-                "<div role=\"button\" class=\"upvote_hint\" data-rate=\"1\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
-                "<div class = \"rating\">" + result.rating + result.hint_used + "</div>" +
-                "<div role=\"button\" class=\"downvote_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </div>");
     }
 
     function appendFlagged(result){
-        $("flagged_hints", element).append("<div class=\"hint_value\" value = \"" + result.hint_used + "\">" +
+        $(".flagged_hints", element).append("<div class=\"hint_value\" value = \"" + result.hint_used + "\">" +
                 "<div role=\"button\" class=\"upvote_hint\" data-rate=\"1\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
-                "<div class = \"rating\">" + result.rating + result.hint_used + "</div>" +
+                "<div class = \"rating\">" + result.rating + "</div><div class=\"hint_used\">" + ""+result.hint_used+"</div>" +
                 "<div role=\"button\" class=\"downvote_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </div>");
     }
 
 
     function getFeedback(result){
+        if(isStaff){
+            $('.feedback', element).append("<div class=\"flagged_hints\"><span>Flagged</span></div>");
+        }
         $.each(result, function(index, value) {
         //data of student answer and hints are stored in the paragraphs/buttons
         //so that when a button is clicked, the answer and hint can be sent to the python script
         student_answer = value;
         hint_used = index;
-        if(isStaff == true){
-            $('.feedback', element).append("<p class=\"flagged_hints\" Flagged Hints </p>");
+        //check if div for a student answer already exists (if length = 0, it doesn't)
+        if(student_answer != "Flagged"){
+            if($(".student_answer", element).find("span").text() != student_answer){
+                $('.feedback', element).append("<div class=\"student_answer\"><span>"+student_answer+"</span></div>");
+            }
         }
-        if(student_answer != "Flagged" && $(".hints_for_"+student_answer, element).length == 0){
-            $('.feedback', element).append("<p class=\"hints_for_"+student_answer+"\" Answer-specific hints for "
-                +student_answer+" </p>");
-        }
-        if($(".hints_for_"+student_answer, element).length != 0){
+        if(student_answer != "Flagged"){
             $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'get_ratings'),
@@ -156,47 +145,11 @@ function CrowdXBlock(runtime, element){
             success: appendFlagged
             });
         }
-        /*
-        if (isStaff == true && student_answer == "Flagged") {
-            $('.feedback', element).append("<p class=\"flagged_hints\"</p>");
-            if (student_answer == "Flagged") {
-                $(".flagged_hints", element).append("<div class=" + hint_used + "><div role=\"button\" class=\"return_hint\"" +
-                    " aria-label=\"return\"><b>O</b></div><div>" + hint_used +
-                    "</div> <div role=\"button\" class=\"purge_hint\" aria-label=\"purge\"><b>X</b></div></div>")
-            }
-        }
-        else if($(".submit"+student_answer).length == 0){
-            $('.feedback', element).append("<p class=\"submit" + student_answer + "\"</p>");
-            $(".submit"+student_answer, element).append("<b>Answer-specific hints for \b" + " " + student_answer + "<p><input id=\"submitbuttonfor" + student_answer + "\" style=\"float: right; float: top;\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint\"><p class=\"showHintsFor" + student_answer + "\"> </p></div>");
-        }
-        //get_feedback will send "There are no hints for" + student_answer if no hints exist
-        //slice to determine this
-        if(hint_used.slice(0,22) != "There are no hints for"){
-            $('.showHintsFor'+student_answer, element).append(
-                "<p \" class =\"votingFor" + hint_used + "\">" +
-                "<div data-value=\"" + student_answer + "\" id=\"" + hint_used +"\" role=\"button\" class=\"upvote_hint\"" +
-                    "data-rate=\"1\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
-                "<div class = \"" + hint_used + "rating\">" + hint_used + "</div>" +
-                "<div data-value=\"" + student_answer + "\" id=\"" + hint_used + "\" role=\"button\" class=\"downvote_hint\"" +
-                    "data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b>" +
-                "</div> </p>");
-            $.ajax({
-                type: "POST",
-                url: runtime.handlerUrl(element, 'get_ratings'),
-                data: JSON.stringify({"student_answer": student_answer, "hint_used": hint_used}),
-                success: show_ratings
-            });
-        }else{
-            $('.showHintsFor'+student_answer).empty();
-            $('.showHintsFor'+student_answer).append("<p class=\".showHintsFor" + student_answer + "\"data-value=\"" + student_answer + "\"> <b>No hints exist in the database. (You received a default hint)</p> <p id=\"" + hint_used + "\"data-value=\"" + student_answer + "\" </p>");
-        }*/
         });
     }
 
     function show_ratings(result) {
         $.each(result, function(index, value) {
-            console.log(index);
-            console.log(value);
             $("."+index+"rating").append(value + " " + index);
         })
     }
@@ -246,14 +199,20 @@ function CrowdXBlock(runtime, element){
         }
     })
 
-    $(document).on('click', '.upvote_hint', function(){ //upvote
+    $(document).on('click', '.upvote_hint', function(){
+        used_hint = $(this).parent().find(".hint_used").text();
+        student_answer = $(this).parent().parent().find("span").text();
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'rate_hint'),
+            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "used_hint": used_hint, "student_answer": student_answer}),
+            success: finish
+        });
+    })
+
+    $(document).on('click', '.downvote_hint', function(){
         canhint = 0;
         id = this.id;
-        $('.hintbutton').each(function(){
-            if($(this).attr('id') == String(id)){
-                $(this).hide();
-            }
-        });
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
@@ -262,23 +221,7 @@ function CrowdXBlock(runtime, element){
         });
     })
 
-    $(document).on('click', '.downvote_hint', function(){ //upvote
-        canhint = 0;
-        id = this.id;
-        $('.hintbutton').each(function(){
-            if($(this).attr('id') == String(id)){
-                $(this).hide();
-            }
-        });
-        $.ajax({
-            type: "POST",
-            url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "used_hint": $(this).attr('id'), "student_answer": $(this).attr('data-value')}),
-            success: finish
-        });
-    })
-
-    $(document).on('click', '.flag_hint', function(){ //upvote
+    $(document).on('click', '.flag_hint', function(){
         canhint = 0;
         id = this.id;
         $('.hintbutton').each(function(){

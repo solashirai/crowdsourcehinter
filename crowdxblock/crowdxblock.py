@@ -277,7 +277,10 @@ class CrowdXBlock(XBlock):
         """
         hint_rating = {}
         if data['student_answer'] == 'Flagged':
-            return '0'
+            hint_rating['rating'] = 0
+            hint_rating['student_ansxwer'] = 'Flagged'
+            hint_rating['hint_used'] = data['hint_used']
+            return hint_rating
         temporary_dictionary = str(self.hint_database[data['student_answer']])
         temporary_dictionary = (ast.literal_eval(temporary_dictionary))
         hint_rating['rating'] = temporary_dictionary[data['hint_used']]
