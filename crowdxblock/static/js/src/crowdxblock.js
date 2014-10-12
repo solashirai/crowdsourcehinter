@@ -96,13 +96,68 @@ function CrowdXBlock(runtime, element){
         $('.HintsToUse', element).text(result.HintsToUse);
     }
 
+    function showHintInfo(hint_used, student_answer){
+        var hint_rating = 0;
+        $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'get_ratings'),
+            data: JSON.stringify({"student_answer": student_answer, "hint_used": hint_used}),
+            success: function (result) {
+                HintInfo = String("<div class=\"hint_value\" value = \"" + hint_used + "\">" +
+                "<div role=\"button\" class=\"upvote_hint\" data-rate=\"1\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
+                "<div class = \"rating\">" + result + hint_used + "</div>" +
+                "<div role=\"button\" class=\"downvote_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </div>");
+            }
+        });
+        return HintInfo;
+    }
+   
+    function appendHint(result){
+        $(".hints_for_"+result.student_answer, element).append("<div class=\"hint_value\" value = \"" + result.hint_used + "\">" +
+                "<div role=\"button\" class=\"upvote_hint\" data-rate=\"1\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
+                "<div class = \"rating\">" + result.rating + result.hint_used + "</div>" +
+                "<div role=\"button\" class=\"downvote_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </div>");
+    }
+
+    function appendFlagged(result){
+        $("flagged_hints", element).append("<div class=\"hint_value\" value = \"" + result.hint_used + "\">" +
+                "<div role=\"button\" class=\"upvote_hint\" data-rate=\"1\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
+                "<div class = \"rating\">" + result.rating + result.hint_used + "</div>" +
+                "<div role=\"button\" class=\"downvote_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </div>");
+    }
+
+
     function getFeedback(result){
         $.each(result, function(index, value) {
         //data of student answer and hints are stored in the paragraphs/buttons
         //so that when a button is clicked, the answer and hint can be sent to the python script
         student_answer = value;
         hint_used = index;
-        if (isStaff == true) {
+        if(isStaff == true){
+            $('.feedback', element).append("<p class=\"flagged_hints\" Flagged Hints </p>");
+        }
+        if(student_answer != "Flagged" && $(".hints_for_"+student_answer, element).length == 0){
+            $('.feedback', element).append("<p class=\"hints_for_"+student_answer+"\" Answer-specific hints for "
+                +student_answer+" </p>");
+        }
+        if($(".hints_for_"+student_answer, element).length != 0){
+            $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'get_ratings'),
+            data: JSON.stringify({"student_answer": student_answer, "hint_used": hint_used}),
+            success: appendHint
+            });
+        }
+        else{
+            $.ajax({
+            type: "POST",
+            url: runtime.handlerUrl(element, 'get_ratings'),
+            data: JSON.stringify({"student_answer": student_answer, "hint_used": hint_used}),
+            success: appendFlagged
+            });
+        }
+        /*
+        if (isStaff == true && student_answer == "Flagged") {
             $('.feedback', element).append("<p class=\"flagged_hints\"</p>");
             if (student_answer == "Flagged") {
                 $(".flagged_hints", element).append("<div class=" + hint_used + "><div role=\"button\" class=\"return_hint\"" +
@@ -110,7 +165,7 @@ function CrowdXBlock(runtime, element){
                     "</div> <div role=\"button\" class=\"purge_hint\" aria-label=\"purge\"><b>X</b></div></div>")
             }
         }
-        if($(".submit"+student_answer).length == 0){
+        else if($(".submit"+student_answer).length == 0){
             $('.feedback', element).append("<p class=\"submit" + student_answer + "\"</p>");
             $(".submit"+student_answer, element).append("<b>Answer-specific hints for \b" + " " + student_answer + "<p><input id=\"submitbuttonfor" + student_answer + "\" style=\"float: right; float: top;\" type=\"button\" class=\"submitbutton\" value=\"Submit a hint\"><p class=\"showHintsFor" + student_answer + "\"> </p></div>");
         }
@@ -134,7 +189,7 @@ function CrowdXBlock(runtime, element){
         }else{
             $('.showHintsFor'+student_answer).empty();
             $('.showHintsFor'+student_answer).append("<p class=\".showHintsFor" + student_answer + "\"data-value=\"" + student_answer + "\"> <b>No hints exist in the database. (You received a default hint)</p> <p id=\"" + hint_used + "\"data-value=\"" + student_answer + "\" </p>");
-        }
+        }*/
         });
     }
 

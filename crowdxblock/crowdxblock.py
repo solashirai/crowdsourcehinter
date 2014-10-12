@@ -273,12 +273,16 @@ class CrowdXBlock(XBlock):
         data['hint_used'] is the hint being shown to the student
 
         returns:
-            hint_rating: the rating of the hint.
+            hint_rating: the rating of the hint as well as data on what the hint in question is
         """
         hint_rating = {}
+        if data['student_answer'] == 'Flagged':
+            return '0'
         temporary_dictionary = str(self.hint_database[data['student_answer']])
         temporary_dictionary = (ast.literal_eval(temporary_dictionary))
-        hint_rating[data['hint_used']] = temporary_dictionary[data['hint_used']]
+        hint_rating['rating'] = temporary_dictionary[data['hint_used']]
+        hint_rating['student_answer'] = data['student_answer']
+        hint_rating['hint_used'] = data['hint_used']
         return hint_rating
 
     @XBlock.json_handler
