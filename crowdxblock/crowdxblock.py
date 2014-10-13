@@ -215,7 +215,7 @@ class CrowdXBlock(XBlock):
             for answer_keys in self.hint_database:
                 if str(len(self.hint_database[str(answer_keys)])) != str(0):
                     for hints in self.hint_database[str(answer_keys)]:
-                        if list(self.Flagged) != 0:
+                        if len(self.Flagged) != 0:
                             for flagged_hints in self.Flagged:
                                 if str(hints) != self.Flagged[flagged_hints]:
                                     feedback_data[str(hints)] = str(answer_keys)
