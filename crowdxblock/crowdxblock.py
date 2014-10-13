@@ -215,11 +215,14 @@ class CrowdXBlock(XBlock):
             for answer_keys in self.hint_database:
                 if str(len(self.hint_database[str(answer_keys)])) != str(0):
                     for hints in self.hint_database[str(answer_keys)]:
-                        for flagged_hints in self.Flagged:
-                            if str(hints) != self.Flagged[flagged_hints]:
-                                feedback_data[str(hints)] = str(answer_keys)
+                        if list(self.Flagged) != 0:
+                            for flagged_hints in self.Flagged:
+                                if str(hints) != self.Flagged[flagged_hints]:
+                                    feedback_data[str(hints)] = str(answer_keys)
                             else:
                                 feedback_data[str(hints)] = str("Flagged")
+                        else:
+                            feedback_data[str(hints)] = str(answer_keys)
                 else:
                     feedback_data[str("There are no hints for" + " " + str(answer_keys))] = str(answer_keys)
         elif len(self.WrongAnswers) == 0:
@@ -313,21 +316,34 @@ class CrowdXBlock(XBlock):
         # might arise due to certain symbols. I don't think I have this fully working but am not sure.
         data_rating = data['student_rating']
         data_hint = data['used_hint']
-        answer_data = self.remove_symbols(answer_data)
+        if str(data['student_rating']) == str(2):
+            for flagged_hints in self.Flagged:
+                if self.Flagged[str(flagged_hints)] == data_hint:
+                    del self.Flagged[flagged_hints]
+                    return {'rating': 'unflagged'}
+        if str(data['student_rating']) == str(-2):
+            for flagged_answer in self.Flagged:
+                if self.Flagged[flagged_answer] == data_hint:            
+                    temporary_dict = str(self.hint_database[str(flagged_answer)])
+                    temporary_dict = (ast.literal_eval(temporary_dict))
+                    temporary_dict.pop(data_hint, None)
+                    self.hint_database[str(flagged_answer)] = temporary_dict
+                    del self.Flagged[flagged_answer] 
+                    return {'rating': 'removed'}
         if str(data['student_rating']) == str(0):
             # if student flagged hint
             self.hint_flagged(data['used_hint'], answer_data)
             return {"rating": 'thiswasflagged', 'used_hint': data_hint}
-        if str(answer_data) not in self.Voted:
-            self.Voted.append(str(answer_data)) # add data to Voted to prevent multiple votes
+        if str(data_hint) not in self.Voted:
+            self.Voted.append(str(data_hint)) # add data to Voted to prevent multiple votes
             rating = self.change_rating(data_hint, int(data_rating), answer_data) # change hint rating
             if str(rating) == str(0):
                 # if the rating is "0", return "zzeerroo" instead. "0" showed up as "null" in JS
-                return {"rating": str('zzeerroo'), 'used_hint': data_hint}
+                return {"rating": str(0), 'used_hint': data_hint}
             else:
                 return {"rating": str(rating), 'used_hint': data_hint}
         else:
-            return {"rating": str('You have already voted on this hint!'), 'used_hint': data_hint}
+            return {"rating": str('voted'), 'used_hint': data_hint}
 
     def hint_flagged(self, data_hint, answer_data):
         """
