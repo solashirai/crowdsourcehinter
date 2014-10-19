@@ -68,6 +68,7 @@ class CrowdXBlock(XBlock):
         """
         html = self.resource_string("static/html/crowdxblockstudio.html")
         frag = Fragment(html.format(self=self))
+        frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
         frag.add_css(self.resource_string("static/css/crowdxblock.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdxblock.js"))
         frag.initialize_js('CrowdXBlock')
@@ -430,8 +431,8 @@ class CrowdXBlock(XBlock):
           data['submission']: This is the text of the new hint that the student has submitted.
           data['answer']: This is the incorrect answer for which the student is submitting a new hint.
         """
-        submission = data['submission'].replace('ddeecciimmaallppooiinntt', '.')
-        answer = data['answer'].replace('ddeecciimmaallppooiinntt', '.')
+        submission = data['submission']
+        answer = data['answer']
         if str(submission) not in self.hint_database[str(answer)]:
             temporary_dictionary = str(self.hint_database[str(answer)])
             temporary_dictionary = (ast.literal_eval(temporary_dictionary))

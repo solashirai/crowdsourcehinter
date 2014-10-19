@@ -1,28 +1,17 @@
-var repeating = 0;
-var repeatcounter = 0;
 var canhint = 0;
-var issubmitting = 0;
-var issubmittinghint = 0;
 
 function CrowdXBlock(runtime, element){
     var isStaff = false;
     $(".HintsToUse", element).text("");
-    clearvariables();
-    //repeat counter is used to counteract a bug caused by switching units
-    //after switching units all logger.listen events would trigger multiple times
-    repeatcounter += 1;
     //use to determine whether or not to initialize hint feedback
     var hasReceivedHint = false;
 
-    Logger.listen('seq_next', null, clearingvariables);
-    Logger.listen('seq_goto', null, clearingvariables);
-    function clearingvariables(event_type, data, element){
-        clearvariables(data);
+    Logger.listen('seq_next', null, stopScript);
+    Logger.listen('seq_goto', null, stopScript);
+    //stop this script if units are switched to prevent data errors/duplication
+    function stopScript(event_type, data, element){
+        return;
     }
-
-    function clearvariables(data){
-        repeating = 0;
-    }    
 
     function logError(details) {
         $.ajax({
@@ -37,17 +26,8 @@ function CrowdXBlock(runtime, element){
 
     //read the data from the problem_graded event here
     function get_event_data(event_type, data, element){
-        repeating += 1;
-        if(repeating != repeatcounter){
-        console.debug(repeating);
-        }else{
         check_correct(event_type, data, element);
-        }
     }
-
-    $(document).on('click', '.check.Check', function(){
-        repeating = 0;
-    });
 
     function check_correct(var_event_type, var_data, var_element){
         //check that problem wasn't correctly answered
@@ -55,7 +35,7 @@ function CrowdXBlock(runtime, element){
             $.ajax({
                 type: "POST",
                 url: runtime.handlerUrl(element, 'get_hint'),
-                data: JSON.stringify({"submittedanswer": var_data[0]}),
+                data: JSON.stringify({"submittedanswer": unescape(var_data[0])}),
                 success: seehint
             });
             hasReceivedHint = true;
@@ -98,10 +78,10 @@ function CrowdXBlock(runtime, element){
     function appendHint(result){
         $(".student_answer", element).each(function(){
             if ($(this).find("span").text() == result.student_answer){
-                $(this).append("<div class=\"hint_value\" value = \"" + result.hint_used + "\">" +
+                $(this).append(unescape("<div class=\"hint_value\" value = \"" + result.hint_used + "\">" +
                 "<div role=\"button\" class=\"rate_hint\" data-rate=\"1\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
                 "<div class = \"rating\">" + result.rating + "</div><div class=\"hint_used\">" + ""+result.hint_used+"</div>" +
-                "<div role=\"button\" class=\"rate_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </div>");
+                "<div role=\"button\" class=\"rate_hint\" data-rate=\"-1\" aria-label=\"downvote\"><b>↓</b></div> </div>"));
             }
         });
     }
@@ -114,6 +94,7 @@ function CrowdXBlock(runtime, element){
     }
 
     function getFeedback(result){
+        console.log("feedback");
         if(isStaff){
             $('.feedback', element).append("<div class=\"flagged_hints\"><span>Flagged</span></div>");
         }
@@ -126,20 +107,19 @@ function CrowdXBlock(runtime, element){
         if(student_answer != "Flagged"){
             if($('.student_answer', element).length == 0){
                 $('.feedback', element).append("<div class=\"student_answer\"><span><b>"+student_answer+"</b></span>"+
-                    "<div><input type =\"button\" class=\"submit_hint\" value=\"Submit a new hint for this answer.\" </input></div></div>");
+                    "<div><input type =\"button\" class=\"student_hint_creation\" value=\"Submit a new hint for this answer.\" </input></div></div>");
             }
             else {
                 //cycle through each .student_answer to check if this answer has been accounted for
                 answerShown = false;
                 $(".student_answer", element).each(function(){
-                    console.log($(this).find("span").text());
                     if($(this).find("span").text() == student_answer){
                         answerShown = true;
                     }
                 });
                 if (answerShown == false){
                     $('.feedback', element).append("<div class=\"student_answer\"><span><b>"+student_answer+"</b></span>"+
-                    "<div><input type =\"button\" class=\"submit_hint\"value=\"Submit a new hint for this answer.\" </input></div></div>");
+                    "<div><input type =\"button\" class=\"student_hint_creation\"value=\"Submit a new hint for this answer.\" </input></div></div>");
                 }
             }
         }
@@ -170,40 +150,31 @@ function CrowdXBlock(runtime, element){
         });
     }
 
-    $(document).on('click', '.submit_hint', function(){
+    $(document).on('click', '.student_hint_creation', function(){
+        $('.math').remove();
+        $('.submit_new').remove();
         student_answer = $(this).parent().parent().find("span").text();
         $(".student_answer", element).each(function(){
             if ($(this).find("span").text() == student_answer){
-                $(this).prepend("<p><input type=\"text\" name=\"studentinput\" class=\"math\" size=\"40\"><input type=\"button\" class=\"button\" value=\"Submit Hint\"> </p>");
+                $(this).prepend("<p><input type=\"text\" name=\"studentinput\" class=\"math\" size=\"40\"><input id=\""+student_answer+"\" type=\"button\" class=\"submit_new\" value=\"Submit Hint\"> </p>");
             }
         });
     })
 
-    $(document).on('click', '#submit', function(){
-        issubmittinghint += 1;
-        if(issubmittinghint == repeatcounter){
-        if($('.math').val() != null){
-            var answerdata = String;
-            issubmitting = 0;
-            $('#submit').each(function(){
-                answerdata = $('.math').attr('id');
-            });
+    $(document).on('click', '.submit_new', function(){
+        if($(this).parent().find('.math').val() != null){
+            var answerdata = unescape($(this).attr('id'));
+            var newhint = unescape($('.math').val());
             $('.submitbutton').show();
             $.ajax({
                 type: "POST",
                 url: runtime.handlerUrl(element, 'give_hint'),
-                data: JSON.stringify({"submission": $('.math').val(), "answer": answerdata}), //give hin for first incorrect answer
+                data: JSON.stringify({"submission": newhint, "answer": answerdata}), //give hin for first incorrect answer
                 //success: finish
             });
-            $("#answer").val('');
-            $(this).remove();
-            $('.math').remove();
-            document.getElementById("submitbuttonfor" + answerdata).remove();
-            $('#submitbuttonfor' + answerdata).remove();
-            $('#'+answerdata).remove();
-            $('#submit'+answerdata).prepend('Thankyou for your hint!');
+            $(this).parent('p').remove();
+            //$('.math').remove();
             }
-        }
     })
 
     $(document).on('click', '.rate_hint', function(){
