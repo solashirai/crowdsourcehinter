@@ -4,28 +4,7 @@
     font-weight: bold;
 }
 
-/*.crowdxblock_block {
-    cursor: pointer;
-    background: rgb(0,0,200);
-}*/
-
-.crowdxblock_block .crowdsource-wrapper {
-  box-shadow: inset 0 1px 2px 1px rgba(0,0,0,0.1);
-  border-radius: 2px;
-  display: none;
-  margin-top: 20px;
-  padding: (15px);
-  background: rgb(50, 50, 235);
-}
-
-.crowdxblock_block .hint-inner-container {
-  padding-left: 15px;
-  padding-right: 15px;
-  font-size: 16px;
-  
-}
-
-.crowdxblock_block .hintsarea {
+.crowdxblock_block .feedback {
   border-style: solid;
   border-width: thin;
   border-color: rgb(200,200,200);
@@ -36,19 +15,47 @@
   padding-bottom: 0px !important;
 }
 
+.hint_value{
+  display: flex;
+  margin-left: 10px;
+  flex-flow: column;
+}
+
+.hint_used{
+  flex-direction: row;
+}
+
 .crowdxblock_block .HintsToUse {
   background-color: #FF8;
 }
 
-.downvote_hint, .flag_hint, .upvote_hint {
+.rate_hint {
   width: 100%;
   margin-left:auto;
   margin-right:auto;
-  text-align:left;
 }
 
-.upvote_hint, .downvote_hint, .flag_hint { cursor: pointer }
-.upvote_hint, .downvote_hint, .flag_hint { color: #948f8f; }
+d2[data-rate="flag"] {
+     align-self: flex-end;
+}
+
+d1[data-rate="upvote"] {
+    color: green;
+    font-weight: bold;
+    margin-right:15px;
+}
+
+d5[data-rate="downvote"] {
+    color: red;
+    font-weight: bold;
+}
+
+.rating{
+    margin-right: 10px;
+}
+
+.rate_hint{ cursor: pointer }
+.rate_hint{ color: #948f8f; }
 
 .hintsarea {
   display: flex;
