@@ -169,7 +169,6 @@ function CrowdXBlock(runtime, element){
             var answerdata = unescape($(this).attr('id'));
             var newhint = unescape($('.math').val());
             Logger.log('submit_new.click.event', {"student_answer": answerdata, "new_hint_submission": newhint});
-            tracker.emit('submit_new', {"student_answer": answerdata, "new_hint_submission": newhint});
             $('.submitbutton').show();
             $.ajax({
                 type: "POST",
@@ -180,7 +179,7 @@ function CrowdXBlock(runtime, element){
                             type: "POST",
                             url: runtime.handlerUrl(element, 'get_ratings'),
                             data: JSON.stringify({"student_answer": answerdata, "hint_used": newhint}),
-                            success: appendFlagged
+                            success: appendHint
                         });
                     }
             });
@@ -192,7 +191,6 @@ function CrowdXBlock(runtime, element){
         used_hint = $(this).parent().find(".hint_used").text();
         student_answer = $(this).parent().parent().find("span").text();
         Logger.log('rate_hint.click.event', {"used_hint": used_hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
-        tracker.emit('rate_hint', {"used_hint": used_hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
