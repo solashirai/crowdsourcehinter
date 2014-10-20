@@ -77,7 +77,7 @@ function CrowdXBlock(runtime, element){
         $(".student_answer", element).each(function(){
             if ($(this).find("span").text() == result.student_answer){
                 $(this).append(unescape("<div class=\"hint_value\" value = \"" + result.hint_used + "\">" +
-                "<div> <d1 role=\"button\" class=\"rate_hint\" data-rate=\"upvote\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></d1>" +
+                "<div> <d1 role=\"button\"class=\"rate_hint\" data-rate=\"upvote\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></d1>" +
                 "<d2 role=\"button\" class=\"rate_hint\" data-rate=\"flag\" data-icon=\"flag\" aria-label=\"flag\"><b>!</b></d2></div>"+
                 "<div><d3 class = \"rating\">" + result.rating + "</d3>"+
                 "<d4 class=\"hint_used\">" + ""+result.hint_used+"</d4></div>" +
@@ -168,11 +168,21 @@ function CrowdXBlock(runtime, element){
         if($(this).parent().find('.math').val() != null){
             var answerdata = unescape($(this).attr('id'));
             var newhint = unescape($('.math').val());
+            Logger.log('submit_new.click.event', {"student_answer": answerdata, "new_hint_submission": newhint});
+            tracker.emit('submit_new', {"student_answer": answerdata, "new_hint_submission": newhint});
             $('.submitbutton').show();
             $.ajax({
                 type: "POST",
                 url: runtime.handlerUrl(element, 'give_hint'),
                 data: JSON.stringify({"submission": newhint, "answer": answerdata}),
+                success: function(result){
+                        $.ajax({
+                            type: "POST",
+                            url: runtime.handlerUrl(element, 'get_ratings'),
+                            data: JSON.stringify({"student_answer": answerdata, "hint_used": newhint}),
+                            success: appendFlagged
+                        });
+                    }
             });
             $(this).parent('p').remove();
         }
@@ -182,6 +192,7 @@ function CrowdXBlock(runtime, element){
         used_hint = $(this).parent().find(".hint_used").text();
         student_answer = $(this).parent().parent().find("span").text();
         Logger.log('rate_hint.click.event', {"used_hint": used_hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
+        tracker.emit('rate_hint', {"used_hint": used_hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
