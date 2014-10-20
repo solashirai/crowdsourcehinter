@@ -1,6 +1,8 @@
 function CrowdXBlock(runtime, element){
     //use executionFunctions to prevent old initializations of hinter from working after switching units
-    var executionFunctions = true;
+    var executeFunctions = true;
+    if(executeFunctions){
+
     var isStaff = false;
     $(".HintsToUse", element).text("");
 
@@ -22,14 +24,11 @@ function CrowdXBlock(runtime, element){
 
     //read the data from the problem_graded event here
     function get_event_data(event_type, data, element){
-        if(executionFunctions){
-            check_correct(event_type, data, element);
-        }
+        check_correct(event_type, data, element);
     }
     Logger.listen('problem_graded', null, get_event_data);
 
     function check_correct(var_event_type, var_data, var_element){
-    if(executionFunctions){
         //check that problem wasn't correctly answered
         if (var_data[1].search(/class="correct/) === -1){
             $.ajax({
@@ -67,23 +66,22 @@ function CrowdXBlock(runtime, element){
                 }
             });
         }  
-    }}
+    }
 
     function seehint(result){
-    if(executionFunctions){
         //show hint to student
         $('.HintsToUse', element).text(result.HintsToUse);
-    }}
+    }
 
     function appendHint(result){
         $(".student_answer", element).each(function(){
             if ($(this).find("span").text() == result.student_answer){
                 $(this).append(unescape("<div class=\"hint_value\" value = \"" + result.hint_used + "\">" +
-                "<div role=\"button\" class=\"rate_hint\" data-rate=\"upvote\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
-                "<div role=\"button\" class=\"rate_hint\" data-rate=\"flag\" data-icon=\"flag\" aria-label=\"flag\"><b>!</b></div>"+
-                "<div class = \"rating\">" + result.rating + "</div>"+
-                "<div class=\"hint_used\">" + ""+result.hint_used+"</div>" +
-                "<div role=\"button\" class=\"rate_hint\" data-rate=\"downvote\" aria-label=\"downvote\"><b>↓</b></div> </div>"));
+                "<div> <d1 role=\"button\" class=\"rate_hint\" data-rate=\"upvote\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></d1>" +
+                "<d2 role=\"button\" class=\"rate_hint\" data-rate=\"flag\" data-icon=\"flag\" aria-label=\"flag\"><b>!</b></d2></div>"+
+                "<div><d3 class = \"rating\">" + result.rating + "</d3>"+
+                "<d4 class=\"hint_used\">" + ""+result.hint_used+"</d4></div>" +
+                "<div> <d5 role=\"button\" class=\"rate_hint\" data-rate=\"downvote\" aria-label=\"downvote\"><b>↓</b></div> </d5></div>"));
             }
         });
     }
@@ -97,7 +95,6 @@ function CrowdXBlock(runtime, element){
     }
 
     function getFeedback(result){
-    if(executionFunctions){
         if(isStaff){
             $('.feedback', element).append("<div class=\"flagged_hints\"><span>Flagged</span></div>");
         }
@@ -153,23 +150,21 @@ function CrowdXBlock(runtime, element){
             });
         }
         });
-    }}
+    }
 
     $(document).on('click', '.student_hint_creation', function(){
-    if(executionFunctions){
         //remove all other hint inputs and replace
         $('.math').remove();
         $('.submit_new').remove();
         student_answer = $(this).parent().parent().find("span").text();
         $(".student_answer", element).each(function(){
             if ($(this).find("span").text() == student_answer){
-                $(this).prepend("<p><input type=\"text\" name=\"studentinput\" class=\"math\" size=\"40\"><input id=\""+student_answer+"\" type=\"button\" class=\"submit_new\" value=\"Submit Hint\"> </p>");
+                $(this).append("<p><input type=\"text\" name=\"studentinput\" class=\"math\" size=\"40\"><input id=\""+student_answer+"\" type=\"button\" class=\"submit_new\" value=\"Submit Hint\"> </p>");
             }
         });
-    }})
+    })
 
     $(document).on('click', '.submit_new', function(){
-    if(executionFunctions){
         if($(this).parent().find('.math').val() != null){
             var answerdata = unescape($(this).attr('id'));
             var newhint = unescape($('.math').val());
@@ -181,10 +176,9 @@ function CrowdXBlock(runtime, element){
             });
             $(this).parent('p').remove();
         }
-    }})
+    })
 
     $(document).on('click', '.rate_hint', function(){
-    if(executionFunctions){
         used_hint = $(this).parent().find(".hint_used").text();
         student_answer = $(this).parent().parent().find("span").text();
         Logger.log('rate_hint.click.event', {"used_hint": used_hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
@@ -207,11 +201,10 @@ function CrowdXBlock(runtime, element){
                 }
             }
         });
-    }})
+    })
 
     //staff ratings are the removal or unflagging of flagged hints from the database
     $(document).on('click', '.staff_rate', function(){
-    if(executionFunctions){
         used_hint = $(this).parent().find(".hint_used").text();
         student_answer = $(this).parent().parent().find("span").text();
         $.ajax({
@@ -226,5 +219,5 @@ function CrowdXBlock(runtime, element){
                     });
             }
         });
-    }})
-}
+    })
+}}
