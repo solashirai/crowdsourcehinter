@@ -224,7 +224,7 @@ class CrowdXBlock(XBlock):
                         else:
                             feedback_data[str(hints)] = str(answer_keys)
                 else:
-                    feedback_data[str("There are no hints for" + " " + str(answer_keys))] = str(answer_keys)
+                    feedback_data[None] = str(answer_keys)
         elif len(self.WrongAnswers) == 0:
             return
         else:
@@ -254,7 +254,7 @@ class CrowdXBlock(XBlock):
                                         self.Used.append(str(random_hint_key))
                         else:
                             self.no_hints(index)
-                            feedback_data[str("There are no hints for" + " " + str(self.WrongAnswers[index]))] = str(self.WrongAnswers[index])
+                            feedback_data[None] = str(self.WrongAnswers[index])
         self.WrongAnswers=[]
         self.Used=[]
         return feedback_data
@@ -273,7 +273,7 @@ class CrowdXBlock(XBlock):
         This function is used to return the ratings of hints during hint feedback.
 
         data['student_answer'] is the answer for the hint being displayed
-        data['hint_used'] is the hint being shown to the student
+        data['hint'] is the hint being shown to the student
 
         returns:
             hint_rating: the rating of the hint as well as data on what the hint in question is
@@ -282,13 +282,13 @@ class CrowdXBlock(XBlock):
         if data['student_answer'] == 'Flagged':
             hint_rating['rating'] = 0
             hint_rating['student_ansxwer'] = 'Flagged'
-            hint_rating['hint_used'] = data['hint_used']
+            hint_rating['hint'] = data['hint']
             return hint_rating
         temporary_dictionary = str(self.hint_database[data['student_answer']])
         temporary_dictionary = (ast.literal_eval(temporary_dictionary))
-        hint_rating['rating'] = temporary_dictionary[data['hint_used']]
+        hint_rating['rating'] = temporary_dictionary[data['hint']]
         hint_rating['student_answer'] = data['student_answer']
-        hint_rating['hint_used'] = data['hint_used']
+        hint_rating['hint'] = data['hint']
         return hint_rating
 
     @XBlock.json_handler
@@ -302,7 +302,7 @@ class CrowdXBlock(XBlock):
 
         Args:
           data['student_answer']: The incorrect answer that corresponds to the hint that is being voted on
-          data['used_hint']: The hint that is being voted on
+          data['hint']: The hint that is being voted on
           data['student_rating']: The rating chosen by the student. The value is -1, 1, or 0.
 
         Returns:
@@ -314,7 +314,7 @@ class CrowdXBlock(XBlock):
         # answer_data is manipulated to remove symbols to prevent errors that
         # might arise due to certain symbols. I don't think I have this fully working but am not sure.
         data_rating = data['student_rating']
-        data_hint = data['used_hint']
+        data_hint = data['hint']
         if data['student_rating'] == 'unflag':
             for flagged_hints in self.Flagged:
                 if self.Flagged[str(flagged_hints)] == data_hint:
@@ -332,23 +332,23 @@ class CrowdXBlock(XBlock):
         if data['student_rating'] == 'flag':
             # add hint to 
             self.Flagged[str(answer_data)] = data_hint
-            return {"rating": 'flagged', 'used_hint': data_hint}
+            return {"rating": 'flagged', 'hint': data_hint}
         if str(data_hint) not in self.Voted:
             self.Voted.append(str(data_hint)) # add data to Voted to prevent multiple votes
             rating = self.change_rating(data_hint, data_rating, answer_data) # change hint rating
             if str(rating) == str(0):
-                return {"rating": str(0), 'used_hint': data_hint}
+                return {"rating": str(0), 'hint': data_hint}
             else:
-                return {"rating": str(rating), 'used_hint': data_hint}
+                return {"rating": str(rating), 'hint': data_hint}
         else:
-            return {"rating": str('voted'), 'used_hint': data_hint}
+            return {"rating": str('voted'), 'hint': data_hint}
 
 #    def hint_flagged(self, data_hint, answer_data):
 #        """
 #        This is used to add a hint to the self.flagged dictionary. When a hint is returned with the rating
 #        of 0, it is considered to be flagged.
 #        Args:
-#          data_hint: This is equal to the data['used_hint'] in self.rate_hint
+#          data_hint: This is equal to the data['hint'] in self.rate_hint
 #          answer_data: This is equal to the data['student_answer'] in self.rate_hint
 #        """
 #        for answer_keys in self.hint_database:
@@ -364,7 +364,7 @@ class CrowdXBlock(XBlock):
         in self.rate_hint
 
         Args:
-          data_hint: This is equal to the data['used_hint'] in self.rate_hint
+          data_hint: This is equal to the data['hint'] in self.rate_hint
           data_rating: This is equal to the data['student_rating'] in self.rate_hint
           answer_data: This is equal to the data['student_answer'] in self.rate_hint
 
