@@ -35,17 +35,17 @@
   margin-right:auto;
 }
 
-d2[data-rate="flag"] {
+div[data-rate="flag"] {
      align-self: flex-end;
 }
 
-d1[data-rate="upvote"] {
+div[data-rate="upvote"] {
     color: green;
     font-weight: bold;
     margin-right:15px;
 }
 
-d5[data-rate="downvote"] {
+div[data-rate="downvote"] {
     color: red;
     font-weight: bold;
 }

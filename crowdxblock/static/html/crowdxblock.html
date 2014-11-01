@@ -1,4 +1,18 @@
-
+<script type="x-tmpl-mustache" id="show_hint_feedback">
+    <div class="hint_value" value={{hint}}>
+        <div role="button" class="rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
+            <b>↑</b>
+        </div>
+        <div role="button" class="rate_hint" data-rate="flag" data-icon="flag" aria-label="flag">
+            <b>!</b>
+        </div>
+        <div class ="rating"> {{rating}} </div>
+        <div class="hint"> {{hint}} </div>
+        <div role="button" class="rate_hint" data-rate="downvote" aria-label="downvote">
+            <b>↓</b>
+        </div>
+    </div>
+</script>
 <div class="crowdxblock_block">  <!--most stuff just for testing purposes-->
 
 <p> <span class='HintsToUse'></span>
