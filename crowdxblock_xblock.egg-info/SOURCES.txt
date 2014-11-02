@@ -6,7 +6,7 @@ crowdxblock/static/css/crowdxblock.css
 crowdxblock/static/css/crowdxblock.css~
 crowdxblock/static/html/crowdxblock.html
 crowdxblock/static/html/crowdxblock.html~
-crowdxblock/static/html/demoproblem.png
+crowdxblock/static/html/crowdxblockstudio.html
 crowdxblock/static/js/src/crowdxblock.js
 crowdxblock/static/js/src/crowdxblock.js~
 crowdxblock_xblock.egg-info/PKG-INFO
