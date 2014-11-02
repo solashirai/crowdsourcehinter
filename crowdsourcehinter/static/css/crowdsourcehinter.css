@@ -1,16 +1,16 @@
-/* CSS for CrowdXBlock */
+/* CSS for CrowdsourceHinter */
 
-.crowdxblock_block .count {
+.crowdsourcehinter_block .count {
     font-weight: bold;
 }
 
-.crowdxblock_block .feedback {
+.crowdsourcehinter_block .feedback {
   border-style: solid;
   border-width: thin;
   border-color: rgb(200,200,200);
 }
 
-.crowdxblock_block .vote {
+.crowdsourcehinter_block .vote {
   padding-top: 0px !important;
   padding-bottom: 0px !important;
 }
@@ -25,7 +25,7 @@
   flex-direction: row;
 }
 
-.crowdxblock_block .HintsToUse {
+.crowdsourcehinter_block .HintsToUse {
   background-color: #FF8;
 }
 

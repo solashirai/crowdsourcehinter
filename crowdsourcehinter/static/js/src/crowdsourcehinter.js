@@ -1,4 +1,4 @@
-function CrowdXBlock(runtime, element){
+function CrowdsourceHinter(runtime, element){
     //use executionFunctions to prevent old initializations of hinter from working after switching units
     var executeFunctions = true;
     if(executeFunctions){

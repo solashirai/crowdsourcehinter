@@ -13,7 +13,7 @@ from xblock.fragment import Fragment
 
 log = logging.getLogger(__name__)
 
-class CrowdXBlock(XBlock):
+class CrowdsourceHinter(XBlock):
     """
     This is the Crowd Sourced Hinter XBlock. This Xblock seeks to provide students with hints
     that specifically address their mistake. Additionally, the hints that this Xblock shows
@@ -53,11 +53,11 @@ class CrowdXBlock(XBlock):
         This view renders the hint view to the students. The HTML has the hints templated 
         in, and most of the remaining functionality is in the JavaScript. 
         """
-        html = self.resource_string("static/html/crowdxblock.html")
+        html = self.resource_string("static/html/crowdsourcehinter.html")
         frag = Fragment(html.format(self=self))
-        frag.add_css(self.resource_string("static/css/crowdxblock.css"))
-        frag.add_javascript(self.resource_string("static/js/src/crowdxblock.js"))
-        frag.initialize_js('CrowdXBlock')
+        frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
+        frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
+        frag.initialize_js('CrowdsourceHinter')
         return frag
 
     def studio_view(self, context=None):
@@ -66,12 +66,12 @@ class CrowdXBlock(XBlock):
         one to define, for example, which problem the hinter is for. It is unfinished and does not currently
         work.
         """
-        html = self.resource_string("static/html/crowdxblockstudio.html")
+        html = self.resource_string("static/html/crowdsourcehinterstudio.html")
         frag = Fragment(html.format(self=self))
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
-        frag.add_css(self.resource_string("static/css/crowdxblock.css"))
-        frag.add_javascript(self.resource_string("static/js/src/crowdxblock.js"))
-        frag.initialize_js('CrowdXBlock')
+        frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
+        frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
+        frag.initialize_js('CrowdsourceHinter')
         return frag
 
     def resource_string(self, path):
@@ -465,9 +465,9 @@ class CrowdXBlock(XBlock):
     def workbench_scenarios():
         """A canned scenario for display in the workbench."""
         return [
-            ("CrowdXBlock",
+            ("CrowdsourceHinter",
              """<vertical_demo>
-<crowdxblock/>
+<crowdsourcehinter/>
 </vertical_demo>
 """),
         ]

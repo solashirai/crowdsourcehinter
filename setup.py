@@ -1,4 +1,4 @@
-"""Setup for crowdxblock XBlock."""
+"""Setup for Crowdsource Hinter XBlock."""
 
 import os
 from setuptools import setup
@@ -21,19 +21,19 @@ def package_data(pkg, roots):
 
 
 setup(
-    name='crowdxblock-xblock',
+    name='crowdsourcehinter-xblock',
     version='0.1',
-    description='crowdxblock XBlock',   # TODO: write a better description.
+    description='crowdsourcehinter XBlock',   # TODO: write a better description.
     packages=[
-        'crowdxblock',
+        'crowdsourcehinter',
     ],
     install_requires=[
         'XBlock',
     ],
     entry_points={
         'xblock.v1': [
-            'crowdxblock = crowdxblock:CrowdXBlock',
+            'crowdsourcehinter = crowdsourcehinter:CrowdsourceHinter',
         ]
     },
-    package_data=package_data("crowdxblock", ["static", "public"]),
+    package_data=package_data("crowdsourcehinter", ["static", "public"]),
 )
