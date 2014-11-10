@@ -17,6 +17,7 @@ function CrowdsourceHinter(runtime, element){
 
     //read the data from the problem_graded event here
     function get_event_data(event_type, data, element){
+        console.log("is this still changing");
         onStudentSubmission(data);
     }
     Logger.listen('problem_graded', null, get_event_data);
@@ -72,12 +73,18 @@ function CrowdsourceHinter(runtime, element){
     //This appended div includes upvote/downvote/flagging buttons, the hint, and the hint's rating
         $(".student_answer", element).each(function(){
             if ($(this).find("span").text() == result.student_answer){
-                var template = $('#show_hint_feedback').html();
+                /*var template = $('#show_hint_feedback').html();
+                Mustache.parse(template);
                 var data = {
-                    "hint": result.hint,
-                    "rating": result.rating
+                    hintvalue: "result.hint",
+                    hint: "result.hint",
+                    rating: "result.rating"
                 };
-                $(this).append(Mustache.to_html(template, data));
+                $(this).append(Mustache.render(template, data)); */
+                var template = $('#testing').html();
+                var data= {testone: "testing", testtwo: "TESTING"};
+                var html = Mustache.to_html(template, data);
+                $(this).html(html);
                 /**$(this).append(unescape("<div class=\"hint_value\" value = \"" + result.hint + "\">" +
                 "<div role=\"button\"class=\"rate_hint\"data-rate=\"upvote\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
                 "<div role=\"button\" class=\"rate_hint\" data-rate=\"flag\" data-icon=\"flag\" aria-label=\"flag\"><b>!</b></div>"+

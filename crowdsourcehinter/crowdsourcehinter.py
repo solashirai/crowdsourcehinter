@@ -55,6 +55,7 @@ class CrowdsourceHinter(XBlock):
         """
         html = self.resource_string("static/html/crowdsourcehinter.html")
         frag = Fragment(html.format(self=self))
+        frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
         frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
         frag.initialize_js('CrowdsourceHinter')
