@@ -82,10 +82,11 @@ function CrowdsourceHinter(runtime, element){
                 $(this).append(Mustache.render(template, data));*/
                 $(this).append(unescape("<div class=\"csh_hint_value\" value = \"" + result.hint + "\">" +
                 "<div role=\"button\"class=\"csh_rate_hint\"data-rate=\"upvote\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
-                "<div role=\"button\" class=\"csh_rate_hint\" data-rate=\"flag\" data-icon=\"flag\" aria-label=\"flag\"><b>!</b></div>"+
                 "<div class = \"csh_rating\">" + result.rating + "</div>"+
                 "<div class=\"csh_hint\">" + ""+result.hint+"</div>" +
-                "<div role=\"button\" class=\"csh_rate_hint\" data-rate=\"downvote\" aria-label=\"downvote\"><b>↓</b></div> </div>"));
+                "<div role=\"button\" class=\"csh_rate_hint\" data-rate=\"downvote\" aria-label=\"downvote\"><b>↓</b></div>"+
+                "<div role=\"button\" class=\"csh_rate_hint\" data-rate=\"flag\" data-icon=\"flag\" aria-label=\"flag\">" +
+                "<b>Report this hint</b></div> </div>"));
             }
         });
     }

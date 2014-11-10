@@ -36,7 +36,7 @@
 }
 
 div[data-rate="flag"] {
-     align-self: flex-end;
+     float: right;
 }
 
 div[data-rate="upvote"] {
