@@ -50,6 +50,15 @@ div[data-rate="downvote"] {
     font-weight: bold;
 }
 
+[csh_isStaff="false"] .csh_flagged_hints {
+    visibility: hidden;
+    display: none;
+}
+
+[csh_isStaff="true"] .csh_flagged_hints {
+    visibility: visible;
+}
+
 .rating{
     margin-right: 10px;
 }

@@ -33,9 +33,9 @@ function CrowdsourceHinter(runtime, element){
                 success: seehint
             });
         }else{
-            $('.correct', element).show();
-            $('.correct', element).text("You're correct! Please help us improve our hints by voting on them, or submit your own hint!");
-            $(".HintsToUse", element).text(" ");
+            $('.csh_correct', element).show();
+            $('.csh_correct', element).text("You're correct! Please help us improve our hints by voting on them, or submit your own hint!");
+            $(".csh_HintsToUse", element).text(" ");
             //send empty data for ajax call because not having a data field causes error
             $.ajax({
                 type: "POST",
@@ -44,6 +44,7 @@ function CrowdsourceHinter(runtime, element){
                 success: function(result) {
                     if (result['is_user_staff']) {
                         isStaff = true;
+                        $('.crowdsourcehinter_block').attr('csh_isStaff', true);
                         $.ajax({
                             type: "POST",
                             url: runtime.handlerUrl(element, 'get_feedback'),
@@ -65,50 +66,56 @@ function CrowdsourceHinter(runtime, element){
 
     function seehint(result){
     //Show a hint to the student after an incorrect answer is submitted.
-        $('.HintsToUse', element).text(result.HintsToUse);
+        $('.csh_HintsToUse', element).text(result.HintsToUse);
     }
 
     function showHintFeedback(result){
     //Append answer-specific hints for each student answer during the feedback stage.
     //This appended div includes upvote/downvote/flagging buttons, the hint, and the hint's rating
-        $(".student_answer", element).each(function(){
+        $(".csh_student_answer", element).each(function(){
             if ($(this).find("span").text() == result.student_answer){
                 /*var template = $('#show_hint_feedback').html();
-                Mustache.parse(template);
                 var data = {
-                    hintvalue: "result.hint",
-                    hint: "result.hint",
-                    rating: "result.rating"
+                    hint: result.hint,
+                    rating: result.rating
                 };
-                $(this).append(Mustache.render(template, data)); */
-                var template = $('#testing').html();
-                var data= {testone: "testing", testtwo: "TESTING"};
-                var html = Mustache.to_html(template, data);
-                $(this).html(html);
-                /**$(this).append(unescape("<div class=\"hint_value\" value = \"" + result.hint + "\">" +
-                "<div role=\"button\"class=\"rate_hint\"data-rate=\"upvote\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
-                "<div role=\"button\" class=\"rate_hint\" data-rate=\"flag\" data-icon=\"flag\" aria-label=\"flag\"><b>!</b></div>"+
-                "<div class = \"rating\">" + result.rating + "</div>"+
-                "<div class=\"hint\">" + ""+result.hint+"</div>" +
-                "<div role=\"button\" class=\"rate_hint\" data-rate=\"downvote\" aria-label=\"downvote\"><b>↓</b></div> </div>"));**/
+                $(this).append(Mustache.render(template, data));*/
+                $(this).append(unescape("<div class=\"csh_hint_value\" value = \"" + result.hint + "\">" +
+                "<div role=\"button\"class=\"csh_rate_hint\"data-rate=\"upvote\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
+                "<div role=\"button\" class=\"csh_rate_hint\" data-rate=\"flag\" data-icon=\"flag\" aria-label=\"flag\"><b>!</b></div>"+
+                "<div class = \"csh_rating\">" + result.rating + "</div>"+
+                "<div class=\"csh_hint\">" + ""+result.hint+"</div>" +
+                "<div role=\"button\" class=\"csh_rate_hint\" data-rate=\"downvote\" aria-label=\"downvote\"><b>↓</b></div> </div>"));
             }
         });
     }
 
     function showFlaggedFeedback(result){
     //For staff use, shows hints that have been flagged by students and allows for the hints' unflagging/removal.
-        $(".flagged_hints", element).append("<div class=\"hint_value\" value = \"" + result.hint + "\">" +
-                "<div role=\"button\" class=\"staff_rate\" data-rate=\"unflag\" aria-label=\"unflag\"><b>O</b></div>" +
-                "<hint class=\"hint\">" + ""+result.hint+"</hint>" +
-                "<div role=\"button\" class=\"staff_rate\" data-rate=\"remove\" aria-label=\"remove\"><b>X</b></div> </div>");
+        $(".csh_flagged_hints", element).append(unescape("<div class=\"csh_hint_value\" value = \"" + result.hint + "\">" +
+                "<div role=\"button\" class=\"csh_staff_rate\" data-rate=\"unflag\" aria-label=\"unflag\"><b>O</b></div>" +
+                "<hint class=\"csh_hint\">" + ""+result.hint+"</hint>" +
+                "<div role=\"button\" class=\"csh_staff_rate\" data-rate=\"remove\" aria-label=\"remove\"><b>X</b></div> </div>"));
+        /*var template = $('#show_flagged_feedback').html();
+        var data = {
+            hint: result.hint
+        };
+        $(".flagged_hints", element).append(Mustache.render(template, data));*/
     }
 
     function setStudentAnswers(student_answers){
     //Append divs for each answer the student submitted before correctly answering the question.
     //showHintFeedback appends new hints into these divs.
         for(var i = 0; i < student_answers.length; i++){
-            $('.feedback', element).append("<div class=\"student_answer\"><span><b>"+student_answers[i]+"</b></span>"+
-            "<div><input type =\"button\" class=\"student_hint_creation\"value=\"Submit a new hint for this answer.\" </input></div></div>");
+            $('.csh_feedback', element).append("<div class=\"csh_student_answer\"><span><b>"+student_answers[i]+"</b></span>"+
+            "<div><input type =\"button\" class=\"csh_student_hint_creation\"value=\"Submit a new hint for this answer.\" </input></div></div>");
+            /*
+            var template = $('#show_answer_feedback').html();
+            var data = {
+                answer = student_answers[i]
+            };
+            $(".feedback", element).append(Mustache.render(template, data));
+            */
         }
     }
 
@@ -116,9 +123,6 @@ function CrowdsourceHinter(runtime, element){
     //Set up the student feedback stage. Each student answer and all answer-specific hints for that answer are shown
     //to the student, as well as an option to create a new hint for an answer.
         if(!isShowingHintFeedback){
-            if(isStaff){
-                $('.feedback', element).append("<div class=\"flagged_hints\"><span>Flagged</span></div>");
-            }
             var student_answers = [];
             $.each(result, function(index, value) {
                 answer = value;
@@ -130,11 +134,11 @@ function CrowdsourceHinter(runtime, element){
             $.each(result, function(index, value) {
                 student_answer = value;
                 hint = index;
-                //hints return undefined if no answer-specific hints exist
-                if(hint == undefined){
-                    $(".student_answer", element).each(function(){
+                //hints return null if no answer-specific hints exist
+                if(hint === "null"){
+                    $(".csh_student_answer", element).each(function(){
                         if ($(this).find("span").text() == student_answer){
-                            $(this).append("<div class=\"hint_value\" value=\"There are no answer-specific hints for this answer.\"></div>");
+                            $(this).append("<div class=\"csh_hint_value\" value=\"There are no answer-specific hints for this answer.\"></div>");
                         }
                     });
                 }
@@ -160,29 +164,29 @@ function CrowdsourceHinter(runtime, element){
         }
     }
     
-    $(document).on('click', '.student_hint_creation', function(){
+    $(element).on('click', '.csh_student_hint_creation', function(){
     //Click event for the creation of a new hint. This button will bring up the text input.
-        $('.student_hint_creation').each(function(){
+        $('.csh_student_hint_creation').each(function(){
             $(this).show();
         });
-        $('.student_text_input').remove();
-        $('.submit_new').remove();
+        $('.csh_student_text_input').remove();
+        $('.csh_submit_new').remove();
         $(this).hide();
         student_answer = $(this).parent().parent().find("span").text();
-        $(".student_answer", element).each(function(){
+        $(".csh_student_answer", element).each(function(){
             if ($(this).find("span").text() == student_answer){
-                $(this).append("<p><input type=\"text\" name=\"studentinput\" class=\"student_text_input\" size=\"40\"><input answer=\""+student_answer+"\" type=\"button\" class=\"submit_new\" value=\"Submit Hint\"> </p>");
+                $(this).append("<p><input type=\"text\" name=\"studentinput\" class=\"csh_student_text_input\" size=\"40\"><input answer=\""+student_answer+"\" type=\"button\" class=\"csh_submit_new\" value=\"Submit Hint\"> </p>");
             }
         });
     })
 
-    $(document).on('click', '.submit_new', function(){
+    $(element).on('click', '.csh_submit_new', function(){
     //Click event to submit a new hint for an answer. 
-        if($(this).parent().find('.student_text_input').val() != null){
+        if($(this).parent().find('.csh_student_text_input').val() != null){
             var answerdata = unescape($(this).attr('answer'));
-            var newhint = unescape($('.student_text_input').val());
+            var newhint = unescape($('.csh_student_text_input').val());
             Logger.log('submit_new.click.event', {"student_answer": answerdata, "new_hint_submission": newhint});
-            $('.submitbutton').show();
+            $('.csh_submitbutton').show();
             $.ajax({
                 type: "POST",
                 url: runtime.handlerUrl(element, 'give_hint'),
@@ -196,15 +200,15 @@ function CrowdsourceHinter(runtime, element){
                         });
                     }
             });
-            $(this).parent().find('.student_text_input').remove();
+            $(this).parent().find('.csh_student_text_input').remove();
             $(this).remove();
         }
     })
 
-    $(document).on('click', '.rate_hint', function(){
+    $(element).on('click', '.csh_rate_hint', function(){
     //Click event to change the rating/flag a hint. The attribute 'data-rate' within each .rate_hint button is used
     //to determine whether the student is upvoting, downvoting, or flagging the hint. 
-        hint = $(this).parent().find(".hint").text();
+        hint = $(this).parent().find(".csh_hint").text();
         student_answer = $(this).parent().parent().find("span").text();
         Logger.log('crowd_hinter.rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
         $.ajax({
@@ -217,9 +221,9 @@ function CrowdsourceHinter(runtime, element){
                         $(this).parent().remove();
                     }
                     else if(result.rating != "voted"){
-                        $(".hint", element).each(function(){
-                            if ($(this).parent().find(".hint").text() == hint && $(this).parent().parent().find("span").text() == student_answer){
-                                $(this).parent().find('.rating').text(result.rating);
+                        $(".csh_hint", element).each(function(){
+                            if ($(this).parent().find(".csh_hint").text() == hint && $(this).parent().parent().find("span").text() == student_answer){
+                                $(this).parent().find('.csh_rating').text(result.rating);
                             }
                     })
                 }
@@ -227,17 +231,17 @@ function CrowdsourceHinter(runtime, element){
         });
     })
 
-    $(document).on('click', '.staff_rate', function(){
+    $(element).on('click', '.csh_staff_rate', function(){
     //Staff ratings are the removal or unflagging of flagged hints from the database. The attribute 'data-rate' is used
     //to determine whether to unflag or delete the hint.
-        hint = $(this).parent().find(".hint").text();
+        hint = $(this).parent().find(".csh_hint").text();
         student_answer = $(this).parent().parent().find("span").text();
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
             data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "hint": hint, "student_answer": student_answer}),
             success: function (result){
-                    $('.hint_value', element).each(function(){
+                    $('.csh_hint_value', element).each(function(){
                         if($(this).attr('value') == hint){
                             $(this).remove();
                         }

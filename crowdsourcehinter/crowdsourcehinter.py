@@ -295,21 +295,17 @@ class CrowdsourceHinter(XBlock):
     @XBlock.json_handler
     def rate_hint(self, data, suffix=''):
         """
-        Used to facilitate hint rating by students. Ratings are -1, 1, or 0. -1 is downvote, 1 is upvote, and 0 is
-        when a student flags a hint. 'zzeerroo' is returned to JS when a hint's rating is 0 because whenever 0 was
-        simply returned, JS would interpret it as null.
+        Used to facilitate hint rating by students.
 
         Hint ratings in hint_database are updated and the resulting hint rating (or flagged status) is returned to JS.
 
         Args:
           data['student_answer']: The incorrect answer that corresponds to the hint that is being voted on
           data['hint']: The hint that is being voted on
-          data['student_rating']: The rating chosen by the student. The value is -1, 1, or 0.
+          data['student_rating']: The rating chosen by the student.
 
         Returns:
-          "rating": The rating of the hint. 'zzeerroo' is returned if the hint's rating is 0.
-                    If the hint has already been voted on, 'You have already voted on this hint!'
-                    will be returned to JS.
+          "rating": The rating of the hint.
         """
         answer_data = data['student_answer']
         # answer_data is manipulated to remove symbols to prevent errors that
@@ -343,19 +339,6 @@ class CrowdsourceHinter(XBlock):
                 return {"rating": str(rating), 'hint': data_hint}
         else:
             return {"rating": str('voted'), 'hint': data_hint}
-
-#    def hint_flagged(self, data_hint, answer_data):
-#        """
-#        This is used to add a hint to the self.flagged dictionary. When a hint is returned with the rating
-#        of 0, it is considered to be flagged.
-#        Args:
-#          data_hint: This is equal to the data['hint'] in self.rate_hint
-#          answer_data: This is equal to the data['student_answer'] in self.rate_hint
-#        """
-#        for answer_keys in self.hint_database:
-#            if answer_keys == data_hint:
-#                for hint_keys in self.hint_database[str(answer_keys)]:
-#                    if str(hint_keys) == answer_data:
         self.Flagged[str(data_hint)] = str(answer_data)
 
     def change_rating(self, data_hint, data_rating, answer_data):
