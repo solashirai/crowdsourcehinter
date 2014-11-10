@@ -16,13 +16,13 @@ function CrowdsourceHinter(runtime, element){
     Logger.listen('seq_goto', null, stopScript);
 
     //read the data from the problem_graded event here
-    function get_event_data(event_type, data, element){
-        console.log("is this still changing");
-        onStudentSubmission(data);
-    }
-    Logger.listen('problem_graded', null, get_event_data);
+    //function get_event_data(event_type, data, element){
+     //   console.log("is this still changing");
+     //   onStudentSubmission(data);
+    //}
+    //Logger.listen('problem_graded', null, get_event_data);
 
-    function onStudentSubmission(problem_graded_event_data){
+    function onStudentSubmission(event_type, problem_graded_event_data, element){
     //This function will determine whether or not the student correctly answered the question.
     //If it was correctly answered it will begin the process for giving feedback on hints.
         if (problem_graded_event_data[1].search(/class="correct/) === -1){
@@ -63,6 +63,7 @@ function CrowdsourceHinter(runtime, element){
             });
         }  
     }
+    Logger.listen('problem_graded', null, onStudentSubmission);
 
     function seehint(result){
     //Show a hint to the student after an incorrect answer is submitted.
