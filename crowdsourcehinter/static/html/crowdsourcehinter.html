@@ -1,5 +1,5 @@
 <script type="x-tmpl-mustache" id="show_hint_feedback">
-    <div class="hint_value" value={{hint}}>
+    <div class="hint_value" value={{hintvalue}}>
         <div role="button" class="rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
             <b>↑</b>
         </div>
@@ -11,6 +11,13 @@
         <div role="button" class="rate_hint" data-rate="downvote" aria-label="downvote">
             <b>↓</b>
         </div>
+    </div>
+</script>
+
+<script type="text/template" id="testing">
+    <div>
+        {{testone}}
+        {{testtwo}}
     </div>
 </script>
 <div class="crowdsourcehinter_block">  <!--most stuff just for testing purposes-->
@@ -28,7 +35,21 @@
 
 
 <div class="feedback">
-
+<script type="x-tmpl-mustache" id="show_hint_feedback">
+    <div class="hint_value" value={{hintvalue}}>
+        <div role="button" class="rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
+            <b>↑</b>
+        </div>
+        <div role="button" class="rate_hint" data-rate="flag" data-icon="flag" aria-label="flag">
+            <b>!</b>
+        </div>
+        <div class ="rating"> {{rating}} </div>
+        <div class="hint"> {{hint}} </div>
+        <div role="button" class="rate_hint" data-rate="downvote" aria-label="downvote">
+            <b>↓</b>
+        </div>
+    </div>
+</script>
 </div>
 
 <p>
