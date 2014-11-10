@@ -1,74 +1,58 @@
-<script type="x-tmpl-mustache" id="show_hint_feedback">
-    <div class="hint_value" value={{hintvalue}}>
-        <div role="button" class="rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
+<script type='x-tmpl-mustache' id='show_hint_feedback'>
+    <div class='csh_hint_value' value={{hintvalue}}>
+        <div role="button" class="csh_rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
             <b>↑</b>
         </div>
-        <div role="button" class="rate_hint" data-rate="flag" data-icon="flag" aria-label="flag">
+        <div role="button" class="csh_rate_hint" data-rate="flag" data-icon="flag" aria-label="flag">
             <b>!</b>
         </div>
-        <div class ="rating"> {{rating}} </div>
-        <div class="hint"> {{hint}} </div>
-        <div role="button" class="rate_hint" data-rate="downvote" aria-label="downvote">
+        <div class ="csh_rating"> {{rating}} </div>
+        <div class="csh_hint"> {{hint}} </div>
+        <div role="button" class="csh_rate_hint" data-rate="downvote" aria-label="downvote">
             <b>↓</b>
         </div>
     </div>
 </script>
 
-<script type="text/template" id="testing">
-    <div>
-        {{testone}}
-        {{testtwo}}
+<script type="x-tmpl-mustache" id="show_flagged_feedback">
+    <div class="csh_hint_value" value ={{hint}}>
+        <div role="button" class="csh_staff_rate" data-rate="unflag" aria-label="unflag">
+            <b>O</b>
+        </div>
+        <div class="csh_hint"> {{hint}} </div>
+        <div role="button" class="csh_staff_rate" data-rate="remove" aria-label="remove">
+            <b>X</b>
+        </div> 
     </div>
 </script>
-<div class="crowdsourcehinter_block">  <!--most stuff just for testing purposes-->
 
-<p> <span class='HintsToUse'></span>
+<script type="x-tmpl-mustache" id="show_answer_feedback">
+    <div class="csh_student_answer">
+        <span><b> {{answer}}</b></span>
+        <div>
+            <input type ="button" class="csh_student_hint_creation" value="Submit a new hint for this answer."
+            </input>
+        </div>
+    </div>
+</script>
+
+<div class="crowdsourcehinter_block" csh_isStaff= false>
+
+<p> <span class='csh_HintsToUse'></span>
 </p>
 
-</div>
 <div class="crowdsourcehinter_block">
 
-    <section class="correct"></section>
+    <section class="csh_correct"></section>
 <p>
 <span class='Thankyou'></span>
 </p>
 
 
-<div class="feedback">
-<script type="x-tmpl-mustache" id="show_hint_feedback">
-    <div class="hint_value" value={{hintvalue}}>
-        <div role="button" class="rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
-            <b>↑</b>
-        </div>
-        <div role="button" class="rate_hint" data-rate="flag" data-icon="flag" aria-label="flag">
-            <b>!</b>
-        </div>
-        <div class ="rating"> {{rating}} </div>
-        <div class="hint"> {{hint}} </div>
-        <div role="button" class="rate_hint" data-rate="downvote" aria-label="downvote">
-            <b>↓</b>
-        </div>
-    </div>
-</script>
+<div class="csh_feedback">
+<div class="csh_flagged_hints">
+    <span>Flagged</span>
 </div>
-
-<p>
-
-</p>
-
-      <section class="action">
-        <input type="hidden" name="problem_id" value="Numerical Input">
-
-    <section class="problem">
-
-        </div></section></span>
-      </section>
-<section class="crowdsource-wrapper">
-</section>
-
-    </section>
-
-  </section>
-
-</section>
-
+</div>
+</div>
+</div>
