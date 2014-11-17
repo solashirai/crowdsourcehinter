@@ -21,15 +21,6 @@ function CrowdsourceHinter(runtime, element){
     //data about the problem obtained from Logger.listen('problem_graded') is passed on to the onStudentSubmission.
     //directly passing data to onStudentSubmission does not work for unknown reasons (to be fixed?)
     function get_event_data(event_type, data, element){
-        //below is minimal mustache template usage attempt
-        var options = {
-            firstName: "Sola",
-            lastName: "Shirai",
-            testvar: "Hello"
-        };
-        var template = $(Mustache.render($("#testingID").html(), options));
-        $('#sampleArea').html(template);
-
         onStudentSubmission(data);
     }
     Logger.listen('problem_graded', null, get_event_data);
@@ -37,6 +28,21 @@ function CrowdsourceHinter(runtime, element){
     function onStudentSubmission(problem_graded_event_data){
     //This function will determine whether or not the student correctly answered the question.
     //If it was correctly answered it will begin the process for giving feedback on hints.
+        $(function(){
+            // Simple example
+            $(".sample1").html(Mustache.render(unescape($("#s1").html()), {var : "rendered"}));
+
+            // Broken out to show pieces. You can add console.log() to inspect these individually. 
+            // It will be easiest, probably, to cut-and-paste pieces like this into the JavaScript console in Chrome, and seeing what they do in the interpretter
+            var template = $("#s2").html();
+            console.log(template);
+            var parameters = {var : "also rendered"};
+            console.log(parameters);
+            var rendered_html = Mustache.render(template, parameters);
+            console.log(rendered_html);
+            $(".sample2").html(rendered_html);
+        });
+        //end of sample code
         if (problem_graded_event_data[1].search(/class="correct/) === -1){
             $.ajax({
                 type: "POST",
@@ -85,12 +91,14 @@ function CrowdsourceHinter(runtime, element){
     //This appended div includes upvote/downvote/flagging buttons, the hint, and the hint's rating
         $(".csh_student_answer", element).each(function(){
             if ($(this).find("span").text() == result.student_answer){
-                /*var template = $('#show_hint_feedback').html();
-                var data = {
-                    hint: result.hint,
-                    rating: result.rating
-                };
-                $(this).append(Mustache.render(template, data));*/
+                /*$(function(){
+                    var template = $('#show_hint_feedback').html();
+                    var data = {
+                        hint: result.hint,
+                        rating: result.rating
+                    };
+                    $(this).append(Mustache.render(template, data));
+                });*/
                 $(this).append(unescape("<div class=\"csh_hint_value\" value = \"" + result.hint + "\">" +
                 "<div role=\"button\"class=\"csh_rate_hint\"data-rate=\"upvote\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
                 "<div class = \"csh_rating\">" + result.rating + "</div>"+
