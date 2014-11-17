@@ -18,16 +18,18 @@ function CrowdsourceHinter(runtime, element){
     Logger.listen('seq_prev', null, stopScript);
     Logger.listen('seq_goto', null, stopScript);
 
-    //read the data from the problem_graded event here
+    //data about the problem obtained from Logger.listen('problem_graded') is passed on to the onStudentSubmission.
+    //directly passing data to onStudentSubmission does not work for unknown reasons (to be fixed?)
     function get_event_data(event_type, data, element){
-        console.log("is this changing");
-/*below is minimal mustache template usage attempt
-$.get('crowdsourcehinter.html', function(data) {
-    var template = $('#personTpl').html();
-    var html = Mustache.to_html(template, data);
-    $('#sampleArea').html(html);
-});
-*/
+        //below is minimal mustache template usage attempt
+        var data = {
+            firstName: "Sola",
+            lastName: "Shirai",
+            testvar: "Hello"
+        };
+        var template = $(Mustache.render($("#testingID").html(), data));
+        $('#sampleArea').html(template);
+
         onStudentSubmission(data);
     }
     Logger.listen('problem_graded', null, get_event_data);
