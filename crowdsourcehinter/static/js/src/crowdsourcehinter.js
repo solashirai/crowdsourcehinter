@@ -22,12 +22,12 @@ function CrowdsourceHinter(runtime, element){
     //directly passing data to onStudentSubmission does not work for unknown reasons (to be fixed?)
     function get_event_data(event_type, data, element){
         //below is minimal mustache template usage attempt
-        var data = {
+        var options = {
             firstName: "Sola",
             lastName: "Shirai",
             testvar: "Hello"
         };
-        var template = $(Mustache.render($("#testingID").html(), data));
+        var template = $(Mustache.render($("#testingID").html(), options));
         $('#sampleArea').html(template);
 
         onStudentSubmission(data);
