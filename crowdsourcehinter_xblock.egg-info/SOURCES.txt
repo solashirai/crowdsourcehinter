@@ -1,9 +1,12 @@
 setup.py
 crowdsourcehinter/__init__.py
 crowdsourcehinter/crowdsourcehinter.py
+crowdsourcehinter/public/3rdParty/mustache.js
 crowdsourcehinter/static/README.txt
 crowdsourcehinter/static/css/crowdsourcehinter.css
+crowdsourcehinter/static/css/crowdsourcehinter.css~
 crowdsourcehinter/static/html/crowdsourcehinter.html
+crowdsourcehinter/static/html/crowdsourcehinter.html~
 crowdsourcehinter/static/html/crowdsourcehinterstudio.html
 crowdsourcehinter/static/js/src/crowdsourcehinter.js
 crowdsourcehinter/static/js/src/crowdsourcehinter.js~

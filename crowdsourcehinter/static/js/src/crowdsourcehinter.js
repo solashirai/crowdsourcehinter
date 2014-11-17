@@ -1,28 +1,38 @@
 function CrowdsourceHinter(runtime, element){
-    //use executionFunctions to prevent old initializations of hinter from working after switching units
-    var executeFunctions = true;
-    if(executeFunctions){
+    //executeHinter is used to disable the hinter after switching units in an edX course
+    //If the code is not made to stop running, the hinter will act up after switching from and back to
+    //a certain unit.
+    var executeHinter = true;
+
+    if(executeHinter){
     var isShowingHintFeedback = false;
     var isStaff = false;
-    $(".HintsToUse", element).text("");
+    $(".csh_HintsToUse", element).text("");
 
     function stopScript(){
     //This function is used to prevent a particular instance of the hinter from acting after
     //switching between edX course's units. 
-        executionFunctions = false;
+        executeHinter = false;
     }
     Logger.listen('seq_next', null, stopScript);
     Logger.listen('seq_prev', null, stopScript);
     Logger.listen('seq_goto', null, stopScript);
 
     //read the data from the problem_graded event here
-    //function get_event_data(event_type, data, element){
-     //   console.log("is this still changing");
-     //   onStudentSubmission(data);
-    //}
-    //Logger.listen('problem_graded', null, get_event_data);
+    function get_event_data(event_type, data, element){
+        console.log("is this changing");
+/*below is minimal mustache template usage attempt
+$.get('crowdsourcehinter.html', function(data) {
+    var template = $('#personTpl').html();
+    var html = Mustache.to_html(template, data);
+    $('#sampleArea').html(html);
+});
+*/
+        onStudentSubmission(data);
+    }
+    Logger.listen('problem_graded', null, get_event_data);
 
-    function onStudentSubmission(event_type, problem_graded_event_data, element){
+    function onStudentSubmission(problem_graded_event_data){
     //This function will determine whether or not the student correctly answered the question.
     //If it was correctly answered it will begin the process for giving feedback on hints.
         if (problem_graded_event_data[1].search(/class="correct/) === -1){
@@ -44,7 +54,6 @@ function CrowdsourceHinter(runtime, element){
                 success: function(result) {
                     if (result['is_user_staff']) {
                         isStaff = true;
-                        $('.crowdsourcehinter_block').attr('csh_isStaff', true);
                         $.ajax({
                             type: "POST",
                             url: runtime.handlerUrl(element, 'get_feedback'),
@@ -63,7 +72,6 @@ function CrowdsourceHinter(runtime, element){
             });
         }  
     }
-    Logger.listen('problem_graded', null, onStudentSubmission);
 
     function seehint(result){
     //Show a hint to the student after an incorrect answer is submitted.
@@ -124,6 +132,9 @@ function CrowdsourceHinter(runtime, element){
     function getFeedback(result){
     //Set up the student feedback stage. Each student answer and all answer-specific hints for that answer are shown
     //to the student, as well as an option to create a new hint for an answer.
+        if(isStaff){
+            $('.crowdsourcehinter_block').attr('class', 'crowdsourcehinter_block_is_staff');
+        }
         if(!isShowingHintFeedback){
             var student_answers = [];
             $.each(result, function(index, value) {

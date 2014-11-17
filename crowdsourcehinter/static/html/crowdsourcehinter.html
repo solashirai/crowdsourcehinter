@@ -26,6 +26,11 @@
     </div>
 </script>
 
+<script id="personTpl" type="text/template">
+<h1>{{firstName}} {{lastName}}</h1>
+<p>Blog URL: <a href="{{blogURL}}">{{blogURL}}</a></p>
+</script>
+
 <script type="x-tmpl-mustache" id="show_answer_feedback">
     <div class="csh_student_answer">
         <span><b> {{answer}}</b></span>
@@ -36,10 +41,11 @@
     </div>
 </script>
 
-<div class="crowdsourcehinter_block" csh_isStaff= false>
+<div class="crowdsourcehinter_block">
 
 <p> <span class='csh_HintsToUse'></span>
 </p>
+<div id="sampleArea"></div>
 
 <div class="crowdsourcehinter_block">
 
