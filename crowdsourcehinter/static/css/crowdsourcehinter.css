@@ -1,35 +1,31 @@
 /* CSS for CrowdsourceHinter */
 
-.crowdsourcehinter_block .count {
-    font-weight: bold;
-}
-
-.crowdsourcehinter_block .feedback {
+.crowdsourcehinter_block .csh_feedback {
   border-style: solid;
   border-width: thin;
   border-color: rgb(200,200,200);
 }
 
-.crowdsourcehinter_block .vote {
+.crowdsourcehinter_block .csh_vote {
   padding-top: 0px !important;
   padding-bottom: 0px !important;
 }
 
-.hint_value{
+.csh_hint_value{
   display: flex;
   margin-left: 10px;
   flex-flow: column;
 }
 
-.hint_used{
+.csh_hint_used{
   flex-direction: row;
 }
 
-.crowdsourcehinter_block .HintsToUse {
+.crowdsourcehinter_block .csh_HintsToUse {
   background-color: #FF8;
 }
 
-.rate_hint {
+.csh_rate_hint {
   width: 100%;
   margin-left:auto;
   margin-right:auto;
@@ -50,23 +46,23 @@ div[data-rate="downvote"] {
     font-weight: bold;
 }
 
-[csh_isStaff="false"] .csh_flagged_hints {
+.crowdsourcehinter_block .csh_flagged_hints {
     visibility: hidden;
     display: none;
 }
 
-[csh_isStaff="true"] .csh_flagged_hints {
+.crowdsourcehinter_block_is_staff .csh_flagged_hints {
     visibility: visible;
 }
 
-.rating{
+.csh_rating{
     margin-right: 10px;
 }
 
-.rate_hint{ cursor: pointer }
-.rate_hint{ color: #948f8f; }
+.csh_rate_hint{ cursor: pointer }
+.csh_rate_hint{ color: #948f8f; }
 
-.hintsarea {
+.csh_hintsarea {
   display: flex;
   flex-direction: colomn;
 }
