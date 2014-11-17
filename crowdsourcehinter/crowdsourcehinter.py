@@ -327,7 +327,7 @@ class CrowdsourceHinter(XBlock):
                     del self.Flagged[flagged_answer] 
                     return {'rating': 'removed'}
         if data['student_rating'] == 'flag':
-            # add hint to 
+            # add hint to Flagged dictionary
             self.Flagged[str(answer_data)] = data_hint
             return {"rating": 'flagged', 'hint': data_hint}
         if str(data_hint) not in self.Voted:
