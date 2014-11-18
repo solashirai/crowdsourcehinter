@@ -28,21 +28,6 @@ function CrowdsourceHinter(runtime, element){
     function onStudentSubmission(problem_graded_event_data){
     //This function will determine whether or not the student correctly answered the question.
     //If it was correctly answered it will begin the process for giving feedback on hints.
-        $(function(){
-            // Simple example
-            $(".sample1").html(Mustache.render(unescape($("#s1").html()), {var : "rendered"}));
-
-            // Broken out to show pieces. You can add console.log() to inspect these individually. 
-            // It will be easiest, probably, to cut-and-paste pieces like this into the JavaScript console in Chrome, and seeing what they do in the interpretter
-            var template = $("#s2").html();
-            console.log(template);
-            var parameters = {var : "also rendered"};
-            console.log(parameters);
-            var rendered_html = Mustache.render(template, parameters);
-            console.log(rendered_html);
-            $(".sample2").html(rendered_html);
-        });
-        //end of sample code
         if (problem_graded_event_data[1].search(/class="correct/) === -1){
             $.ajax({
                 type: "POST",
@@ -91,51 +76,46 @@ function CrowdsourceHinter(runtime, element){
     //This appended div includes upvote/downvote/flagging buttons, the hint, and the hint's rating
         $(".csh_student_answer", element).each(function(){
             if ($(this).find("span").text() == result.student_answer){
-                /*$(function(){
-                    var template = $('#show_hint_feedback').html();
+                var html = "";
+                $(function(){
                     var data = {
                         hint: result.hint,
                         rating: result.rating
                     };
-                    $(this).append(Mustache.render(template, data));
-                });*/
-                $(this).append(unescape("<div class=\"csh_hint_value\" value = \"" + result.hint + "\">" +
-                "<div role=\"button\"class=\"csh_rate_hint\"data-rate=\"upvote\" data-icon=\"arrow-u\" aria-label=\"upvote\"><b>↑</b></div>" +
-                "<div class = \"csh_rating\">" + result.rating + "</div>"+
-                "<div class=\"csh_hint\">" + ""+result.hint+"</div>" +
-                "<div role=\"button\" class=\"csh_rate_hint\" data-rate=\"downvote\" aria-label=\"downvote\"><b>↓</b></div>"+
-                "<div role=\"button\" class=\"csh_rate_hint\" data-rate=\"flag\" data-icon=\"flag\" aria-label=\"flag\">" +
-                "<b>Report this hint</b></div> </div>"));
+                    html = Mustache.render($("#show_hint_feedback").html(), data);
+                });
+                $(this).append(html);
             }
         });
     }
 
     function showFlaggedFeedback(result){
     //For staff use, shows hints that have been flagged by students and allows for the hints' unflagging/removal.
-        $(".csh_flagged_hints", element).append(unescape("<div class=\"csh_hint_value\" value = \"" + result.hint + "\">" +
-                "<div role=\"button\" class=\"csh_staff_rate\" data-rate=\"unflag\" aria-label=\"unflag\"><b>O</b></div>" +
-                "<hint class=\"csh_hint\">" + ""+result.hint+"</hint>" +
-                "<div role=\"button\" class=\"csh_staff_rate\" data-rate=\"remove\" aria-label=\"remove\"><b>X</b></div> </div>"));
-        /*var template = $('#show_flagged_feedback').html();
-        var data = {
-            hint: result.hint
-        };
-        $(".flagged_hints", element).append(Mustache.render(template, data));*/
+        var html = "";
+        $(function(){
+            var template = $('#show_flagged_feedback').html();
+            var data = {
+                hint: result.hint
+            };
+            html = Mustache.render(template, data);
+            console.log(html);
+        });
+        $(".csh_flagged_hints", element).append(html);
     }
 
     function setStudentAnswers(student_answers){
     //Append divs for each answer the student submitted before correctly answering the question.
     //showHintFeedback appends new hints into these divs.
         for(var i = 0; i < student_answers.length; i++){
-            $('.csh_feedback', element).append("<div class=\"csh_student_answer\"><span><b>"+student_answers[i]+"</b></span>"+
-            "<div><input type =\"button\" class=\"csh_student_hint_creation\"value=\"Submit a new hint for this answer.\" </input></div></div>");
-            /*
-            var template = $('#show_answer_feedback').html();
-            var data = {
-                answer = student_answers[i]
-            };
-            $(".feedback", element).append(Mustache.render(template, data));
-            */
+            var html = "";
+            $(function(){
+                var template = $('#show_answer_feedback').html();
+                var data = {
+                    answer: student_answers[i]
+                };
+                html = Mustache.render(template, data); 
+            });
+            $(".csh_feedback", element).append(html);
         }
     }
 

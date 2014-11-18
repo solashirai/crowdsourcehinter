@@ -1,5 +1,5 @@
-<script type='x-tmpl-mustache' id='show_hint_feedback'>
-    <div class='csh_hint_value' value={{hintvalue}}>
+<script type='x-tmpl/mustache' id='show_hint_feedback'>
+    <div class='csh_hint_value' value="{{hintvalue}}">
         <div role="button" class="csh_rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
             <b>↑</b>
         </div>
@@ -9,13 +9,13 @@
             <b>↓</b>
         </div>
         <div role="button" class="csh_rate_hint" data-rate="flag" data-icon="flag" aria-label="flag">
-            <b>"Report this hint"</b>
+            <b>Report this hint</b>
         </div>
     </div>
 </script>
 
-<script type="x-tmpl-mustache" id="show_flagged_feedback">
-    <div class="csh_hint_value" value ={{hint}}>
+<script type="x-tmpl/mustache" id="show_flagged_feedback">
+    <div class="csh_hint_value" value ="{{hint}}">
         <div role="button" class="csh_staff_rate" data-rate="unflag" aria-label="unflag">
             <b>O</b>
         </div>
@@ -25,16 +25,9 @@
         </div> 
     </div>
 </script>
-
-<script type="x-tmpl/mustache" id="s1">
-  Sample template 1 is {{var}}
-</script>
-<script type="x-tmpl/mustache" id="s2">
-  Sample template 2 is {{var}}
-</script>
-<script type="x-tmpl-mustache" id="show_answer_feedback">
+<script type="x-tmpl/mustache" id="show_answer_feedback">
     <div class="csh_student_answer">
-        <span><b> {{answer}}</b></span>
+        <span><b>{{answer}}</b></span>
         <div>
             <input type ="button" class="csh_student_hint_creation" value="Submit a new hint for this answer."
             </input>
@@ -53,9 +46,6 @@
 <p>
 <span class='Thankyou'></span>
 </p>
-
-<div class="sample1"></div>
-<div class="sample2"></div>
 <div class="csh_feedback">
 <div class="csh_flagged_hints">
     <span>Flagged</span>
