@@ -4,7 +4,7 @@
             <b>↑</b>
         </div>
         <div class ="csh_rating"> {{rating}} </div>
-        <div class="csh_hint"> {{hint}} </div>
+        <div class="csh_hint">{{hint}}</div>
         <div role="button" class="csh_rate_hint" data-rate="downvote" aria-label="downvote">
             <b>↓</b>
         </div>
@@ -19,12 +19,24 @@
         <div role="button" class="csh_staff_rate" data-rate="unflag" aria-label="unflag">
             <b>O</b>
         </div>
-        <div class="csh_hint"> {{hint}} </div>
+        <div class="csh_hint">{{hint}}</div>
         <div role="button" class="csh_staff_rate" data-rate="remove" aria-label="remove">
             <b>X</b>
         </div> 
     </div>
 </script>
+
+<script type="x-tmpl/mustache" id="student_hint_creation">
+    <p><input type="text" name="studentinput" class="csh_student_text_input" size="40">
+       <input answer="{{student_answer}}" type="button" class="csh_submit_new" value="Submit Hint"> 
+    </p>
+</script>
+
+<script type="x-tmpl/mustache" id="show_no_hints">
+    <div class="csh_hint_value" value="There are no answer-specific hints for this answer.">
+    </div>
+</script>
+
 <script type="x-tmpl/mustache" id="show_answer_feedback">
     <div class="csh_student_answer">
         <span><b>{{answer}}</b></span>

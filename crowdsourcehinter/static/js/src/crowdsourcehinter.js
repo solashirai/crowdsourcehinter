@@ -98,7 +98,6 @@ function CrowdsourceHinter(runtime, element){
                 hint: result.hint
             };
             html = Mustache.render(template, data);
-            console.log(html);
         });
         $(".csh_flagged_hints", element).append(html);
     }
@@ -141,7 +140,14 @@ function CrowdsourceHinter(runtime, element){
                 if(hint === "null"){
                     $(".csh_student_answer", element).each(function(){
                         if ($(this).find("span").text() == student_answer){
-                            $(this).append("<div class=\"csh_hint_value\" value=\"There are no answer-specific hints for this answer.\"></div>");
+                            var html = "";
+                            $(function(){
+                                var template = $('#show_no_hints').html();
+                                var data = {};
+                                html = Mustache.render(template, data); 
+                            });
+                            $(this).append(html);
+       //                     $(this).append("<div class=\"csh_hint_value\" value=\"There are no answer-specific hints for this answer.\"></div>");
                         }
                     });
                 }
@@ -178,7 +184,14 @@ function CrowdsourceHinter(runtime, element){
         student_answer = $(this).parent().parent().find("span").text();
         $(".csh_student_answer", element).each(function(){
             if ($(this).find("span").text() == student_answer){
-                $(this).append("<p><input type=\"text\" name=\"studentinput\" class=\"csh_student_text_input\" size=\"40\"><input answer=\""+student_answer+"\" type=\"button\" class=\"csh_submit_new\" value=\"Submit Hint\"> </p>");
+                var html = "";
+                $(function(){
+                    var template = $('#student_hint_creation').html();
+                    var data = {student_answer: student_answer};
+                    html = Mustache.render(template, data); 
+                });
+                $(this).append(html);
+                //$(this).append("<p><input type=\"text\" name=\"studentinput\" class=\"csh_student_text_input\" size=\"40\"><input answer=\""+student_answer+"\" type=\"button\" class=\"csh_submit_new\" value=\"Submit Hint\"> </p>");
             }
         });
     })
