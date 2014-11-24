@@ -38,10 +38,10 @@ class CrowdsourceHinter(XBlock):
     # i believe this will also prevent students from voting again on a particular hint if they were to return to
     # a particular problem later
     Voted = List(default=[], scope=Scope.user_state)
-    # This is a dictionary of hints that have been flagged. the keys represent the incorrect answer submission, and the
-    # values are the hints the corresponding hints. even if a hint is flagged, if the hint shows up for a different
-    # incorrect answer, i believe that the hint will still be able to show for a student
-    Flagged = Dict(default={"answer2": "This is a hint that should be flagged"}, scope=Scope.user_state_summary)
+    # This is a dictionary of hints that have been flagged. the values represent the incorrect answer submission, and the
+    # keys are the hints the corresponding hints. hints with identical text for differing answers will all not show up for the
+    # student.
+    Flagged = Dict(default={"This is a hint that should be flagged": "answer2"}, scope=Scope.user_state_summary)
     # This string determines whether or not to show only the best (highest rated) hint to a student
     # When set to 'True' only the best hint will be shown to the student.
     # Details on operation when set to 'False' are to be finalized.
@@ -185,7 +185,7 @@ class CrowdsourceHinter(XBlock):
             return str(0)
         for hint_keys in self.hint_database[str(answer)]:
             for flagged_keys in self.Flagged:
-                if str(hint_keys) == str(flagged_keys):
+                if hint_keys == flagged_keys:
                     isflagged.append(hint_keys)
             if str(hint_keys) in self.Used:
                 isused += 1
@@ -218,11 +218,9 @@ class CrowdsourceHinter(XBlock):
                     for hints in self.hint_database[str(answer_keys)]:
                         if len(self.Flagged) != 0:
                             for flagged_hints in self.Flagged:
-                                if str(hints) != self.Flagged[flagged_hints]:
-                                    feedback_data[str(hints)] = str(answer_keys)
-                                else:
+                                if str(hints) == flagged_hints:
                                     feedback_data[str(hints)] = str("Flagged")
-                        else:
+                        if hints not in feedback_data.keys():
                             feedback_data[str(hints)] = str(answer_keys)
                 else:
                     feedback_data[None] = str(answer_keys)
@@ -308,27 +306,25 @@ class CrowdsourceHinter(XBlock):
           "rating": The rating of the hint.
         """
         answer_data = data['student_answer']
-        # answer_data is manipulated to remove symbols to prevent errors that
-        # might arise due to certain symbols. I don't think I have this fully working but am not sure.
         data_rating = data['student_rating']
         data_hint = data['hint']
         if data['student_rating'] == 'unflag':
             for flagged_hints in self.Flagged:
-                if self.Flagged[str(flagged_hints)] == data_hint:
-                    del self.Flagged[flagged_hints]
+                if flagged_hints == data_hint:
+                    self.Flagged.pop(data_hint, None)
                     return {'rating': 'unflagged'}
         if data['student_rating'] == 'remove':
-            for flagged_answer in self.Flagged:
-                if self.Flagged[flagged_answer] == data_hint:            
-                    temporary_dict = str(self.hint_database[str(flagged_answer)])
+            for flagged_hints in self.Flagged:
+                if data_hint == flagged_hints:
+                    temporary_dict = str(self.hint_database[self.Flagged[data_hint]])
                     temporary_dict = (ast.literal_eval(temporary_dict))
                     temporary_dict.pop(data_hint, None)
-                    self.hint_database[str(flagged_answer)] = temporary_dict
-                    del self.Flagged[flagged_answer] 
+                    self.hint_database[self.Flagged[data_hint]] = temporary_dict
+                    self.Flagged.pop(data_hint, None)           
                     return {'rating': 'removed'}
         if data['student_rating'] == 'flag':
             # add hint to Flagged dictionary
-            self.Flagged[str(answer_data)] = data_hint
+            self.Flagged[str(data_hint)] = answer_data
             return {"rating": 'flagged', 'hint': data_hint}
         if str(data_hint) not in self.Voted:
             self.Voted.append(str(data_hint)) # add data to Voted to prevent multiple votes
@@ -339,7 +335,6 @@ class CrowdsourceHinter(XBlock):
                 return {"rating": str(rating), 'hint': data_hint}
         else:
             return {"rating": str('voted'), 'hint': data_hint}
-        self.Flagged[str(data_hint)] = str(answer_data)
 
     def change_rating(self, data_hint, data_rating, answer_data):
         """

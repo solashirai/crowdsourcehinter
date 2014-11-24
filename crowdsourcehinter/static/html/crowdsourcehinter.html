@@ -1,15 +1,19 @@
 <script type='x-tmpl/mustache' id='show_hint_feedback'>
     <div class='csh_hint_value' value="{{hintvalue}}">
-        <div role="button" class="csh_rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
-            <b>↑</b>
+        <div class='csh_rating_data'>
+            <div role="button" class="csh_rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
+                <b>↑</b>
+            </div>
+            <div class ="csh_rating"> {{rating}} </div>
+            <div role="button" class="csh_rate_hint" data-rate="downvote" aria-label="downvote">
+                <b>↓</b>
+            </div>
         </div>
-        <div class ="csh_rating"> {{rating}} </div>
-        <div class="csh_hint">{{hint}}</div>
-        <div role="button" class="csh_rate_hint" data-rate="downvote" aria-label="downvote">
-            <b>↓</b>
-        </div>
-        <div role="button" class="csh_rate_hint" data-rate="flag" data-icon="flag" aria-label="flag">
-            <b>Report this hint</b>
+        <div class='csh_hint_data'>
+            <div class="csh_hint">{{hint}}</div>
+            <div role="button" class="csh_rate_hint" data-rate="flag" data-icon="flag" aria-label="flag">
+                <b>Report this hint</b>
+            </div>
         </div>
     </div>
 </script>
