@@ -37,7 +37,8 @@
 }
 
 div[data-rate="flag"]{
-     float: center;
+     position: relative;
+     float: right;
 }
 
 div[data-rate="upvote"] {
