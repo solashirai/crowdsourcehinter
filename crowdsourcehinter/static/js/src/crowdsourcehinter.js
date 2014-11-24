@@ -147,7 +147,6 @@ function CrowdsourceHinter(runtime, element){
                                 html = Mustache.render(template, data); 
                             });
                             $(this).append(html);
-       //                     $(this).append("<div class=\"csh_hint_value\" value=\"There are no answer-specific hints for this answer.\"></div>");
                         }
                     });
                 }
@@ -191,7 +190,6 @@ function CrowdsourceHinter(runtime, element){
                     html = Mustache.render(template, data); 
                 });
                 $(this).append(html);
-                //$(this).append("<p><input type=\"text\" name=\"studentinput\" class=\"csh_student_text_input\" size=\"40\"><input answer=\""+student_answer+"\" type=\"button\" class=\"csh_submit_new\" value=\"Submit Hint\"> </p>");
             }
         });
     })
@@ -224,8 +222,8 @@ function CrowdsourceHinter(runtime, element){
     $(element).on('click', '.csh_rate_hint', function(){
     //Click event to change the rating/flag a hint. The attribute 'data-rate' within each .rate_hint button is used
     //to determine whether the student is upvoting, downvoting, or flagging the hint. 
-        hint = $(this).parent().find(".csh_hint").text();
-        student_answer = $(this).parent().parent().find("span").text();
+        hint = $(this).parent().parent().find(".csh_hint").text();
+        student_answer = $(this).parent().parent().parent().find("span").text();
         Logger.log('crowd_hinter.rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
         $.ajax({
             type: "POST",
@@ -233,13 +231,14 @@ function CrowdsourceHinter(runtime, element){
             data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "hint": hint, "student_answer": student_answer}),
             success: function (result){
                     if(result.rating == "flagged"){
-                        $(this).parent().hide();
-                        $(this).parent().remove();
+                        //hide hint if it was flagged by the student
+                        $(this).parent().parent().hide();
+                        $(this).parent().parent().remove();
                     }
                     else if(result.rating != "voted"){
                         $(".csh_hint", element).each(function(){
-                            if ($(this).parent().find(".csh_hint").text() == hint && $(this).parent().parent().find("span").text() == student_answer){
-                                $(this).parent().find('.csh_rating').text(result.rating);
+                            if ($(this).parent().parent().find(".csh_hint").text() == hint && $(this).parent().parent().parent().find("span").text() == student_answer){
+                                $(this).parent().parent().find('.csh_rating').text(result.rating);
                             }
                     })
                 }

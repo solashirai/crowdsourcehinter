@@ -14,15 +14,20 @@
 .csh_hint_value{
   display: flex;
   margin-left: 10px;
-  flex-flow: column;
+  column-count: 2;
 }
 
-.csh_hint_used{
-  flex-direction: row;
+.csh_rating_data{
+  width: 3%;
+  vertical-align: middle;
 }
 
 .crowdsourcehinter_block .csh_HintsToUse {
   background-color: #FF8;
+}
+
+.csh_hint_data{
+  width: 97%;
 }
 
 .csh_rate_hint {
@@ -31,8 +36,8 @@
   margin-right:auto;
 }
 
-div[data-rate="flag"] {
-     float: right;
+div[data-rate="flag"]{
+     float: center;
 }
 
 div[data-rate="upvote"] {
