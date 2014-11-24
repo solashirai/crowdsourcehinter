@@ -84,7 +84,7 @@ function CrowdsourceHinter(runtime, element){
                     };
                     html = Mustache.render($("#show_hint_feedback").html(), data);
                 });
-                $(this).append(html);
+                $(this).find("span").append(html);
             }
         });
     }
@@ -232,8 +232,11 @@ function CrowdsourceHinter(runtime, element){
             success: function (result){
                     if(result.rating == "flagged"){
                         //hide hint if it was flagged by the student
-                        $(this).parent().parent().hide();
-                        $(this).parent().parent().remove();
+                        $(".csh_hint", element).each(function(){
+                            if ($(this).parent().parent().find(".csh_hint").text() == hint && $(this).parent().parent().parent().find("span").text() == student_answer){
+                                $(this).parent().parent().remove();
+                            }
+                        });
                     }
                     else if(result.rating != "voted"){
                         $(".csh_hint", element).each(function(){
