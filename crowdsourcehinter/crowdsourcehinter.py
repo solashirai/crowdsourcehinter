@@ -211,7 +211,6 @@ class CrowdsourceHinter(XBlock):
         # corresponding incorrect answer
         feedback_data = {}
         number_of_hints = 0
-        # TODO: possibly simply check here whether or not user is staff
         if data['isStaff'] == 'true':
             for answer_keys in self.hint_database:
                 if str(len(self.hint_database[str(answer_keys)])) != str(0):
