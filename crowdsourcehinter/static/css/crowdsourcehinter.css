@@ -14,7 +14,7 @@
 .csh_hint_value{
   display: flex;
   margin-left: 10px;
-  column-count: 2;
+  /*column-count: 2;*/
 }
 
 .csh_rating_data{
@@ -28,6 +28,8 @@
 
 .csh_hint_data{
   width: 97%;
+  display: flex;
+  flex-direction: column;
 }
 
 .csh_rate_hint {
@@ -37,8 +39,7 @@
 }
 
 div[data-rate="flag"]{
-     position: relative;
-     float: right;
+    align-self: flex-end;
 }
 
 div[data-rate="upvote"] {
