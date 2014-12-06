@@ -27,6 +27,7 @@
 }
 
 .csh_hint_data{
+  justify-content: center;
   width: 97%;
   display: flex;
   flex-direction: column;
@@ -39,6 +40,7 @@
 }
 
 div[data-rate="flag"]{
+    text-align: right;
     align-self: flex-end;
 }
 
