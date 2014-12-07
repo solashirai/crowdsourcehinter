@@ -122,7 +122,7 @@ class CrowdsourceHinter(XBlock):
         # the string returned by the event problem_graded is very messy and is different
         # for each problem, but after all of the numbers/letters there is an equal sign, after which the
         # student's input is shown. I use the function below to remove everything before the first equal
-        # sign and only take the student's actual input.
+        # sign and only take the student's actual input. This is not very clean.
         if "=" in answer:
             if found_equal_sign == 0:
                 found_equal_sign = 1
@@ -166,7 +166,7 @@ class CrowdsourceHinter(XBlock):
                         self.Used.append(str("There are no hints for" + " " + answer))
                         return {'HintsToUse': "Sorry, there are no more hints for this answer."}
         self.Used.append(not_used)
-        return {'HintsToUse': not_used}
+        return {'HintsToUse': not_used, "StudentAnswer": answer}
 
     def find_hints(self, answer):
         """
