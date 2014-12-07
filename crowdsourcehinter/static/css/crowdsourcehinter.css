@@ -14,7 +14,6 @@
 .csh_hint_value{
   display: flex;
   margin-left: 10px;
-  /*column-count: 2;*/
 }
 
 .csh_rating_data{
@@ -24,6 +23,11 @@
 
 .crowdsourcehinter_block .csh_HintsToUse {
   background-color: #FF8;
+}
+
+.csh_hint_reveal{
+  display: flex;
+  flex-direction: row;
 }
 
 .csh_hint_data{
@@ -40,7 +44,6 @@
 }
 
 div[data-rate="flag"]{
-    text-align: right;
     align-self: flex-end;
 }
 

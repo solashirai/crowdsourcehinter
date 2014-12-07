@@ -68,6 +68,8 @@ function CrowdsourceHinter(runtime, element){
 
     function seehint(result){
     //Show a hint to the student after an incorrect answer is submitted.
+        console.log(result.StudentAnswer);
+        $('.csh_HintsToUse', element).attr('student_answer', result.StudentAnswer);
         $('.csh_HintsToUse', element).text(result.HintsToUse);
     }
 
@@ -220,6 +222,16 @@ function CrowdsourceHinter(runtime, element){
     })
 
     $(element).on('click', '.csh_rate_hint', function(){
+        hint = $('.csh_HintsToUse', element).text();
+        student_answer = $('.csh_HintsToUse', element).attr('student_answer');
+        Logger.log('crowd_hinter.rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
+        console.log(hint);
+        console.log(student_answer);
+    });
+
+//This version of the rate hint is currently decomissioned. This is valid if hint rating/flagging is returned
+//soley to showing after the student correctly answers the question.
+/*    $(element).on('click', '.csh_rate_hint', function(){
     //Click event to change the rating/flag a hint. The attribute 'data-rate' within each .rate_hint button is used
     //to determine whether the student is upvoting, downvoting, or flagging the hint. 
         hint = $(this).parent().parent().find(".csh_hint").text();
@@ -247,7 +259,7 @@ function CrowdsourceHinter(runtime, element){
                 }
             }
         });
-    })
+    })*/
 
     $(element).on('click', '.csh_staff_rate', function(){
     //Staff ratings are the removal or unflagging of flagged hints from the database. The attribute 'data-rate' is used
