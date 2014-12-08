@@ -17,7 +17,7 @@
 }
 
 .csh_rating_data{
-  width: 3%;
+  width: 10%;
   vertical-align: middle;
 }
 
@@ -38,7 +38,7 @@
 
 .csh_hint_data{
   justify-content: center;
-  width: 97%;
+  width: 90%;
   display: flex;
   flex-direction: column;
 }

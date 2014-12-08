@@ -26,6 +26,9 @@ class CrowdsourceHinter(XBlock):
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
     # feedback, to find which incorrect answer's hint a student voted on.
     WrongAnswers = List([], scope=Scope.user_state)
+    # This list will keep track of what student answers didn't have a hint to show them. This list is used for
+    # the feedback stage, where students will be prompted and strongly encouraged to provide a hint for such hintless answers.
+    NoHintsFor = List([], scope=Scope.user_state)
     # A dictionary of default hints. default hints will be shown to students when there are no matches with the
     # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
     # particular incorrect answer)
@@ -166,6 +169,7 @@ class CrowdsourceHinter(XBlock):
                     else:
                         # if there are no more hints left in either the database or defaults
                         self.Used.append(str("There are no hints for" + " " + answer))
+                        self.NoHintsFor.append(answer)
                         return {'HintsToUse': "Sorry, there are no more hints for this answer.", "StudentAnswer": answer}
         self.Used.append(not_used)
         return {'HintsToUse': not_used, "StudentAnswer": answer}
@@ -212,20 +216,7 @@ class CrowdsourceHinter(XBlock):
         # that were not used. The keys are the used hints, the values are the
         # corresponding incorrect answer
         feedback_data = {}
-        number_of_hints = 0
-        if data['isStaff'] == 'true':
-            for answer_keys in self.hint_database:
-                if str(len(self.hint_database[str(answer_keys)])) != str(0):
-                    for hints in self.hint_database[str(answer_keys)]:
-                        if len(self.Flagged) != 0:
-                            for flagged_hints in self.Flagged:
-                                if str(hints) == flagged_hints:
-                                    feedback_data[str(hints)] = str("Flagged")
-                        if hints not in feedback_data.keys():
-                            feedback_data[str(hints)] = str(answer_keys)
-                else:
-                    feedback_data[None] = str(answer_keys)
-        elif len(self.WrongAnswers) == 0:
+        if len(self.WrongAnswers) == 0:
             return
         else:
             for index in range(0, len(self.Used)):
@@ -234,29 +225,12 @@ class CrowdsourceHinter(XBlock):
                     if str(self.Used[index]) in self.hint_database[str(answer_keys)]:
                         # add new key (hint) to feedback_data with a value (incorrect answer)
                         feedback_data[str(self.Used[index])] = str(self.WrongAnswers[index])
-                for answer_keys in self.hint_database:
-                    if str(answer_keys) == str(self.WrongAnswers[index]):
-                        # for answes in self.hint_database, if the len of the answer's corresponding
-                        # hints is not zero...
-                        if str(len(self.hint_database[str(answer_keys)])) != str(0):
-                            number_of_hints = 0
-                            hint_key_shuffled = self.hint_database[str(answer_keys)].keys()
-                            # shuffle keys so that random hints won't repeat. probably can be done better.
-                            random.shuffle(hint_key_shuffled)
-                            for random_hint_key in hint_key_shuffled:
-                                if str(random_hint_key) not in self.Flagged.keys():
-                                    if number_of_hints < 3:
-                                        number_of_hints += 1
-                                        # add random unused hint to feedback_data's keys
-                                        # with the value as the incorrect answer
-                                        feedback_data[str(random_hint_key)] = str(self.WrongAnswers[index])
-                                        self.WrongAnswers.append(str(self.WrongAnswers[index]))
-                                        self.Used.append(str(random_hint_key))
-                        else:
-                            self.no_hints(index)
-                            feedback_data[None] = str(self.WrongAnswers[index])
+                    else:
+                        # if the student's answer had no hints (or all the hints were flagged and unavailable) return None
+                        feedback_data[None] = str(self.WrongAnswers[index])
         self.WrongAnswers=[]
         self.Used=[]
+        print(feedback_data)
         return feedback_data
 
     def no_hints(self, index):
