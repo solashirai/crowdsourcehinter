@@ -58,7 +58,7 @@ function CrowdsourceHinter(runtime, element){
                             type: "POST",
                             url: runtime.handlerUrl(element, 'get_feedback'),
                             data: JSON.stringify({"isStaff":"false"}),
-                            success: getFeedback
+                            success: getStudentFeedback
                         });
                     }
                 }
@@ -68,12 +68,11 @@ function CrowdsourceHinter(runtime, element){
 
     function seehint(result){
     //Show a hint to the student after an incorrect answer is submitted.
-        console.log(result.StudentAnswer);
         $('.csh_HintsToUse', element).attr('student_answer', result.StudentAnswer);
         $('.csh_HintsToUse', element).text(result.HintsToUse);
     }
 
-    function showHintFeedback(result){
+    function showHintFeedback(hint){
     //Append answer-specific hints for each student answer during the feedback stage.
     //This appended div includes upvote/downvote/flagging buttons, the hint, and the hint's rating
         $(".csh_student_answer", element).each(function(){
@@ -81,8 +80,7 @@ function CrowdsourceHinter(runtime, element){
                 var html = "";
                 $(function(){
                     var data = {
-                        hint: result.hint,
-                        rating: result.rating
+                        hint: hint
                     };
                     html = Mustache.render($("#show_hint_feedback").html(), data);
                 });
@@ -127,15 +125,8 @@ function CrowdsourceHinter(runtime, element){
             $('.crowdsourcehinter_block').attr('class', 'crowdsourcehinter_block_is_staff');
         }
         if(!isShowingHintFeedback){
-            var student_answers = [];
             $.each(result, function(index, value) {
-                answer = value;
-                if($.inArray(answer, student_answers) === -1 && answer != "Flagged"){
-                    student_answers.push(answer);
-                }
-            });
-            setStudentAnswers(student_answers);
-            $.each(result, function(index, value) {
+                setStudentAnswers(value);
                 student_answer = value;
                 hint = index;
                 //hints return null if no answer-specific hints exist
@@ -153,22 +144,7 @@ function CrowdsourceHinter(runtime, element){
                     });
                 }
                 //flagged hints have their corresponding answer set to "Flagged"
-                else if(student_answer != "Flagged"){
-                    $.ajax({
-                        type: "POST",
-                        url: runtime.handlerUrl(element, 'get_ratings'),
-                        data: JSON.stringify({"student_answer": student_answer, "hint": hint}),
-                        success: showHintFeedback
-                    });
-                }
-                else{
-                    $.ajax({
-                        type: "POST",
-                        url: runtime.handlerUrl(element, 'get_ratings'),
-                        data: JSON.stringify({"student_answer": student_answer, "hint": hint}),
-                        success: showFlaggedFeedback
-                    });
-                }
+                showHintFeedback(hint);
             });
             isShowingHintFeedback = true;
         }
