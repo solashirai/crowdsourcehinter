@@ -27,7 +27,13 @@
 
 .csh_hint_reveal{
   display: flex;
+  flex-direction: column;
+}
+
+.csh_HintQuickFeedback{
+  display: flex;
   flex-direction: row;
+  justify-content: flex-end;
 }
 
 .csh_hint_data{
@@ -38,19 +44,16 @@
 }
 
 .csh_rate_hint {
-  width: 100%;
-  margin-left:auto;
-  margin-right:auto;
+  margin-right: 15px;
 }
 
 div[data-rate="flag"]{
-    align-self: flex-end;
+    font-weight: bold;
 }
 
 div[data-rate="upvote"] {
     color: green;
     font-weight: bold;
-    margin-right:15px;
 }
 
 div[data-rate="downvote"] {
