@@ -132,14 +132,16 @@ class CrowdsourceHinter(XBlock):
         if remaining_hints != str(0):
             best_hint = max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0]
             if self.show_best['showbest'] == 'True':
+                # if set to show best, only the best hint will be shown. Different hitns will not be shown
+                # for multiple submissions/hint requests
                 if best_hint not in self.Flagged.keys():
                     self.Used.append(best_hint)
-                    return {'HintsToUse': best_hint}
+                    return {'HintsToUse': best_hint, "StudentAnswer": answer}
             if best_hint not in self.Used:
                 # choose highest rated hint for the incorrect answer
                 if best_hint not in self.Flagged.keys():
                     self.Used.append(best_hint)
-                    return {'HintsToUse': best_hint}
+                    return {'HintsToUse': best_hint, "StudentAnswer": answer}
             else:
                 # choose another random hint for the answer.
                 temporary_hints_list = []
@@ -153,7 +155,7 @@ class CrowdsourceHinter(XBlock):
                 # choose highest rated hint for the incorrect answer
                 if best_hint not in self.Flagged.keys():
                     self.Used.append(best_hint)
-                    return {'HintsToUse': best_hint}
+                    return {'HintsToUse': best_hint, "StudentAnswer": answer}
             else:
                 temporary_hints_list = []
                 for hint_keys in self.DefaultHints:
@@ -164,7 +166,7 @@ class CrowdsourceHinter(XBlock):
                     else:
                         # if there are no more hints left in either the database or defaults
                         self.Used.append(str("There are no hints for" + " " + answer))
-                        return {'HintsToUse': "Sorry, there are no more hints for this answer."}
+                        return {'HintsToUse': "Sorry, there are no more hints for this answer.", "StudentAnswer": answer}
         self.Used.append(not_used)
         return {'HintsToUse': not_used, "StudentAnswer": answer}
 
@@ -287,7 +289,8 @@ class CrowdsourceHinter(XBlock):
         hint_rating['rating'] = temporary_dictionary[data['hint']]
         hint_rating['student_answer'] = data['student_answer']
         hint_rating['hint'] = data['hint']
-        return hint_rating
+        print(hint_rating)
+        return hint_rating 
 
     @XBlock.json_handler
     def rate_hint(self, data, suffix=''):
