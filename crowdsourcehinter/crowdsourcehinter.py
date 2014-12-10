@@ -8,7 +8,7 @@ import pkg_resources
 import random
 
 from xblock.core import XBlock
-from xblock.fields import Scope, Dict, List
+from xblock.fields import Scope, Dict, List, Boolean
 from xblock.fragment import Fragment
 
 log = logging.getLogger(__name__)
@@ -26,13 +26,10 @@ class CrowdsourceHinter(XBlock):
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
     # feedback, to find which incorrect answer's hint a student voted on.
     WrongAnswers = List([], scope=Scope.user_state)
-    # This list will keep track of what student answers didn't have a hint to show them. This list is used for
-    # the feedback stage, where students will be prompted and strongly encouraged to provide a hint for such hintless answers.
-    NoHintsFor = List([], scope=Scope.user_state)
     # A dictionary of default hints. default hints will be shown to students when there are no matches with the
     # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
     # particular incorrect answer)
-    DefaultHints = Dict(default={'default_hint': 0}, scope=Scope.content)
+    DefaultHints = Dict(default={}, scope=Scope.content)
     # List of which hints have been shown to the student
     # this list is used to prevent the same hint from showing up to a student (if they submit the same incorrect answers
     # multiple times)
@@ -44,12 +41,11 @@ class CrowdsourceHinter(XBlock):
     # This is a dictionary of hints that have been flagged. the values represent the incorrect answer submission, and the
     # keys are the hints the corresponding hints. hints with identical text for differing answers will all not show up for the
     # student.
-    Flagged = Dict(default={"This is a hint that should be flagged": "answer2"}, scope=Scope.user_state_summary)
+    Flagged = Dict(default={}, scope=Scope.user_state_summary)
     # This string determines whether or not to show only the best (highest rated) hint to a student
     # When set to 'True' only the best hint will be shown to the student.
     # Details on operation when set to 'False' are to be finalized.
-    # TODO: make this into a boolean instead of a dict
-    show_best = Dict(default={'showbest': 'True'}, scope=Scope.user_state_summary)
+    show_best = Boolean(default = True, scope=Scope.user_state_summary)
 
     def student_view(self, context=None):
         """
@@ -132,9 +128,11 @@ class CrowdsourceHinter(XBlock):
                 eqplace = answer.index("=") + 1
                 answer = answer[eqplace:]
         remaining_hints = str(self.find_hints(answer))
+        print(answer)
+        print(remaining_hints)
         if remaining_hints != str(0):
             best_hint = max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0]
-            if self.show_best['showbest'] == 'True':
+            if self.show_best:
                 # if set to show best, only the best hint will be shown. Different hitns will not be shown
                 # for multiple submissions/hint requests
                 if best_hint not in self.Flagged.keys():
@@ -145,34 +143,27 @@ class CrowdsourceHinter(XBlock):
                 if best_hint not in self.Flagged.keys():
                     self.Used.append(best_hint)
                     return {'HintsToUse': best_hint, "StudentAnswer": answer}
-            else:
-                # choose another random hint for the answer.
-                temporary_hints_list = []
-                for hint_keys in self.hint_database[str(answer)]:
-                    if hint_keys not in self.Used:
-                        if hint_keys not in self.Flagged:
-                            temporary_hints_list.append(str(hint_keys))
-                            not_used = random.choice(temporary_hints_list)
-        else:
-            if best_hint not in self.Used:
-                # choose highest rated hint for the incorrect answer
-                if best_hint not in self.Flagged.keys():
-                    self.Used.append(best_hint)
-                    return {'HintsToUse': best_hint, "StudentAnswer": answer}
-            else:
-                temporary_hints_list = []
-                for hint_keys in self.DefaultHints:
-                    if hint_keys not in self.Used:
+            # choose another random hint for the answer.
+            temporary_hints_list = []
+            for hint_keys in self.hint_database[str(answer)]:
+                if hint_keys not in self.Used:
+                    if hint_keys not in self.Flagged:
                         temporary_hints_list.append(str(hint_keys))
-                    if len(temporary_hints_list) != 0:
                         not_used = random.choice(temporary_hints_list)
-                    else:
-                        # if there are no more hints left in either the database or defaults
-                        self.Used.append(str("There are no hints for" + " " + answer))
-                        self.NoHintsFor.append(answer)
-                        return {'HintsToUse': "Sorry, there are no more hints for this answer.", "StudentAnswer": answer}
-        self.Used.append(not_used)
-        return {'HintsToUse': not_used, "StudentAnswer": answer}
+                        self.Used.append(not_used)
+                        return {'HintsToUse': not_used, "StudentAnswer": answer}
+        else:
+            temporary_hints_list = []
+            for hint_keys in self.DefaultHints:
+                temporary_hints_list.append(str(hint_keys))
+            if len(temporary_hints_list) != 0:
+                not_used = random.choice(temporary_hints_list)
+                self.Used.append(not_used)
+                return {'HintsToUse': not_used, "StudentAnswer": answer}
+            else:
+                # if there are no more hints left in either the database or defaults
+                self.Used.append(str("There are no hints for" + " " + answer))
+                return {'HintsToUse': "Sorry, there are no hints for this answer.", "StudentAnswer": answer}
 
     def find_hints(self, answer):
         """
@@ -181,6 +172,8 @@ class CrowdsourceHinter(XBlock):
 
         Args:
           answer: This is equal to answer from get_hint, the answer the student submitted
+        
+        Returns 0 if no hints to show exist
         """
         isflagged = []
         isused = 0
@@ -194,7 +187,8 @@ class CrowdsourceHinter(XBlock):
                 if hint_keys == flagged_keys:
                     isflagged.append(hint_keys)
             if str(hint_keys) in self.Used:
-                isused += 1
+               if self.show_best is False:
+                    isused += 1
         if (len(self.hint_database[str(answer)]) - len(isflagged) - isused) > 0:
             return str(1)
         else:
@@ -219,15 +213,15 @@ class CrowdsourceHinter(XBlock):
         if len(self.WrongAnswers) == 0:
             return
         else:
+            print(self.Used)
             for index in range(0, len(self.Used)):
                 # each index is a hint that was used, in order of usage
-                for answer_keys in self.hint_database:
-                    if str(self.Used[index]) in self.hint_database[str(answer_keys)]:
-                        # add new key (hint) to feedback_data with a value (incorrect answer)
-                        feedback_data[str(self.Used[index])] = str(self.WrongAnswers[index])
-                    else:
-                        # if the student's answer had no hints (or all the hints were flagged and unavailable) return None
-                        feedback_data[None] = str(self.WrongAnswers[index])
+                if str(self.Used[index]) in self.hint_database[self.WrongAnswers[index]]:
+                    # add new key (hint) to feedback_data with a value (incorrect answer)
+                    feedback_data[str(self.Used[index])] = str(self.WrongAnswers[index])
+                else:
+                    # if the student's answer had no hints (or all the hints were flagged and unavailable) return None
+                    feedback_data[None] = str(self.WrongAnswers[index])
         self.WrongAnswers=[]
         self.Used=[]
         print(feedback_data)
@@ -334,26 +328,8 @@ class CrowdsourceHinter(XBlock):
         else:
             temporary_dictionary[str(data_hint)] -= 1
         self.hint_database[str(answer_data)] = temporary_dictionary
+        print(self.hint_database)
         return str(temporary_dictionary[str(data_hint)])
-
-    def remove_symbols(self, answer_data):
-        """
-        For removing colons and such from answers to prevent weird things from happening. Not sure if this is properly functional.
-
-        Args:
-          answer_data: This is equal to the data['answer'] in self.rate_hint
-
-        Returns:
-          answer_data: This is equal to the argument answer_data except that symbols have been
-                       replaced by text (hopefully)
-        """
-        answer_data = answer_data.replace('ddeecciimmaallppooiinntt', '.')
-        answer_data = answer_data.replace('qquueessttiioonnmmaarrkk', '?')
-        answer_data = answer_data.replace('ccoolloonn', ':')
-        answer_data = answer_data.replace('sseemmiiccoolloonn', ';')
-        answer_data = answer_data.replace('eeqquuaallss', '=')
-        answer_data = answer_data.replace('qquuoottaattiioonnmmaarrkkss', '"')
-        return answer_data
 
     @XBlock.json_handler
     def moderate_hint(self, data, suffix=''):
@@ -422,7 +398,7 @@ class CrowdsourceHinter(XBlock):
         return [
             ("CrowdsourceHinter",
              """<vertical_demo>
-<crowdsourcehinter/>
-</vertical_demo>
-"""),
+                <crowdsourcehinter/>
+             </vertical_demo>
+             """),
         ]

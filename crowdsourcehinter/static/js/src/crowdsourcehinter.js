@@ -38,7 +38,7 @@ function CrowdsourceHinter(runtime, element){
         }else{
             $('.csh_correct', element).show();
             $('.csh_correct', element).text("You're correct! Please help us improve our hints by voting on them, or submit your own hint!");
-            $(".csh_HintsToUse", element).text(" ");
+            $(".csh_hint_reveal", element).hide();
             //send empty data for ajax call because not having a data field causes error
             $.ajax({
                 type: "POST",
@@ -58,7 +58,7 @@ function CrowdsourceHinter(runtime, element){
                             type: "POST",
                             url: runtime.handlerUrl(element, 'get_feedback'),
                             data: JSON.stringify({"isStaff":"false"}),
-                            success: getStudentFeedback
+                            success: getFeedback
                         });
                     }
                 }
@@ -72,11 +72,11 @@ function CrowdsourceHinter(runtime, element){
         $('.csh_HintsToUse', element).text(result.HintsToUse);
     }
 
-    function showHintFeedback(hint){
+    function showHintFeedback(hint, student_answer){
     //Append answer-specific hints for each student answer during the feedback stage.
     //This appended div includes upvote/downvote/flagging buttons, the hint, and the hint's rating
         $(".csh_student_answer", element).each(function(){
-            if ($(this).find("span").text() == result.student_answer){
+            if ($(this).find("span").text() == student_answer){
                 var html = "";
                 $(function(){
                     var data = {
@@ -105,17 +105,13 @@ function CrowdsourceHinter(runtime, element){
     function setStudentAnswers(student_answers){
     //Append divs for each answer the student submitted before correctly answering the question.
     //showHintFeedback appends new hints into these divs.
-        for(var i = 0; i < student_answers.length; i++){
-            var html = "";
-            $(function(){
-                var template = $('#show_answer_feedback').html();
-                var data = {
-                    answer: student_answers[i]
-                };
-                html = Mustache.render(template, data); 
-            });
-            $(".csh_feedback", element).append(html);
-        }
+        var html = "";
+        var template = $('#show_answer_feedback').html();
+        var data = {
+            answer: student_answers
+        };
+        html = Mustache.render(template, data); 
+        $(".csh_feedback", element).append(html);
     }
 
     function getFeedback(result){
@@ -134,17 +130,18 @@ function CrowdsourceHinter(runtime, element){
                     $(".csh_student_answer", element).each(function(){
                         if ($(this).find("span").text() == student_answer){
                             var html = "";
-                            $(function(){
-                                var template = $('#show_no_hints').html();
-                                var data = {};
-                                html = Mustache.render(template, data); 
-                            });
-                            $(this).append(html);
+                            var template = $('#show_no_hints').html();
+                            var data = {};
+                            html = Mustache.render(template, data);
+                            console.log(html);
+                            $(this).find("span").append(html);
                         }
                     });
                 }
                 //flagged hints have their corresponding answer set to "Flagged"
-                showHintFeedback(hint);
+                else{
+                    showHintFeedback(hint, student_answer);
+                }
             });
             isShowingHintFeedback = true;
         }
@@ -188,7 +185,7 @@ function CrowdsourceHinter(runtime, element){
                             type: "POST",
                             url: runtime.handlerUrl(element, 'get_ratings'),
                             data: JSON.stringify({"student_answer": answerdata, "hint": newhint}),
-                            success: showHintFeedback
+                            success: showHintFeedback(newhint, answerdata)
                         });
                     }
             });
