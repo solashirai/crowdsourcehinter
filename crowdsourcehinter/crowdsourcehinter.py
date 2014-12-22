@@ -22,7 +22,7 @@ class CrowdsourceHinter(XBlock):
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
     # TODO: Remove default values once done testing
-    hint_database = Dict(default={'answer': {'Try doing something new': 5, 'you should go review that lesson again': 0}, "answer2": {'new answer hint': 3, "You should go look in your notes": 6, "This is a hint that should be flagged": -4}}, scope=Scope.user_state_summary)
+    hint_database = Dict(default={}, scope=Scope.user_state_summary)
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
     # feedback, to find which incorrect answer's hint a student voted on.
     WrongAnswers = List([], scope=Scope.user_state)
@@ -113,6 +113,7 @@ class CrowdsourceHinter(XBlock):
                         or another random hint for an incorrect answer
                         or 'Sorry, there are no more hints for this answer.' if no more hints exist
         """
+        print(self.show_best)
         answer = str(data["submittedanswer"])
         answer = answer.lower() # for analyzing the student input string I make it lower case.
         found_equal_sign = 0
@@ -187,7 +188,7 @@ class CrowdsourceHinter(XBlock):
                 if hint_keys == flagged_keys:
                     isflagged.append(hint_keys)
             if str(hint_keys) in self.Used:
-               if self.show_best is False:
+                if self.show_best is False:
                     isused += 1
         if (len(self.hint_database[str(answer)]) - len(isflagged) - isused) > 0:
             return str(1)
@@ -397,8 +398,21 @@ class CrowdsourceHinter(XBlock):
         """A canned scenario for display in the workbench."""
         return [
             ("CrowdsourceHinter",
-             """<vertical_demo>
+             """
+                <crowdsourcehinter>
+                    "Hello world."
                 <crowdsourcehinter/>
-             </vertical_demo>
              """),
         ]
+
+    @classmethod
+    def parse_xml(cls, node, runtime, keys, _id_generator):
+        """
+        A minimal working test for parse_xml
+        """
+        print("parse xml is working")
+        block = runtime.construct_xblock_from_class(cls, keys)
+        print node.text, (node.text == "Hello!")
+        block.show_best = (node.text == "Hello!")
+        block.hint_databawse = {"answer": {"xml test hint": 3}}
+        return block
