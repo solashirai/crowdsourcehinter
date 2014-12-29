@@ -1,7 +1,7 @@
 <script type='x-tmpl/mustache' id='show_hint_feedback'>
     <div class='csh_hint_value' value="{{hintvalue}}">
         <div class='csh_hint_data'>
-            <div class="csh_hint">{{hint}}</div>
+            <div class="csh_hint"><b>{{hint}}</b></div>
         </div>
         <div class='csh_rating_data'>
             <div role="button" class="csh_rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
@@ -36,17 +36,20 @@
 </script>
 
 <script type="x-tmpl/mustache" id="show_no_hints">
-    <div class="csh_hint_value" value="There are no answer-specific hints for this answer.">
+    <div class="csh_hint_value">Submit a hint for this incorrect answer to help future students!
     </div>
 </script>
 
 <script type="x-tmpl/mustache" id="show_answer_feedback">
     <div class="csh_student_answer">
-        <span><b>{{answer}}</b></span>
-        <div>
-            <input type ="button" class="csh_student_hint_creation" value="Submit a New Hint"
-            </input>
-        </div>
+        <h class="csh_answer_text">{{answer}}</h>
+    </div>
+</script>
+
+<script type="x-tmpl/mustache" id="add_hint_creation">
+    <div>
+        <input type ="button" class="csh_student_hint_creation" value="Submit a New Hint">
+        </input>
     </div>
 </script>
 
