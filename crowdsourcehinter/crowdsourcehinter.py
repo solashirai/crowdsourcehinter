@@ -323,26 +323,6 @@ class CrowdsourceHinter(XBlock):
         print("Ratings changed : " + str(self.hint_database))
         return str(temporary_dictionary[str(data_hint)])
 
-#    @XBlock.json_handler
-#    def moderate_hint(self, data, suffix=''):
-#        """
-#        Under construction? 
-#        """
-#        flagged_hints = {}
-#        flagged_hints = self.Flagged
-#        if data['rating'] == "dismiss":
-#            flagged_hints.pop(data['answer_wrong'], None)
-#        else:
-#            flagged_hints.pop(data['answer_wrong'], None)
-#            for answer_keys in self.hint_database:
-#                if str(answer_keys) == data['answ']:
-#                    for hint_keys in self.hint_database[str(answer_keys)]:
-#                        if str(hint_keys) == data['hint']:
-#                            temporary_dict = str(self.hint_database[str(answer_keys)])
-#                            temporary_dict = (ast.literal_eval(temporary_dict))
-#                            temporary_dict.pop(hint_keys, None)
-#                            self.hint_database[str(answer_keys)] = temporary_dict
-
     @XBlock.json_handler
     def give_hint(self, data, suffix=''):
         """
