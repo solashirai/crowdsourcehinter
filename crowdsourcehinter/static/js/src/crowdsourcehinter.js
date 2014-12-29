@@ -37,7 +37,6 @@ function CrowdsourceHinter(runtime, element){
             });
         }else{
             $('.csh_correct', element).show();
-            $('.csh_correct', element).text("Tell us whether the hint you received was helpful to improve our hinting system, or submit a new hint for other students to see!");
             $(".csh_hint_reveal", element).hide();
             //send empty data for ajax call because not having a data field causes error
             $.ajax({
@@ -178,7 +177,7 @@ function CrowdsourceHinter(runtime, element){
         if($(this).parent().find('.csh_student_text_input').val() != null){
             var answerdata = unescape($(this).attr('answer'));
             var newhint = unescape($('.csh_student_text_input').val());
-            Logger.log('submit_new.click.event', {"student_answer": answerdata, "new_hint_submission": newhint});
+            Logger.log('crowd_hinter.submit_new.click.event', {"student_answer": answerdata, "new_hint_submission": newhint});
             $('.csh_submitbutton').show();
             $.ajax({
                 type: "POST",
