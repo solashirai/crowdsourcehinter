@@ -21,7 +21,6 @@ class CrowdsourceHinter(XBlock):
     """
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
-    # TODO: Remove default values once done testing
     hint_database = Dict(default={}, scope=Scope.user_state_summary)
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
     # feedback, to find which incorrect answer's hint a student voted on.
@@ -29,7 +28,8 @@ class CrowdsourceHinter(XBlock):
     # A dictionary of default hints. default hints will be shown to students when there are no matches with the
     # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
     # particular incorrect answer)
-    DefaultHints = Dict(default={}, scope=Scope.content)
+    # 
+    DefaultHints = List(default=[], scope=Scope.content)
     # List of which hints have been shown to the student
     # this list is used to prevent the same hint from showing up to a student (if they submit the same incorrect answers
     # multiple times)
@@ -154,11 +154,8 @@ class CrowdsourceHinter(XBlock):
                         self.Used.append(not_used)
                         return {'HintsToUse': not_used, "StudentAnswer": answer}
         else:
-            temporary_hints_list = []
-            for hint_keys in self.DefaultHints:
-                temporary_hints_list.append(str(hint_keys))
-            if len(temporary_hints_list) != 0:
-                not_used = random.choice(temporary_hints_list)
+            if len(self.DefaultHints) != 0:
+                not_used = random.choice(self.DefaultHints)
                 self.Used.append(not_used)
                 return {'HintsToUse': not_used, "StudentAnswer": answer}
             else:
@@ -259,6 +256,7 @@ class CrowdsourceHinter(XBlock):
         hint_rating['student_answer'] = data['student_answer']
         hint_rating['hint'] = data['hint']
         print(hint_rating)
+        print(str(self.hint_database))
         return hint_rating 
 
     @XBlock.json_handler
@@ -329,15 +327,15 @@ class CrowdsourceHinter(XBlock):
         else:
             temporary_dictionary[str(data_hint)] -= 1
         self.hint_database[str(answer_data)] = temporary_dictionary
-        print(self.hint_database)
+        print(str(self.hint_database))
         return str(temporary_dictionary[str(data_hint)])
 
     @XBlock.json_handler
     def moderate_hint(self, data, suffix=''):
         """
-        UNDER CONSTRUCTION, intended to be used for instructors to remove hints from the database after hints
-        have been flagged.
+        Under construction? 
         """
+        print("this is being used")
         flagged_hints = {}
         flagged_hints = self.Flagged
         if data['rating'] == "dismiss":
@@ -372,17 +370,18 @@ class CrowdsourceHinter(XBlock):
             # self.hint_database equal to it due to being unable to directly
             # edit self.hint_databse. Most likely scope error
             self.hint_database[str(answer)] = temporary_dictionary
+            print(str(self.hint_database))
             return
         else:
             # if the hint exists already, simply upvote the previously entered hint
             if str(submission) in self.DefaultHints:
-                self.DefaultHints[str(submission)] += 1
                 return
             else:
                 temporary_dictionary = str(self.hint_database[str(answer)])
                 temporary_dictionary = (ast.literal_eval(temporary_dictionary))
                 temporary_dictionary[str(submission)] += 1
                 self.hint_database[str(answer)] = temporary_dictionary
+                print(str(self.hint_database))
                 return
 
     @XBlock.json_handler
@@ -410,9 +409,6 @@ class CrowdsourceHinter(XBlock):
         """
         A minimal working test for parse_xml
         """
-        print("parse xml is working")
         block = runtime.construct_xblock_from_class(cls, keys)
-        print node.text, (node.text == "Hello!")
-        block.show_best = (node.text == "Hello!")
-        block.hint_databawse = {"answer": {"xml test hint": 3}}
+        block.DefaultHints = ["Make sure to check your answer for basic mistakes like spelling!"]
         return block
