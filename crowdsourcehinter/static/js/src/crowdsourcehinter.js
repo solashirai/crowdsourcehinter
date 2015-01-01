@@ -84,6 +84,11 @@ function CrowdsourceHinter(runtime, element){
                     html = Mustache.render($("#show_hint_feedback").html(), data);
                 });
                 $(this).append(html);
+                var html = "";
+                var template = $('#add_hint_creation').html();
+                var data = {};
+                html = Mustache.render(template, data);
+                $(this).append(html);
             }
         });
     }
@@ -133,6 +138,11 @@ function CrowdsourceHinter(runtime, element){
                             var data = {};
                             html = Mustache.render(template, data);
                             $(this).append(html);
+                            var html = "";
+                            var template = $('#add_hint_creation').html();
+                            var data = {};
+                            html = Mustache.render(template, data);
+                            $(this).append(html);
                         }
                     });
                 }
@@ -140,11 +150,6 @@ function CrowdsourceHinter(runtime, element){
                 else{
                     showHintFeedback(hint, student_answer);
                 }
-                var html = "";
-                var template = $('#add_hint_creation').html();
-                var data = {};
-                html = Mustache.render(template, data);
-                $(this).append(html);
             });
             isShowingHintFeedback = true;
         }
