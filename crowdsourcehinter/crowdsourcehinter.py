@@ -22,14 +22,17 @@ class CrowdsourceHinter(XBlock):
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
     hint_database = Dict(default={}, scope=Scope.user_state_summary)
+    # Database of initial hints, set by the course instructor. If initial hints are set by the instructor, hint_database's contents
+    # will become identical to initial_hints. The datastructure for initial_hints is the same as for hint_databsae, 
+    # {"incorrect_answer": {"hint": rating}} 
+    initial_hints = Dict(default={}, scope=Scope.content)
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
     # feedback, to find which incorrect answer's hint a student voted on.
     WrongAnswers = List([], scope=Scope.user_state)
-    # A dictionary of default hints. default hints will be shown to students when there are no matches with the
+    # A dictionary of generic_hints. default hints will be shown to students when there are no matches with the
     # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
     # particular incorrect answer)
-    # 
-    DefaultHints = List(default=[], scope=Scope.content)
+    generic_hints = List(default=[], scope=Scope.content)
     # List of which hints have been shown to the student
     # this list is used to prevent the same hint from showing up to a student (if they submit the same incorrect answers
     # multiple times)
@@ -113,6 +116,12 @@ class CrowdsourceHinter(XBlock):
                         or another random hint for an incorrect answer
                         or 'Sorry, there are no more hints for this answer.' if no more hints exist
         """
+        # populate hint_database with hints from initial_hints if there are no hints in hint_database.
+        # this probably will occur only on the very first run of a unit containing this block.
+        if not bool(self.hint_database):
+            temporarydict = {}
+            temporarydict = self.initial_hints
+            self.hint_database = temporarydict
         answer = str(data["submittedanswer"])
         answer = answer.lower() # for analyzing the student input string I make it lower case.
         found_equal_sign = 0
@@ -151,8 +160,8 @@ class CrowdsourceHinter(XBlock):
                         self.Used.append(not_used)
                         return {'HintsToUse': not_used, "StudentAnswer": answer}
         else:
-            if len(self.DefaultHints) != 0:
-                not_used = random.choice(self.DefaultHints)
+            if len(self.generic_hints) != 0:
+                not_used = random.choice(self.generic_hints)
                 self.Used.append(not_used)
                 return {'HintsToUse': not_used, "StudentAnswer": answer}
             else:
@@ -345,7 +354,7 @@ class CrowdsourceHinter(XBlock):
             return
         else:
             # if the hint exists already, simply upvote the previously entered hint
-            if str(submission) in self.DefaultHints:
+            if str(submission) in self.generic_hints:
                 return
             else:
                 temporary_dictionary = str(self.hint_database[str(answer)])
@@ -380,5 +389,6 @@ class CrowdsourceHinter(XBlock):
         A minimal working test for parse_xml
         """
         block = runtime.construct_xblock_from_class(cls, keys)
-        block.DefaultHints = ["Make sure to check your answer for basic mistakes like spelling!"]
+        block.generic_hints = ["Make sure to check your answer for basic mistakes like spelling!"]
+        block.initial_hints = {"michigann": {"You have an extra N in your answer": 1}}
         return block
