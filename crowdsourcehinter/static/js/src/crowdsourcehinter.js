@@ -3,6 +3,7 @@ function CrowdsourceHinter(runtime, element){
     //If the code is not made to stop running, the hinter will act up after switching from and back to
     //a certain unit.
     var executeHinter = true;
+    $(".csh_HintQuickFeedback", element).hide();
 
     if(executeHinter){
     var isShowingHintFeedback = false;
@@ -29,6 +30,7 @@ function CrowdsourceHinter(runtime, element){
     //This function will determine whether or not the student correctly answered the question.
     //If it was correctly answered it will begin the process for giving feedback on hints.
         if (problem_graded_event_data[1].search(/class="correct/) === -1){
+            $(".csh_HintQuickFeedback", element).show();
             $.ajax({
                 type: "POST",
                 url: runtime.handlerUrl(element, 'get_hint'),
