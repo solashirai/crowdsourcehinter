@@ -120,7 +120,8 @@ class CrowdsourceHinter(XBlock):
         # this probably will occur only on the very first run of a unit containing this block.
         if not bool(self.hint_database):
             temporarydict = {}
-            temporarydict = self.initial_hints
+            temporarydict = str(self.initial_hints)
+            temporarydict = ast.literal_eval(temporarydict)
             self.hint_database = temporarydict
         answer = str(data["submittedanswer"])
         answer = answer.lower() # for analyzing the student input string I make it lower case.

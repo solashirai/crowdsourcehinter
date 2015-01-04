@@ -45,7 +45,6 @@
 .csh_rate_hint {
   margin-right: 15px;
   margin-top: 5px;
-  font-size: 70%;
   align-self: flex-end;
 }
 
@@ -86,7 +85,7 @@ div[data-rate="downvote"] {
 }
 
 .csh_rating{
-    margin-right: 10px;
+    margin-right: 5px;
 }
 
 .csh_rate_hint{ cursor: pointer }
