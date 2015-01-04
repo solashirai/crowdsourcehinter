@@ -205,6 +205,9 @@ function CrowdsourceHinter(runtime, element){
     })
 
     $(element).on('click', '.csh_rate_hint', function(){
+        if ($(this).attr('data-rate') == "flag"){
+            alert("This hint has been flagged for review.");
+        }
         hint = $('.csh_HintsToUse', element).text();
         student_answer = $('.csh_HintsToUse', element).attr('student_answer');
         Logger.log('crowd_hinter.rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});

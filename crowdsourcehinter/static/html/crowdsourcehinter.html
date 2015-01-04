@@ -30,7 +30,7 @@
 </script>
 
 <script type="x-tmpl/mustache" id="student_hint_creation">
-    <p><input type="text" name="studentinput" class="csh_student_text_input" size="40">
+    <p><textarea type="text" name="studentinput" class="csh_student_text_input"></textarea>
        <input answer="{{student_answer}}" type="button" class="csh_submit_new" value="Submit Hint"> 
     </p>
 </script>
@@ -59,13 +59,13 @@
     <div class='csh_HintsToUse' student_answer = ''>
     </div>
     <div class='csh_HintQuickFeedback'>
-        <div role="button" class="csh_rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
+        <div role="button" class="csh_rate_hint" data-rate="upvote" title="This hint was helpful!">
             <b>↑</b>
         </div>
-        <div role="button" class="csh_rate_hint" data-rate="downvote" aria-label="downvote">
+        <div role="button" class="csh_rate_hint" data-rate="downvote" title="This hint was not very helpful.">
             <b>↓</b>
         </div>
-        <div role="button" class="csh_rate_hint" data-rate="flag" data-icon="flag" aria-label="flag">
+        <div role="button" class="csh_rate_hint" data-rate="flag" title="Report this hint">
             <b>⚑</b>
         </div>
     </div>
