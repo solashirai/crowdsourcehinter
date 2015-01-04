@@ -77,7 +77,7 @@ function CrowdsourceHinter(runtime, element){
     //Append answer-specific hints for each student answer during the feedback stage.
     //This appended div includes upvote/downvote/flagging buttons, the hint, and the hint's rating
         $(".csh_student_answer", element).each(function(){
-            if ($(this).find('.csh_answer_text').text() == student_answer){
+            if ($(this).find('.csh_answer_text').attr('answer') == student_answer){
                 var html = "";
                 $(function(){
                     var data = {
@@ -134,7 +134,7 @@ function CrowdsourceHinter(runtime, element){
                 //hints return null if no answer-specific hints exist
                 if(hint === "null"){
                     $(".csh_student_answer", element).each(function(){
-                        if ($(this).find('.csh_answer_text').text() == student_answer){
+                        if ($(this).find('.csh_answer_text').attr('answer') == student_answer){
                             var html = "";
                             var template = $('#show_no_hints').html();
                             var data = {};
@@ -165,9 +165,9 @@ function CrowdsourceHinter(runtime, element){
         $('.csh_student_text_input').remove();
         $('.csh_submit_new').remove();
         $(this).hide();
-        student_answer = $(this).parent().parent().find('.csh_answer_text').text();
+        student_answer = $(this).parent().parent().find('.csh_answer_text').attr('answer');
         $(".csh_student_answer", element).each(function(){
-            if ($(this).find('.csh_answer_text').text() == student_answer){
+            if ($(this).find('.csh_answer_text').attr('answer') == student_answer){
                 var html = "";
                 $(function(){
                     var template = $('#student_hint_creation').html();
@@ -220,7 +220,7 @@ function CrowdsourceHinter(runtime, element){
     //Staff ratings are the removal or unflagging of flagged hints from the database. The attribute 'data-rate' is used
     //to determine whether to unflag or delete the hint.
         hint = $(this).parent().find(".csh_hint").text();
-        student_answer = $(this).parent().parent().find('.csh_answer_text').text();
+        student_answer = $(this).parent().parent().find('.csh_answer_text').attr('answer');
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
