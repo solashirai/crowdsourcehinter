@@ -225,9 +225,15 @@ class CrowdsourceHinter(XBlock):
                 if str(self.Used[index]) in self.hint_database[self.WrongAnswers[index]]:
                     # add new key (hint) to feedback_data with a value (incorrect answer)
                     feedback_data[str(self.Used[index])] = str(self.WrongAnswers[index])
+                    self.WrongAnswers=[]
+                    self.Used=[]
+                    return feedback_data
                 else:
                     # if the student's answer had no hints (or all the hints were flagged and unavailable) return None
                     feedback_data[None] = str(self.WrongAnswers[index])
+                    self.WrongAnswers=[]
+                    self.Used=[]
+                    return feedback_data
         self.WrongAnswers=[]
         self.Used=[]
         return feedback_data
