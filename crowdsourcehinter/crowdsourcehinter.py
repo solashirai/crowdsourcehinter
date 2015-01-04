@@ -119,7 +119,9 @@ class CrowdsourceHinter(XBlock):
         # populate hint_database with hints from initial_hints if there are no hints in hint_database.
         # this probably will occur only on the very first run of a unit containing this block.
         if not bool(self.hint_database):
-            temporarydict = {}
+            # this temporary dictionary is set to equal the initial_hints to allow hint_database to 
+            # set initial hints. temporarydict is set to a string then uses ast.literal_eval due to
+            # a scope error that occured when simply setting temporarydict = self.initial_hints
             temporarydict = str(self.initial_hints)
             temporarydict = ast.literal_eval(temporarydict)
             self.hint_database = temporarydict
