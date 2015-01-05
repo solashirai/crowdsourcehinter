@@ -20,6 +20,8 @@ class CrowdsourceHinter(XBlock):
     """
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
+    #
+    # Example: {"computerr": {"You misspelled computer, remove the last r.": 5}}
     hint_database = Dict(default={}, scope=Scope.user_state_summary)
     # Database of initial hints, set by the course instructor. If initial hints are set by the instructor, hint_database's contents
     # will become identical to initial_hints. The datastructure for initial_hints is the same as for hint_databsae, 
@@ -27,14 +29,20 @@ class CrowdsourceHinter(XBlock):
     initial_hints = Dict(default={}, scope=Scope.content)
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
     # feedback, to find which incorrect answer's hint a student voted on.
+    #
+    # Example: ["personal computer", "PC", "computerr"]
     WrongAnswers = List([], scope=Scope.user_state)
     # A dictionary of generic_hints. default hints will be shown to students when there are no matches with the
     # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
     # particular incorrect answer)
+    #
+    # Example: ["Make sure to check your answer for simple mistakes, like spelling or spaces!"]
     generic_hints = List(default=[], scope=Scope.content)
     # List of which hints have been shown to the student
     # this list is used to prevent the same hint from showing up to a student (if they submit the same incorrect answers
     # multiple times)
+    #
+    # Example: ["You misspelled computer, remove the last r."]
     Used = List([], scope=Scope.user_state)
     # This list is used to prevent students from voting multiple times on the same hint during the feedback stage.
     # i believe this will also prevent students from voting again on a particular hint if they were to return to
@@ -43,6 +51,8 @@ class CrowdsourceHinter(XBlock):
     # This is a dictionary of hints that have been flagged. the values represent the incorrect answer submission, and the
     # keys are the hints the corresponding hints. hints with identical text for differing answers will all not show up for the
     # student.
+    #
+    # Example: {"desk": "You're completely wrong, the answer is supposed to be computer."}
     Flagged = Dict(default={}, scope=Scope.user_state_summary)
     # This string determines whether or not to show only the best (highest rated) hint to a student
     # When set to 'True' only the best hint will be shown to the student.
@@ -404,6 +414,8 @@ class CrowdsourceHinter(XBlock):
         """
         block = runtime.construct_xblock_from_class(cls, keys)
         block = runtime.construct_xblock_from_class(cls, keys)
+        print(node)
+        print(node.text)
         block.generic_hints = ["Make sure to check your answer for basic mistakes like spelling!"]
         block.initial_hints = {"michigann": {"You have an extra N in your answer": 1}}
         return block
