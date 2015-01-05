@@ -413,7 +413,6 @@ class CrowdsourceHinter(XBlock):
         A minimal working test for parse_xml
         """
         block = runtime.construct_xblock_from_class(cls, keys)
-        block = runtime.construct_xblock_from_class(cls, keys)
         print(node)
         print(node.text)
         block.generic_hints = ["Make sure to check your answer for basic mistakes like spelling!"]
