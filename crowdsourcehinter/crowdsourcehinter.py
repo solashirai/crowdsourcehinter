@@ -1,11 +1,10 @@
-# pylint: disable=line-too-long
-# pylint: disable=unused-argument
-
 import ast
 import logging
 import operator
 import pkg_resources
 import random
+import json
+import hashlib
 
 from xblock.core import XBlock
 from xblock.fields import Scope, Dict, List, Boolean
@@ -116,6 +115,9 @@ class CrowdsourceHinter(XBlock):
                         or another random hint for an incorrect answer
                         or 'Sorry, there are no more hints for this answer.' if no more hints exist
         """
+        print(str(self.hint_database))
+        print(str(self.initial_hints))
+        print(str(self.generic_hints))
         # populate hint_database with hints from initial_hints if there are no hints in hint_database.
         # this probably will occur only on the very first run of a unit containing this block.
         if not bool(self.hint_database):
@@ -385,11 +387,14 @@ class CrowdsourceHinter(XBlock):
         """A canned scenario for display in the workbench."""
         return [
             ("CrowdsourceHinter",
-             """
-                <crowdsourcehinter>
-                    "Hello world."
-                <crowdsourcehinter/>
-             """),
+            """
+                <verticaldemo>
+                    <crowdsourcehinter>
+                        {"initial_hint_answer": "michigann", "initial_hint_text": "you have an extra n", "generic_hint": "make sure to chekc your spelling"}
+                    </crowdsourcehinter>
+                 </verticaldemo>
+            """
+            ),
         ]
 
     @classmethod
@@ -397,6 +402,7 @@ class CrowdsourceHinter(XBlock):
         """
         A minimal working test for parse_xml
         """
+        block = runtime.construct_xblock_from_class(cls, keys)
         block = runtime.construct_xblock_from_class(cls, keys)
         block.generic_hints = ["Make sure to check your answer for basic mistakes like spelling!"]
         block.initial_hints = {"michigann": {"You have an extra N in your answer": 1}}
