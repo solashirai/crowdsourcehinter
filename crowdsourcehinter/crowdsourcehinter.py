@@ -4,7 +4,8 @@ import operator
 import pkg_resources
 import random
 import json
-import hashlib
+import copy
+from copy import deepcopy
 
 from xblock.core import XBlock
 from xblock.fields import Scope, Dict, List, Boolean
@@ -128,15 +129,15 @@ class CrowdsourceHinter(XBlock):
         print(str(self.hint_database))
         print(str(self.initial_hints))
         print(str(self.generic_hints))
+        print(str(self.Flagged))
         # populate hint_database with hints from initial_hints if there are no hints in hint_database.
         # this probably will occur only on the very first run of a unit containing this block.
         if not bool(self.hint_database):
-            # this temporary dictionary is set to equal the initial_hints to allow hint_database to 
-            # set initial hints. temporarydict is set to a string then uses ast.literal_eval due to
-            # a scope error that occured when simply setting temporarydict = self.initial_hints
-            temporarydict = str(self.initial_hints)
-            temporarydict = ast.literal_eval(temporarydict)
-            self.hint_database = temporarydict
+            #temporarydict = self.initial_hints
+            #temporarydict = ast.literal_eval(temporarydict)
+            #TODO: Figure out why temporarydict = self.initial_hints doesn't work.
+            
+            self.hint_database = copy.copy(self.initial_hints)
         answer = str(data["submittedanswer"])
         answer = answer.lower() # for analyzing the student input string I make it lower case.
         found_equal_sign = 0
@@ -229,6 +230,14 @@ class CrowdsourceHinter(XBlock):
         # that were not used. The keys are the used hints, the values are the
         # corresponding incorrect answer
         feedback_data = {}
+        if data['isStaff'] == 'true':
+            if len(self.Flagged) != 0:
+                for answer_keys in self.hint_database:
+                    if str(len(self.hint_database[str(answer_keys)])) != str(0):
+                        for hints in self.hint_database[str(answer_keys)]:
+                            for flagged_hints in self.Flagged:
+                                if str(hints) == flagged_hints:
+                                    feedback_data[str(hints)] = str("Flagged")
         if len(self.WrongAnswers) == 0:
             return
         else:
@@ -275,12 +284,10 @@ class CrowdsourceHinter(XBlock):
             hint_rating['student_ansxwer'] = 'Flagged'
             hint_rating['hint'] = data['hint']
             return hint_rating
-        temporary_dictionary = str(self.hint_database[data['student_answer']])
-        temporary_dictionary = (ast.literal_eval(temporary_dictionary))
-        hint_rating['rating'] = temporary_dictionary[data['hint']]
+        hint_rating['rating'] = self.hint_database[data['student_answer']][data['hint']]
         hint_rating['student_answer'] = data['student_answer']
         hint_rating['hint'] = data['hint']
-        return hint_rating 
+        return hint_rating
 
     @XBlock.json_handler
     def rate_hint(self, data, suffix=''):
@@ -300,6 +307,9 @@ class CrowdsourceHinter(XBlock):
         answer_data = data['student_answer']
         data_rating = data['student_rating']
         data_hint = data['hint']
+        print answer_data, data_rating, data_hint
+        print (str(self.hint_database))
+        print (str(self.Flagged))
         if data['student_rating'] == 'unflag':
             for flagged_hints in self.Flagged:
                 if flagged_hints == data_hint:
@@ -308,10 +318,7 @@ class CrowdsourceHinter(XBlock):
         if data['student_rating'] == 'remove':
             for flagged_hints in self.Flagged:
                 if data_hint == flagged_hints:
-                    temporary_dict = str(self.hint_database[self.Flagged[data_hint]])
-                    temporary_dict = (ast.literal_eval(temporary_dict))
-                    temporary_dict.pop(data_hint, None)
-                    self.hint_database[self.Flagged[data_hint]] = temporary_dict
+                    self.hint_database[self.Flagged[data_hint]].pop(data_hint, None)
                     self.Flagged.pop(data_hint, None)           
                     return {'rating': 'removed'}
         if data['student_rating'] == 'flag':
@@ -343,15 +350,11 @@ class CrowdsourceHinter(XBlock):
           The rating associated with the hint is returned. This rating is identical
           to what would be found under self.hint_database[answer_string[hint_string]]
         """
-        temporary_dictionary = str(self.hint_database[str(answer_data)])
-        temporary_dictionary = (ast.literal_eval(temporary_dictionary))
         if data_rating == 'upvote':
-            temporary_dictionary[str(data_hint)] += 1
+            self.hint_database[str(answer_data)][str(data_hint)] += 1
         else:
-            temporary_dictionary[str(data_hint)] -= 1
-        self.hint_database[str(answer_data)] = temporary_dictionary
+            self.hint_database[str(answer_data)][str(data_hint)] -= 1
         print("Ratings changed : " + str(self.hint_database))
-        return str(temporary_dictionary[str(data_hint)])
 
     @XBlock.json_handler
     def give_hint(self, data, suffix=''):
@@ -365,23 +368,14 @@ class CrowdsourceHinter(XBlock):
         submission = data['submission']
         answer = data['answer']
         if str(submission) not in self.hint_database[str(answer)]:
-            temporary_dictionary = str(self.hint_database[str(answer)])
-            temporary_dictionary = (ast.literal_eval(temporary_dictionary))
-            temporary_dictionary.update({submission: 0})
-            # once again, manipulating temporary_dictionary and setting
-            # self.hint_database equal to it due to being unable to directly
-            # edit self.hint_databse. Most likely scope error
-            self.hint_database[str(answer)] = temporary_dictionary
+            self.hint_database[str(answer)].update({submission: 0})
             return
         else:
             # if the hint exists already, simply upvote the previously entered hint
             if str(submission) in self.generic_hints:
                 return
             else:
-                temporary_dictionary = str(self.hint_database[str(answer)])
-                temporary_dictionary = (ast.literal_eval(temporary_dictionary))
-                temporary_dictionary[str(submission)] += 1
-                self.hint_database[str(answer)] = temporary_dictionary
+                self.hint_database[str(answer)][str(submission)] += 1
                 return
 
     @XBlock.json_handler
@@ -415,6 +409,7 @@ class CrowdsourceHinter(XBlock):
         block = runtime.construct_xblock_from_class(cls, keys)
         print(node)
         print(node.text)
+        print type(node)
         block.generic_hints = ["Make sure to check your answer for basic mistakes like spelling!"]
         block.initial_hints = {"michigann": {"You have an extra N in your answer": 1}}
         return block
