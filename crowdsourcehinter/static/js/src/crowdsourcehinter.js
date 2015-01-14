@@ -101,7 +101,7 @@ function CrowdsourceHinter(runtime, element){
         $(function(){
             var template = $('#show_flagged_feedback').html();
             var data = {
-                hint: result.hint
+                hint: result
             };
             html = Mustache.render(template, data);
         });
@@ -125,9 +125,16 @@ function CrowdsourceHinter(runtime, element){
     //to the student, as well as an option to create a new hint for an answer.
         if(isStaff){
             $('.crowdsourcehinter_block').attr('class', 'crowdsourcehinter_block_is_staff');
+            $.each(result, function(index, value) {
+                if(value == "Flagged") {
+                    //index represents the flagged hint's text
+                    showFlaggedFeedback(index);
+                }
+            });
         }
         if(!isShowingHintFeedback){
             $.each(result, function(index, value) {
+              if(value != "Flagged"){
                 setStudentAnswers(value);
                 student_answer = value;
                 hint = index;
@@ -152,6 +159,7 @@ function CrowdsourceHinter(runtime, element){
                 else{
                     showHintFeedback(hint, student_answer);
                 }
+              }
             });
             isShowingHintFeedback = true;
         }
@@ -223,7 +231,7 @@ function CrowdsourceHinter(runtime, element){
     //Staff ratings are the removal or unflagging of flagged hints from the database. The attribute 'data-rate' is used
     //to determine whether to unflag or delete the hint.
         hint = $(this).parent().find(".csh_hint").text();
-        student_answer = $(this).parent().parent().find('.csh_answer_text').attr('answer');
+        student_answer = "Flagged";
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
