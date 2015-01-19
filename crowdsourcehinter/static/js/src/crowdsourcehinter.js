@@ -70,7 +70,8 @@ function CrowdsourceHinter(runtime, element){
     function seehint(result){
     //Show a hint to the student after an incorrect answer is submitted.
         $('.csh_HintsToUse', element).attr('student_answer', result.StudentAnswer);
-        $('.csh_HintsToUse', element).text(result.HintsToUse);
+        $('.csh_HintsToUse', element).attr('hint_received', result.HintsToUse);
+        $('.csh_HintsToUse', element).text("Hint: " + result.HintsToUse);
     }
 
     function showHintFeedback(hint, student_answer){
@@ -216,7 +217,7 @@ function CrowdsourceHinter(runtime, element){
         if ($(this).attr('data-rate') == "flag"){
             alert("This hint has been flagged for review.");
         }
-        hint = $('.csh_HintsToUse', element).text();
+        hint = $('.csh_HintsToUse', element).attr('hint_received');
         student_answer = $('.csh_HintsToUse', element).attr('student_answer');
         Logger.log('crowd_hinter.rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
         $.ajax({

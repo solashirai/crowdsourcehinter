@@ -1,9 +1,6 @@
 /* CSS for CrowdsourceHinter */
 
 .crowdsourcehinter_block .csh_feedback {
-  border-style: solid;
-  border-width: thin;
-  border-color: rgb(200,200,200);
 }
 
 .crowdsourcehinter_block .csh_vote {
@@ -18,7 +15,6 @@
 }
 
 .crowdsourcehinter_block {
-  background-color: #BBE2ED;
 }
 
 .csh_hint_reveal{

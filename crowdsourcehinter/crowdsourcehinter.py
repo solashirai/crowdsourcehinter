@@ -129,12 +129,9 @@ class CrowdsourceHinter(XBlock):
         print(str(self.hint_database))
         print(str(self.initial_hints))
         print(str(self.generic_hints))
-        print(str(self.Flagged))
         # populate hint_database with hints from initial_hints if there are no hints in hint_database.
         # this probably will occur only on the very first run of a unit containing this block.
         if not bool(self.hint_database):
-            #temporarydict = self.initial_hints
-            #temporarydict = ast.literal_eval(temporarydict)
             #TODO: Figure out why temporarydict = self.initial_hints doesn't work.
             
             self.hint_database = copy.copy(self.initial_hints)
@@ -394,6 +391,8 @@ class CrowdsourceHinter(XBlock):
             """
                 <verticaldemo>
                     <crowdsourcehinter>
+                        "Hello world!"
+                        Hello World!
                         {"initial_hint_answer": "michigann", "initial_hint_text": "you have an extra n", "generic_hint": "make sure to chekc your spelling"}
                     </crowdsourcehinter>
                  </verticaldemo>
@@ -407,7 +406,20 @@ class CrowdsourceHinter(XBlock):
         A minimal working test for parse_xml
         """
         block = runtime.construct_xblock_from_class(cls, keys)
-        print(node)
+        #import pdb; pdb.set_trace()
+        #['__class__', '__contains__', '__copy__', '__deepcopy__', '__delattr__', '__delitem__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__init__', '__iter__', '__len__', '__module__', '__new__', '__nonzero__', '__reduce__', '__reduce_ex__', '__repr__', '__reversed__', '__setattr__', '__setitem__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_filter', '_init', 'addnext', 'addprevious', 'append', 'attrib', 'base', 'blacklist', 'clear', 'extend', 'find', 'findall', 'findtext', 'get', 'getchildren', 'getiterator', 'getnext', 'getparent', 'getprevious', 'getroottree', 'index', 'insert', 'items', 'iter', 'iterancestors', 'iterchildren', 'iterdescendants', 'iterfind', 'itersiblings', 'itertext', 'keys', 'makeelement', 'nsmap', 'prefix', 'remove', 'replace', 'set', 'sourceline', 'tag', 'tail', 'text', 'values', 'xpath']
+
+        print(node.tag)
+        print(node.tail)
+        print(node.values)
+        print(node.xpath)
+        print(node.items)
+        print(node.iterchildren)
+        print(node.itertext)
+        print(node.keys)
+        print(node.makeelement)
+        print(node.sourceline)
+        print(node.tag)
         print(node.text)
         print type(node)
         block.generic_hints = ["Make sure to check your answer for basic mistakes like spelling!"]
