@@ -30,7 +30,10 @@
 </script>
 
 <script type="x-tmpl/mustache" id="student_hint_creation">
-    <p><textarea type="text" name="studentinput" class="csh_student_text_input"></textarea>
+    <p>
+        <textarea type="text" name="studentinput" class="csh_student_text_input"></textarea>
+    </p>
+    <p>
        <input answer="{{student_answer}}" type="button" class="csh_submit_new" value="Submit Hint"> 
     </p>
 </script>
@@ -42,7 +45,8 @@
 
 <script type="x-tmpl/mustache" id="show_answer_feedback">
     <div class="csh_student_answer">
-        <h class="csh_answer_text" answer={{answer}}><i> Your answer: {{answer}}</i></h>
+        <h class="csh_answer_text" answer={{answer}}>
+        <i> Your original answer: {{answer}} <br> The hint you viewed: </i></h>
     </div>
 </script>
 
