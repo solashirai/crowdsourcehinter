@@ -92,3 +92,7 @@ div[data-rate="downvote"] {
   flex-direction: colomn;
 }
 
+.csh_student_text_input{
+  width: 100%;
+}
+
