@@ -20,7 +20,7 @@ function CrowdsourceHinter(runtime, element){
     Logger.listen('seq_goto', null, stopScript);
 
     //data about the problem obtained from Logger.listen('problem_graded') is passed on to the onStudentSubmission.
-    //directly passing data to onStudentSubmission does not work for unknown reasons (to be fixed?)
+    //directly passing data to onStudentSubmission does not appear to work
     function get_event_data(event_type, data, element){
         onStudentSubmission(data);
     }
@@ -72,6 +72,8 @@ function CrowdsourceHinter(runtime, element){
         $('.csh_HintsToUse', element).attr('student_answer', result.StudentAnswer);
         $('.csh_HintsToUse', element).attr('hint_received', result.HintsToUse);
         $('.csh_HintsToUse', element).text("Hint: " + result.HintsToUse);
+        Logger.log('crowd_hinter.seehint', {"student_answer": result.StudentAnswer, "hint_received": result.HintsToUse});
+
     }
 
     function showHintFeedback(hint, student_answer){
@@ -233,6 +235,7 @@ function CrowdsourceHinter(runtime, element){
     //to determine whether to unflag or delete the hint.
         hint = $(this).parent().find(".csh_hint").text();
         student_answer = "Flagged";
+        Logger.log('crowd_hinter.staff_rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
