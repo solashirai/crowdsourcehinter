@@ -6,7 +6,6 @@ import random
 import json
 import copy
 from copy import deepcopy
-from eventtracking import tracker
 
 from xblock.core import XBlock
 from xblock.fields import Scope, Dict, List, Boolean
@@ -155,13 +154,11 @@ class CrowdsourceHinter(XBlock):
                 # for multiple submissions/hint requests
                 if best_hint not in self.Flagged.keys():
                     self.Used.append(best_hint)
-                    tracker.emit('get_hint', answer, best_hint, 'best hint')
                     return {'HintsToUse': best_hint, "StudentAnswer": answer}
             if best_hint not in self.Used:
                 # choose highest rated hint for the incorrect answer
                 if best_hint not in self.Flagged.keys():
                     self.Used.append(best_hint)
-                    tracker.emit('get_hint', answer, best_hint, 'best hint')
                     return {'HintsToUse': best_hint, "StudentAnswer": answer}
             # choose another random hint for the answer.
             temporary_hints_list = []
@@ -171,13 +168,11 @@ class CrowdsourceHinter(XBlock):
                         temporary_hints_list.append(str(hint_keys))
                         not_used = random.choice(temporary_hints_list)
                         self.Used.append(not_used)
-                        tracker.emit('get_hint', answer, not_used, 'unused hint')
                         return {'HintsToUse': not_used, "StudentAnswer": answer}
         else:
             if len(self.generic_hints) != 0:
                 not_used = random.choice(self.generic_hints)
                 self.Used.append(not_used)
-                tracker.emit('get_hint', answer, not_used, 'generic hint')
                 return {'HintsToUse': not_used, "StudentAnswer": answer}
             else:
                 # if there are no more hints left in either the database or defaults
@@ -310,24 +305,20 @@ class CrowdsourceHinter(XBlock):
             for flagged_hints in self.Flagged:
                 if flagged_hints == data_hint:
                     self.Flagged.pop(data_hint, None)
-                    tracker.emit('rate_hint', data, 'unflagged')
                     return {'rating': 'unflagged'}
         if data['student_rating'] == 'remove':
             for flagged_hints in self.Flagged:
                 if data_hint == flagged_hints:
                     self.hint_database[self.Flagged[data_hint]].pop(data_hint, None)
-                    self.Flagged.pop(data_hint, None)   
-                    tracker.emit('rate_hint', data, 'removed')        
+                    self.Flagged.pop(data_hint, None)       
                     return {'rating': 'removed'}
         if data['student_rating'] == 'flag':
             # add hint to Flagged dictionary
             self.Flagged[str(data_hint)] = answer_data
-            tracker.emit('rate_hint', data, 'flagged')
             return {"rating": 'flagged', 'hint': data_hint}
         if str(data_hint) not in self.Voted:
             self.Voted.append(str(data_hint)) # add data to Voted to prevent multiple votes
             rating = self.change_rating(data_hint, data_rating, answer_data) # change hint rating
-            tracker.emit('rate_hint', data, 'rating changed')
             if str(rating) == str(0):
                 return {"rating": str(0), 'hint': data_hint}
             else:
@@ -367,7 +358,6 @@ class CrowdsourceHinter(XBlock):
         """
         submission = data['submission']
         answer = data['answer']
-        tracker.emit('give_hint', answer, submission)
         if str(submission) not in self.hint_database[str(answer)]:
             self.hint_database[str(answer)].update({submission: 0})
             return
@@ -395,8 +385,6 @@ class CrowdsourceHinter(XBlock):
             """
                 <verticaldemo>
                     <crowdsourcehinter>
-                        "Hello world!"
-                        Hello World!
                         {"initial_hint_answer": "michigann", "initial_hint_text": "you have an extra n", "generic_hint": "make sure to chekc your spelling"}
                     </crowdsourcehinter>
                  </verticaldemo>
@@ -410,22 +398,5 @@ class CrowdsourceHinter(XBlock):
         A minimal working test for parse_xml
         """
         block = runtime.construct_xblock_from_class(cls, keys)
-        import pdb; pdb.set_trace()
-        #['__class__', '__contains__', '__copy__', '__deepcopy__', '__delattr__', '__delitem__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__init__', '__iter__', '__len__', '__module__', '__new__', '__nonzero__', '__reduce__', '__reduce_ex__', '__repr__', '__reversed__', '__setattr__', '__setitem__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_filter', '_init', 'addnext', 'addprevious', 'append', 'attrib', 'base', 'blacklist', 'clear', 'extend', 'find', 'findall', 'findtext', 'get', 'getchildren', 'getiterator', 'getnext', 'getparent', 'getprevious', 'getroottree', 'index', 'insert', 'items', 'iter', 'iterancestors', 'iterchildren', 'iterdescendants', 'iterfind', 'itersiblings', 'itertext', 'keys', 'makeelement', 'nsmap', 'prefix', 'remove', 'replace', 'set', 'sourceline', 'tag', 'tail', 'text', 'values', 'xpath']
-
-        print(node.tag)
-        print(node.tail)
-        print(node.values)
-        print(node.xpath)
-        print(node.items)
-        print(node.iterchildren)
-        print(node.itertext)
-        print(node.keys)
-        print(node.makeelement)
-        print(node.sourceline)
-        print(node.tag)
-        print(node.text)
-        print type(node)
-        block.generic_hints = ["Make sure to check your answer for basic mistakes like spelling!"]
-        block.initial_hints = {"michigann": {"You have an extra N in your answer": 1}}
+        #import pdb; pdb.set_trace()
         return block
