@@ -4,14 +4,14 @@
             <div class="csh_hint"><b>{{hint}}</b></div>
         </div>
         <div class='csh_rating_data'>
-            <div role="button" class="csh_rate_hint" data-rate="upvote" data-icon="arrow-u" aria-label="upvote">
-                <b>This hint was helpful</b>
+            <div role="button" class="csh_rate_hint" data-rate="upvote" data-icon="arrow-u" title="This hint was helpful">
+                <b>+</b>
             </div>
-            <div role="button" class="csh_rate_hint" data-rate="downvote" aria-label="downvote">
-                <b>This hint was not helpful</b>
+            <div role="button" class="csh_rate_hint" data-rate="downvote" title="This hint was not helpful.">
+                <b>-</b>
             </div>
-            <div role="button" class="csh_rate_hint" data-rate="flag" data-icon="flag" aria-label="flag">
-                <b>Report this hint</b>
+            <div role="button" class="csh_rate_hint" data-rate="flag" data-icon="flag" title="Report this hint.">
+                <b>⚑</b>
             </div>
         </div>
     </div>
@@ -20,18 +20,18 @@
 <script type="x-tmpl/mustache" id="show_flagged_feedback">
     <div class="csh_hint_value" value ="{{hint}}">
         <div role="button" class="csh_staff_rate" data-rate="unflag" aria-label="unflag">
-            <b>O</b>
+            <b>Unflag Hint</b>
         </div>
         <div class="csh_hint">{{hint}}</div>
         <div role="button" class="csh_staff_rate" data-rate="remove" aria-label="remove">
-            <b>X</b>
+            <b>Remove Hint</b>
         </div> 
     </div>
 </script>
 
 <script type="x-tmpl/mustache" id="student_hint_creation">
     <p>
-        <textarea type="text" name="studentinput" class="csh_student_text_input"></textarea>
+        <input type="text" name="studentinput" class="csh_student_text_input">
     </p>
     <p>
        <input answer="{{student_answer}}" type="button" class="csh_submit_new" value="Submit Hint"> 
@@ -46,7 +46,7 @@
 <script type="x-tmpl/mustache" id="show_answer_feedback">
     <div class="csh_student_answer">
         <h class="csh_answer_text" answer={{answer}}>
-        <i> Your original answer: {{answer}} <br> The hint you viewed: </i></h>
+        <i> Your original answer: </i>{{answer}} <br> <i>The hint you viewed: </i></h>
     </div>
 </script>
 
@@ -64,10 +64,10 @@
     </div>
     <div class='csh_HintQuickFeedback'>
         <div role="button" class="csh_rate_hint" data-rate="upvote" title="This hint was helpful!">
-            <b>↑</b>
+            <b>+</b>
         </div>
         <div role="button" class="csh_rate_hint" data-rate="downvote" title="This hint was not very helpful.">
-            <b>↓</b>
+            <b>-</b>
         </div>
         <div role="button" class="csh_rate_hint" data-rate="flag" title="Report this hint">
             <b>⚑</b>
