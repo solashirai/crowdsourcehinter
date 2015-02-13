@@ -38,7 +38,7 @@ class CrowdsourceHinter(XBlock):
     # particular incorrect answer)
     #
     # Example: ["Make sure to check your answer for simple mistakes, like spelling or spaces!"]
-    generic_hints = List(default=[], scope=Scope.content)
+    generic_hints = List(default=["check for simple mistakes like typos"], scope=Scope.content)
     # List of which hints have been shown to the student
     # this list is used to prevent the same hint from showing up to a student (if they submit the same incorrect answers
     # multiple times)
