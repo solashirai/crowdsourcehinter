@@ -1,3 +1,4 @@
+
 function CrowdsourceHinter(runtime, element){
     //executeHinter is used to disable the hinter after switching units in an edX course
     //If the code is not made to stop running, the hinter will act up after switching from and back to
@@ -24,7 +25,7 @@ function CrowdsourceHinter(runtime, element){
     function get_event_data(event_type, data, element){
         onStudentSubmission(data);
     }
-    Logger.listen('problem_graded', null, get_event_data);
+    Logger.listen('problem_check', null, get_event_data);
 
     function onStudentSubmission(problem_graded_event_data){
     //This function will determine whether or not the student correctly answered the question.
