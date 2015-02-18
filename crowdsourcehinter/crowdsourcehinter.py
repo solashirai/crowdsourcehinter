@@ -18,7 +18,7 @@ class CrowdsourceHinter(XBlock):
     This is the Crowd Sourced Hinter XBlock. This Xblock seeks to provide students with hints
     that specifically address their mistake. Additionally, the hints that this Xblock shows
     are created by the students themselves. This doc string will probably be edited later.
-    """
+    """ 
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
     #
@@ -385,7 +385,7 @@ class CrowdsourceHinter(XBlock):
             """
                 <verticaldemo>
                     <crowdsourcehinter>
-                        {"initial_hint_answer": "michigann", "initial_hint_text": "you have an extra n", "generic_hint": "make sure to chekc your spelling"}
+                        {"initial_hint_answer": "michigann", "initial_hint_text": "you have an extra n", "generic_hint": "make sure to check your spelling"}
                     </crowdsourcehinter>
                  </verticaldemo>
             """
@@ -398,5 +398,6 @@ class CrowdsourceHinter(XBlock):
         A minimal working test for parse_xml
         """
         block = runtime.construct_xblock_from_class(cls, keys)
-        #import pdb; pdb.set_trace()
+        #from IPython import embed
+        #embed()
         return block

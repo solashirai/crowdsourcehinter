@@ -24,6 +24,7 @@ function CrowdsourceHinter(runtime, element){
     //directly passing data to onStudentSubmission does not appear to work
     function get_event_data(event_type, data, element){
         onStudentSubmission(data);
+        console.log(data);
     }
     Logger.listen('problem_check', null, get_event_data);
 
