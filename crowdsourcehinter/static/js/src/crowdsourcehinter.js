@@ -27,6 +27,10 @@ function CrowdsourceHinter(runtime, element){
         console.log(data);
     }
     Logger.listen('problem_check', null, get_event_data);
+    function print_info(event_type, data, element){
+        console.log(data);
+    }
+    Logger.listen('problem_graded', null, print_info);
 
     function onStudentSubmission(problem_graded_event_data){
     //This function will determine whether or not the student correctly answered the question.
