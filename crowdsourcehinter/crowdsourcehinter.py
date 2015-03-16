@@ -8,8 +8,10 @@ import copy
 from copy import deepcopy
 
 from xblock.core import XBlock
-from xblock.fields import Scope, Dict, List, Boolean
+from xblock.fields import Scope, Dict, List, Boolean, String
 from xblock.fragment import Fragment
+
+from eventtracking import tracker
 
 log = logging.getLogger(__name__)
 
@@ -59,6 +61,10 @@ class CrowdsourceHinter(XBlock):
     # When set to 'True' only the best hint will be shown to the student.
     # Details on operation when set to 'False' are to be finalized.
     show_best = Boolean(default = True, scope=Scope.user_state_summary)
+    # This String represents the xblock element for which the hinter is running. It is necessary to manually
+    # set this value in the XML file under the format "hinting_element": "i4x://edX/DemoX/problem/Text_Input" .
+    # Without properly setting this String, the hinter will not correctly be able to use the Logger listen for problem_graded.
+    Element = String(default="", scope=Scope.content)
 
     def student_view(self, context=None):
         """
@@ -101,6 +107,13 @@ class CrowdsourceHinter(XBlock):
         being defined. However, It's the only way to get the data right now.
         """
         return self.xmodule_runtime.user_is_staff
+
+    @XBlock.json_handler
+    def get_element(self, data, suffix=''):
+        """
+        Returns the self.element so that the javascript Logger.listen will be using the correct element.
+        """
+        return str(self.Element);
 
     @XBlock.json_handler
     def is_user_staff(self, _data, _suffix=''):
@@ -404,4 +417,5 @@ class CrowdsourceHinter(XBlock):
         xmlText = ast.literal_eval((node.text).encode('utf-8'))
         block.generic_hints.append(xmlText["generic_hints"])
         block.initial_hints = copy.copy(xmlText["initial_hints"])
+        block.Element = xmlText["hinting_element"]
         return block
