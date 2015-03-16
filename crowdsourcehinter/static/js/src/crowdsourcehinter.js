@@ -8,13 +8,24 @@ function CrowdsourceHinter(runtime, element){
 
     if(executeHinter){
     var isShowingHintFeedback = false;
+    var hinting_element;
     var isStaff = false;
     $(".csh_HintsToUse", element).text("");
+    $.ajax({
+        type: "POST",
+        url: runtime.handlerUrl(element, 'get_element'),
+        data: JSON.stringify("helloworld"),
+        success: function(result){
+            console.log("hinting_element being set", result);
+            hinting_element = result;
+        }
+    });
 
     function stopScript(){
     //This function is used to prevent a particular instance of the hinter from acting after
     //switching between edX course's units. 
         executeHinter = false;
+        console.log("executeHinter set to false");
     }
     Logger.listen('seq_next', null, stopScript);
     Logger.listen('seq_prev', null, stopScript);
@@ -23,14 +34,18 @@ function CrowdsourceHinter(runtime, element){
     //data about the problem obtained from Logger.listen('problem_graded') is passed on to the onStudentSubmission.
     //directly passing data to onStudentSubmission does not appear to work
     function get_event_data(event_type, data, element){
-        onStudentSubmission(data);
-        console.log(data);
+        //onStudentSubmission(data);
+        console.log("gradedevent listen");
     }
-    Logger.listen('problem_check', null, get_event_data);
-    function print_info(event_type, data, element){
-        console.log(data);
+    Logger.listen('problem_graded', hinting_element, function(){console.log("test")});
+    Logger.listen('problem_graded', 'i4x://edX/DemoX/problem/Text_Input', function(){console.log("test2")});
+
+    function get_event_data_temp(event_type, data, element){
+        console.log("checkevent listen");
+        console.log(hinting_element);
+        console.log(typeof('i4x://edX/DemoX/problem/Text_Input'));
     }
-    Logger.listen('problem_graded', null, print_info);
+    Logger.listen('problem_check', null, get_event_data_temp);
 
     function onStudentSubmission(problem_graded_event_data){
     //This function will determine whether or not the student correctly answered the question.
