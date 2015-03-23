@@ -16,8 +16,9 @@ function CrowdsourceHinter(runtime, element){
         url: runtime.handlerUrl(element, 'get_element'),
         data: JSON.stringify("helloworld"),
         success: function(result){
-            console.log("hinting_element being set", result);
-            hinting_element = result;
+            console.log("hinting_element being set", String(result));
+            hinting_element = String(result);
+            Logger.listen('problem_graded', result, get_event_data);
         }
     });
 
@@ -25,7 +26,6 @@ function CrowdsourceHinter(runtime, element){
     //This function is used to prevent a particular instance of the hinter from acting after
     //switching between edX course's units. 
         executeHinter = false;
-        console.log("executeHinter set to false");
     }
     Logger.listen('seq_next', null, stopScript);
     Logger.listen('seq_prev', null, stopScript);
@@ -34,18 +34,8 @@ function CrowdsourceHinter(runtime, element){
     //data about the problem obtained from Logger.listen('problem_graded') is passed on to the onStudentSubmission.
     //directly passing data to onStudentSubmission does not appear to work
     function get_event_data(event_type, data, element){
-        //onStudentSubmission(data);
-        console.log("gradedevent listen");
+        onStudentSubmission(data);
     }
-    Logger.listen('problem_graded', hinting_element, function(){console.log("test")});
-    Logger.listen('problem_graded', 'i4x://edX/DemoX/problem/Text_Input', function(){console.log("test2")});
-
-    function get_event_data_temp(event_type, data, element){
-        console.log("checkevent listen");
-        console.log(hinting_element);
-        console.log(typeof('i4x://edX/DemoX/problem/Text_Input'));
-    }
-    Logger.listen('problem_check', null, get_event_data_temp);
 
     function onStudentSubmission(problem_graded_event_data){
     //This function will determine whether or not the student correctly answered the question.
@@ -217,6 +207,7 @@ function CrowdsourceHinter(runtime, element){
             var answerdata = unescape($(this).attr('answer'));
             var newhint = unescape($('.csh_student_text_input').val());
             Logger.log('crowd_hinter.submit_new.click.event', {"student_answer": answerdata, "new_hint_submission": newhint});
+            console.log(answerdata, newhint);
             $('.csh_submitbutton').show();
             $.ajax({
                 type: "POST",

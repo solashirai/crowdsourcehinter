@@ -108,12 +108,19 @@ class CrowdsourceHinter(XBlock):
         """
         return self.xmodule_runtime.user_is_staff
 
+    def convert_keys_to_string(dictionary):
+        """Recursively converts dictionary keys to strings."""
+        if not isinstance(dictionary, dict):
+            return dictionary
+        return dict((str(k), convert_keys_to_string(v)) 
+            for k, v in dictionary.items())
+
     @XBlock.json_handler
     def get_element(self, data, suffix=''):
         """
         Returns the self.element so that the javascript Logger.listen will be using the correct element.
         """
-        return str(self.Element);
+        return unicode(self.Element);
 
     @XBlock.json_handler
     def is_user_staff(self, _data, _suffix=''):
@@ -145,8 +152,6 @@ class CrowdsourceHinter(XBlock):
         # populate hint_database with hints from initial_hints if there are no hints in hint_database.
         # this probably will occur only on the very first run of a unit containing this block.
         if not bool(self.hint_database):
-            #TODO: Figure out why temporarydict = self.initial_hints doesn't work.
-            
             self.hint_database = copy.copy(self.initial_hints)
         answer = str(data["submittedanswer"])
         answer = answer.lower() # for analyzing the student input string I make it lower case.
@@ -164,6 +169,7 @@ class CrowdsourceHinter(XBlock):
                 answer = answer[eqplace:]
         remaining_hints = str(self.find_hints(answer))
         if remaining_hints != str(0):
+            print(self.hint_database)
             best_hint = max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0]
             if self.show_best:
                 # if set to show best, only the best hint will be shown. Different hitns will not be shown
@@ -385,6 +391,13 @@ class CrowdsourceHinter(XBlock):
                 self.hint_database[str(answer)][str(submission)] += 1
                 return
 
+    def convert_keys_to_string(dictionary):
+        """Recursively converts dictionary keys to strings."""
+        if not isinstance(dictionary, dict):
+            return dictionary
+        return dict((str(k), convert_keys_to_string(v)) 
+            for k, v in dictionary.items())
+
     @XBlock.json_handler
     def studiodata(self, data, suffix=''):
         """
@@ -414,8 +427,9 @@ class CrowdsourceHinter(XBlock):
         A minimal working test for parse_xml
         """
         block = runtime.construct_xblock_from_class(cls, keys)
-        xmlText = ast.literal_eval((node.text).encode('utf-8'))
-        block.generic_hints.append(xmlText["generic_hints"])
+        xmlText = ast.literal_eval(str(node.text))
+        block.generic_hints.append(str(xmlText["generic_hints"]))
         block.initial_hints = copy.copy(xmlText["initial_hints"])
-        block.Element = xmlText["hinting_element"]
+        block.Element = str(xmlText["hinting_element"])
+        print block.Element, block.initial_hints
         return block
