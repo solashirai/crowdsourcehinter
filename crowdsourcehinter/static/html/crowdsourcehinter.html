@@ -4,11 +4,11 @@
             <div class="csh_hint"><b>{{hint}}</b></div>
         </div>
         <div class='csh_rating_data'>
-            <div role="button" class="csh_rate_hint" data-rate="upvote" data-icon="arrow-u" title="This hint was helpful">
-                <b>+</b>
+            <div role="button" class="csh_rate_hint" data-rate="upvote" data-icon="arrow-u">
+                <b>Rate as Helpful</b>
             </div>
-            <div role="button" class="csh_rate_hint" data-rate="downvote" title="This hint was not helpful.">
-                <b>-</b>
+            <div role="button" class="csh_rate_hint" data-rate="downvote">
+                <b>Rate as Unhelpful</b>
             </div>
             <div role="button" class="csh_rate_hint" data-rate="flag" data-icon="flag" title="Report this hint.">
                 <b>⚑</b>
@@ -19,13 +19,14 @@
 
 <script type="x-tmpl/mustache" id="show_flagged_feedback">
     <div class="csh_hint_value" value ="{{hint}}">
-        <div role="button" class="csh_staff_rate" data-rate="unflag" aria-label="unflag">
-            <b>Unflag Hint</b>
-        </div>
         <div class="csh_hint">{{hint}}</div>
+        <div role="button" class="csh_staff_rate" data-rate="unflag" aria-label="unflag">
+            <u><b>Return hint for use in the hinter</b></u>
+        </div>
         <div role="button" class="csh_staff_rate" data-rate="remove" aria-label="remove">
-            <b>Remove Hint</b>
+            <u><b>Permanently remove hint.</b></u>
         </div> 
+        <div>--------</div>
     </div>
 </script>
 
@@ -46,13 +47,14 @@
 <script type="x-tmpl/mustache" id="show_answer_feedback">
     <div class="csh_student_answer">
         <h class="csh_answer_text" answer={{answer}}>
-        <i> Your original answer: </i>{{answer}} <br> <i>The hint you viewed: </i></h>
+        <i> Improve hints for this question by leaving feedback on this hint or contributing your own! </i> <br>
+        <i> Your original answer was: {{answer}} </i></h>
     </div>
 </script>
 
 <script type="x-tmpl/mustache" id="add_hint_creation">
     <div>
-        <input type ="button" class="csh_student_hint_creation" value="Submit a New Hint">
+        <input type ="button" class="csh_student_hint_creation" value="Contribute a New Hint">
         </input>
     </div>
 </script>
@@ -84,7 +86,7 @@
 </p>
 <div class="csh_feedback">
 <div class="csh_flagged_hints">
-    <span>Flagged</span>
+    <span>moderate reported hints</span>
 </div>
 </div>
 </div>
