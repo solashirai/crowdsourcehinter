@@ -35,7 +35,8 @@
 
 .csh_rating_data {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-self: flex-end;
 }
 
 .csh_rate_hint {
@@ -85,6 +86,7 @@ div[data-rate="downvote"] {
 }
 
 .csh_rate_hint{ cursor: pointer }
+.csh_staff_rate{ cursor: pointer }
 .csh_rate_hint{ color: #948f8f; }
 
 .csh_hintsarea {

@@ -1,5 +1,5 @@
 
-function CrowdsourceHinter(runtime, element){
+function CrowdsourceHinter(runtime, element, data){
     //executeHinter is used to disable the hinter after switching units in an edX course
     //If the code is not made to stop running, the hinter will act up after switching from and back to
     //a certain unit.
@@ -11,16 +11,6 @@ function CrowdsourceHinter(runtime, element){
     var hinting_element;
     var isStaff = false;
     $(".csh_HintsToUse", element).text("");
-    $.ajax({
-        type: "POST",
-        url: runtime.handlerUrl(element, 'get_element'),
-        data: JSON.stringify("helloworld"),
-        success: function(result){
-            console.log("hinting_element being set", String(result));
-            hinting_element = String(result);
-            Logger.listen('problem_graded', result, get_event_data);
-        }
-    });
 
     function stopScript(){
     //This function is used to prevent a particular instance of the hinter from acting after
@@ -36,6 +26,7 @@ function CrowdsourceHinter(runtime, element){
     function get_event_data(event_type, data, element){
         onStudentSubmission(data);
     }
+    Logger.listen('problem_graded', data.hinting_element, get_event_data);
 
     function onStudentSubmission(problem_graded_event_data){
     //This function will determine whether or not the student correctly answered the question.
@@ -138,7 +129,7 @@ function CrowdsourceHinter(runtime, element){
     //Set up the student feedback stage. Each student answer and all answer-specific hints for that answer are shown
     //to the student, as well as an option to create a new hint for an answer.
         if(isStaff){
-            $('.crowdsourcehinter_block').attr('class', 'crowdsourcehinter_block_is_staff');
+            $('.crowdsourcehinter_block', element).attr('class', 'crowdsourcehinter_block_is_staff');
             $.each(result, function(index, value) {
                 if(value == "Flagged") {
                     //index represents the flagged hint's text
@@ -181,11 +172,11 @@ function CrowdsourceHinter(runtime, element){
     
     $(element).on('click', '.csh_student_hint_creation', function(){
     //Click event for the creation of a new hint. This button will bring up the text input.
-        $('.csh_student_hint_creation').each(function(){
+        $('.csh_student_hint_creation', element).each(function(){
             $(this).show();
         });
-        $('.csh_student_text_input').remove();
-        $('.csh_submit_new').remove();
+        $('.csh_student_text_input', element).remove();
+        $('.csh_submit_new', element).remove();
         $(this).hide();
         student_answer = $(this).parent().parent().find('.csh_answer_text').attr('answer');
         $(".csh_student_answer", element).each(function(){
@@ -203,12 +194,11 @@ function CrowdsourceHinter(runtime, element){
 
     $(element).on('click', '.csh_submit_new', function(){
     //Click event to submit a new hint for an answer. 
-        if($(this).parent().find('.csh_student_text_input').val() != null){
+        if($(this).parent().parent().find('.csh_student_text_input').val() != null){
             var answerdata = unescape($(this).attr('answer'));
             var newhint = unescape($('.csh_student_text_input').val());
             Logger.log('crowd_hinter.submit_new.click.event', {"student_answer": answerdata, "new_hint_submission": newhint});
-            console.log(answerdata, newhint);
-            $('.csh_submitbutton').show();
+            $('.csh_submitbutton', element).show();
             $.ajax({
                 type: "POST",
                 url: runtime.handlerUrl(element, 'give_hint'),
@@ -222,7 +212,7 @@ function CrowdsourceHinter(runtime, element){
                         });
                     }
             });
-            $(this).parent().find('.csh_student_text_input').remove();
+            $(this).parent().parent().find('.csh_student_text_input').remove();
             $(this).remove();
         }
     })
