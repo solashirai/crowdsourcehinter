@@ -28,7 +28,7 @@ class CrowdsourceHinter(XBlock):
     hint_database = Dict(default={}, scope=Scope.user_state_summary)
     # Database of initial hints, set by the course instructor. If initial hints are set by the instructor, hint_database's contents
     # will become identical to initial_hints. The datastructure for initial_hints is the same as for hint_databsae, 
-    # {"incorrect_answer": {"hint": rating}} 
+    # {"incorrect_answer": {"hint": rating}}
     initial_hints = Dict(default={}, scope=Scope.content)
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
     # feedback, to find which incorrect answer's hint a student voted on.
@@ -76,7 +76,7 @@ class CrowdsourceHinter(XBlock):
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
         frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
-        frag.initialize_js('CrowdsourceHinter')
+        frag.initialize_js('CrowdsourceHinter', {'hinting_element': self.Element})
         return frag
 
     def studio_view(self, context=None):
@@ -108,20 +108,6 @@ class CrowdsourceHinter(XBlock):
         """
         return self.xmodule_runtime.user_is_staff
 
-    def convert_keys_to_string(dictionary):
-        """Recursively converts dictionary keys to strings."""
-        if not isinstance(dictionary, dict):
-            return dictionary
-        return dict((str(k), convert_keys_to_string(v)) 
-            for k, v in dictionary.items())
-
-    @XBlock.json_handler
-    def get_element(self, data, suffix=''):
-        """
-        Returns the self.element so that the javascript Logger.listen will be using the correct element.
-        """
-        return unicode(self.Element);
-
     @XBlock.json_handler
     def is_user_staff(self, _data, _suffix=''):
         """
@@ -146,9 +132,6 @@ class CrowdsourceHinter(XBlock):
                         or another random hint for an incorrect answer
                         or 'Sorry, there are no more hints for this answer.' if no more hints exist
         """
-        print(self.initial_hints)
-        print(self.generic_hints)
-        print str(data["submittedanswer"])
         # populate hint_database with hints from initial_hints if there are no hints in hint_database.
         # this probably will occur only on the very first run of a unit containing this block.
         if not bool(self.hint_database):
@@ -169,10 +152,9 @@ class CrowdsourceHinter(XBlock):
                 answer = answer[eqplace:]
         remaining_hints = str(self.find_hints(answer))
         if remaining_hints != str(0):
-            print(self.hint_database)
             best_hint = max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0]
             if self.show_best:
-                # if set to show best, only the best hint will be shown. Different hitns will not be shown
+                # if set to show best, only the best hint will be shown. Different hints will not be shown
                 # for multiple submissions/hint requests
                 if best_hint not in self.Flagged.keys():
                     self.Used.append(best_hint)
@@ -191,15 +173,15 @@ class CrowdsourceHinter(XBlock):
                         not_used = random.choice(temporary_hints_list)
                         self.Used.append(not_used)
                         return {'HintsToUse': not_used, "StudentAnswer": answer}
+        # find generic hints for the student if no specific hints exist
+        if len(self.generic_hints) != 0:
+            not_used = random.choice(self.generic_hints)
+            self.Used.append(not_used)
+            return {'HintsToUse': not_used, "StudentAnswer": answer}
         else:
-            if len(self.generic_hints) != 0:
-                not_used = random.choice(self.generic_hints)
-                self.Used.append(not_used)
-                return {'HintsToUse': not_used, "StudentAnswer": answer}
-            else:
-                # if there are no more hints left in either the database or defaults
-                self.Used.append(str("There are no hints for" + " " + answer))
-                return {'HintsToUse': "Sorry, there are no hints for this answer.", "StudentAnswer": answer}
+            # if there are no more hints left in either the database or defaults
+            self.Used.append(str("There are no hints for" + " " + answer))
+            return {'HintsToUse': "Sorry, there are no hints for this answer.", "StudentAnswer": answer}
 
     def find_hints(self, answer):
         """
@@ -367,7 +349,6 @@ class CrowdsourceHinter(XBlock):
             self.hint_database[str(answer_data)][str(data_hint)] += 1
         else:
             self.hint_database[str(answer_data)][str(data_hint)] -= 1
-        print("Ratings changed : " + str(self.hint_database))
 
     @XBlock.json_handler
     def give_hint(self, data, suffix=''):
@@ -390,13 +371,6 @@ class CrowdsourceHinter(XBlock):
             else:
                 self.hint_database[str(answer)][str(submission)] += 1
                 return
-
-    def convert_keys_to_string(dictionary):
-        """Recursively converts dictionary keys to strings."""
-        if not isinstance(dictionary, dict):
-            return dictionary
-        return dict((str(k), convert_keys_to_string(v)) 
-            for k, v in dictionary.items())
 
     @XBlock.json_handler
     def studiodata(self, data, suffix=''):
@@ -431,5 +405,4 @@ class CrowdsourceHinter(XBlock):
         block.generic_hints.append(str(xmlText["generic_hints"]))
         block.initial_hints = copy.copy(xmlText["initial_hints"])
         block.Element = str(xmlText["hinting_element"])
-        print block.Element, block.initial_hints
         return block
