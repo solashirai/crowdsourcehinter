@@ -51,19 +51,19 @@ class CrowdsourceHinter(XBlock):
     # i believe this will also prevent students from voting again on a particular hint if they were to return to
     # a particular problem later
     Voted = List(default=[], scope=Scope.user_state)
-    # This is a dictionary of hints that have been flagged. the values represent the incorrect answer submission, and the
+    # This is a dictionary of hints that have been reported. the values represent the incorrect answer submission, and the
     # keys are the hints the corresponding hints. hints with identical text for differing answers will all not show up for the
     # student.
     #
     # Example: {"desk": "You're completely wrong, the answer is supposed to be computer."}
-    Flagged = Dict(default={}, scope=Scope.user_state_summary)
+    Reported = Dict(default={}, scope=Scope.user_state_summary)
     # This string determines whether or not to show only the best (highest rated) hint to a student
     # When set to 'True' only the best hint will be shown to the student.
     # Details on operation when set to 'False' are to be finalized.
     show_best = Boolean(default = True, scope=Scope.user_state_summary)
     # This String represents the xblock element for which the hinter is running. It is necessary to manually
     # set this value in the XML file under the format "hinting_element": "i4x://edX/DemoX/problem/Text_Input" .
-    # Without properly setting this String, the hinter will not correctly be able to use the Logger listen for problem_graded.
+    # Setting the element in the XML file is critical for the hinter to work.
     Element = String(default="", scope=Scope.content)
 
     def student_view(self, context=None):
@@ -156,19 +156,20 @@ class CrowdsourceHinter(XBlock):
             if self.show_best:
                 # if set to show best, only the best hint will be shown. Different hints will not be shown
                 # for multiple submissions/hint requests
-                if best_hint not in self.Flagged.keys():
+                # currently set by default to True
+                if best_hint not in self.Reported.keys():
                     self.Used.append(best_hint)
                     return {'HintsToUse': best_hint, "StudentAnswer": answer}
             if best_hint not in self.Used:
                 # choose highest rated hint for the incorrect answer
-                if best_hint not in self.Flagged.keys():
+                if best_hint not in self.Reported.keys():
                     self.Used.append(best_hint)
                     return {'HintsToUse': best_hint, "StudentAnswer": answer}
             # choose another random hint for the answer.
             temporary_hints_list = []
             for hint_keys in self.hint_database[str(answer)]:
                 if hint_keys not in self.Used:
-                    if hint_keys not in self.Flagged:
+                    if hint_keys not in self.Reported:
                         temporary_hints_list.append(str(hint_keys))
                         not_used = random.choice(temporary_hints_list)
                         self.Used.append(not_used)
@@ -193,7 +194,7 @@ class CrowdsourceHinter(XBlock):
         
         Returns 0 if no hints to show exist
         """
-        isflagged = []
+        isreported = []
         isused = 0
         self.WrongAnswers.append(str(answer)) # add the student's input to the temporary list
         if str(answer) not in self.hint_database:
@@ -201,13 +202,13 @@ class CrowdsourceHinter(XBlock):
             self.hint_database[str(answer)] = {}
             return str(0)
         for hint_keys in self.hint_database[str(answer)]:
-            for flagged_keys in self.Flagged:
-                if hint_keys == flagged_keys:
-                    isflagged.append(hint_keys)
+            for reported_keys in self.Reported:
+                if hint_keys == reported_keys:
+                    isreported.append(hint_keys)
             if str(hint_keys) in self.Used:
                 if self.show_best is False:
                     isused += 1
-        if (len(self.hint_database[str(answer)]) - len(isflagged) - isused) > 0:
+        if (len(self.hint_database[str(answer)]) - len(isreported) - isused) > 0:
             return str(1)
         else:
             return str(0)
@@ -229,13 +230,13 @@ class CrowdsourceHinter(XBlock):
         # corresponding incorrect answer
         feedback_data = {}
         if data['isStaff'] == 'true':
-            if len(self.Flagged) != 0:
+            if len(self.Reported) != 0:
                 for answer_keys in self.hint_database:
                     if str(len(self.hint_database[str(answer_keys)])) != str(0):
                         for hints in self.hint_database[str(answer_keys)]:
-                            for flagged_hints in self.Flagged:
-                                if str(hints) == flagged_hints:
-                                    feedback_data[str(hints)] = str("Flagged")
+                            for reported_hints in self.Reported:
+                                if str(hints) == reported_hints:
+                                    feedback_data[str(hints)] = str("Reported")
         if len(self.WrongAnswers) == 0:
             return
         else:
@@ -248,7 +249,7 @@ class CrowdsourceHinter(XBlock):
                     self.Used=[]
                     return feedback_data
                 else:
-                    # if the student's answer had no hints (or all the hints were flagged and unavailable) return None
+                    # if the student's answer had no hints (or all the hints were reported and unavailable) return None
                     feedback_data[None] = str(self.WrongAnswers[index])
                     self.WrongAnswers=[]
                     self.Used=[]
@@ -277,9 +278,9 @@ class CrowdsourceHinter(XBlock):
             hint_rating: the rating of the hint as well as data on what the hint in question is
         """
         hint_rating = {}
-        if data['student_answer'] == 'Flagged':
+        if data['student_answer'] == 'Reported':
             hint_rating['rating'] = 0
-            hint_rating['student_ansxwer'] = 'Flagged'
+            hint_rating['student_ansxwer'] = 'Reported'
             hint_rating['hint'] = data['hint']
             return hint_rating
         hint_rating['rating'] = self.hint_database[data['student_answer']][data['hint']]
@@ -292,7 +293,7 @@ class CrowdsourceHinter(XBlock):
         """
         Used to facilitate hint rating by students.
 
-        Hint ratings in hint_database are updated and the resulting hint rating (or flagged status) is returned to JS.
+        Hint ratings in hint_database are updated and the resulting hint rating (or reported status) is returned to JS.
 
         Args:
           data['student_answer']: The incorrect answer that corresponds to the hint that is being voted on
@@ -305,21 +306,21 @@ class CrowdsourceHinter(XBlock):
         answer_data = data['student_answer']
         data_rating = data['student_rating']
         data_hint = data['hint']
-        if data['student_rating'] == 'unflag':
-            for flagged_hints in self.Flagged:
-                if flagged_hints == data_hint:
-                    self.Flagged.pop(data_hint, None)
-                    return {'rating': 'unflagged'}
+        if data['student_rating'] == 'unreport':
+            for reporteded_hints in self.Reported:
+                if reported_hints == data_hint:
+                    self.Reported.pop(data_hint, None)
+                    return {'rating': 'unreported'}
         if data['student_rating'] == 'remove':
-            for flagged_hints in self.Flagged:
-                if data_hint == flagged_hints:
-                    self.hint_database[self.Flagged[data_hint]].pop(data_hint, None)
-                    self.Flagged.pop(data_hint, None)       
+            for reported_hints in self.Reported:
+                if data_hint == reported_hints:
+                    self.hint_database[self.Reported[data_hint]].pop(data_hint, None)
+                    self.Reported.pop(data_hint, None)       
                     return {'rating': 'removed'}
-        if data['student_rating'] == 'flag':
-            # add hint to Flagged dictionary
-            self.Flagged[str(data_hint)] = answer_data
-            return {"rating": 'flagged', 'hint': data_hint}
+        if data['student_rating'] == 'report':
+            # add hint to Reported dictionary
+            self.Reported[str(data_hint)] = answer_data
+            return {"rating": 'reported', 'hint': data_hint}
         if str(data_hint) not in self.Voted:
             self.Voted.append(str(data_hint)) # add data to Voted to prevent multiple votes
             rating = self.change_rating(data_hint, data_rating, answer_data) # change hint rating
@@ -351,7 +352,7 @@ class CrowdsourceHinter(XBlock):
             self.hint_database[str(answer_data)][str(data_hint)] -= 1
 
     @XBlock.json_handler
-    def give_hint(self, data, suffix=''):
+    def add_new_hint(self, data, suffix=''):
         """
         This function adds a new hint submitted by the student into the hint_database.
 
@@ -375,10 +376,10 @@ class CrowdsourceHinter(XBlock):
     @XBlock.json_handler
     def studiodata(self, data, suffix=''):
         """
-        This function serves to return the dictionary of flagged hints to JS. This is intended for use in
+        This function serves to return the dictionary of reported hints to JS. This is intended for use in
         the studio_view, which is under construction at the moment
         """
-        return self.Flagged
+        return self.Reported
 
     @staticmethod
     def workbench_scenarios():
@@ -388,7 +389,7 @@ class CrowdsourceHinter(XBlock):
             """
                 <verticaldemo>
                     <crowdsourcehinter>
-                        {"initial_hint_answer": "michigann", "initial_hint_text": "you have an extra n", "generic_hint": "make sure to check your spelling"}
+                        {"generic_hints": "Make sure to check for basic mistakes like typos", "initial_hints": {"michiganp": {"remove the p at the end", 0}, "michigann": {"too many Ns on there": 0}}, "hinting_element": "i4x://edX/DemoX/problem/Text_Input"}
                     </crowdsourcehinter>
                  </verticaldemo>
             """
