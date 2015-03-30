@@ -10,17 +10,17 @@
             <div role="button" class="csh_rate_hint" data-rate="downvote">
                 <b>Rate as Unhelpful</b>
             </div>
-            <div role="button" class="csh_rate_hint" data-rate="flag" data-icon="flag" title="Report this hint.">
+            <div role="button" class="csh_rate_hint" data-rate="report" data-icon="report" title="Report this hint.">
                 <b>⚑</b>
             </div>
         </div>
     </div>
 </script>
 
-<script type="x-tmpl/mustache" id="show_flagged_feedback">
+<script type="x-tmpl/mustache" id="show_reported_feedback">
     <div class="csh_hint_value" value ="{{hint}}">
         <div class="csh_hint">{{hint}}</div>
-        <div role="button" class="csh_staff_rate" data-rate="unflag" aria-label="unflag">
+        <div role="button" class="csh_staff_rate" data-rate="unreport" aria-label="unreport">
             <u><b>Return hint for use in the hinter</b></u>
         </div>
         <div role="button" class="csh_staff_rate" data-rate="remove" aria-label="remove">
@@ -71,7 +71,7 @@
         <div role="button" class="csh_rate_hint" data-rate="downvote" title="This hint was not very helpful.">
             <b>-</b>
         </div>
-        <div role="button" class="csh_rate_hint" data-rate="flag" title="Report this hint">
+        <div role="button" class="csh_rate_hint" data-rate="report" title="Report this hint">
             <b>⚑</b>
         </div>
     </div>
@@ -85,7 +85,7 @@
 <span class='Thankyou'></span>
 </p>
 <div class="csh_feedback">
-<div class="csh_flagged_hints">
+<div class="csh_reported_hints">
     <span>moderate reported hints</span>
 </div>
 </div>

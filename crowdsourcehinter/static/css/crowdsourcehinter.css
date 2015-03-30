@@ -45,7 +45,7 @@
   align-self: flex-end;
 }
 
-div[data-rate="flag"]{
+div[data-rate="report"]{
     font-weight: bold;
 }
 
@@ -69,15 +69,15 @@ div[data-rate="downvote"] {
     font-weight: bold;
 }
 
-.csh_flagged_hints {
+.csh_reported_hints {
     background-color: red;
 }
-.crowdsourcehinter_block .csh_flagged_hints {
+.crowdsourcehinter_block .csh_reported_hints {
     visibility: hidden;
     display: none;
 }
 
-.crowdsourcehinter_block_is_staff .csh_flagged_hints {
+.crowdsourcehinter_block_is_staff .csh_reported_hints {
     visibility: visible;
 }
 

@@ -80,7 +80,7 @@ function CrowdsourceHinter(runtime, element, data){
 
     function showHintFeedback(hint, student_answer){
     //Append answer-specific hints for each student answer during the feedback stage.
-    //This appended div includes upvote/downvote/flagging buttons, the hint, and the hint's rating
+    //This appended div includes upvote/downvote/reporting buttons, the hint, and the hint's rating
         $(".csh_student_answer", element).each(function(){
             if ($(this).find('.csh_answer_text').attr('answer') == student_answer){
                 var html = "";
@@ -100,17 +100,17 @@ function CrowdsourceHinter(runtime, element, data){
         });
     }
 
-    function showFlaggedFeedback(result){
-    //For staff use, shows hints that have been flagged by students and allows for the hints' unflagging/removal.
+    function showReportedFeedback(result){
+    //For staff use, shows hints that have been reporteded by students and allows for the hints' unreporting/removal.
         var html = "";
         $(function(){
-            var template = $('#show_flagged_feedback').html();
+            var template = $('#show_reported_feedback').html();
             var data = {
                 hint: result
             };
             html = Mustache.render(template, data);
         });
-        $(".csh_flagged_hints", element).append(html);
+        $(".csh_reported_hints", element).append(html);
     }
 
     function setStudentAnswers(student_answers){
@@ -131,15 +131,15 @@ function CrowdsourceHinter(runtime, element, data){
         if(isStaff){
             $('.crowdsourcehinter_block', element).attr('class', 'crowdsourcehinter_block_is_staff');
             $.each(result, function(index, value) {
-                if(value == "Flagged") {
-                    //index represents the flagged hint's text
-                    showFlaggedFeedback(index);
+                if(value == "Reported") {
+                    //index represents the reported hint's text
+                    showReportedFeedback(index);
                 }
             });
         }
         if(!isShowingHintFeedback){
             $.each(result, function(index, value) {
-              if(value != "Flagged"){
+              if(value != "Reported"){
                 setStudentAnswers(value);
                 student_answer = value;
                 hint = index;
@@ -160,7 +160,7 @@ function CrowdsourceHinter(runtime, element, data){
                         }
                     });
                 }
-                //flagged hints have their corresponding answer set to "Flagged"
+                //reported hints have their corresponding answer set to "Reported"
                 else{
                     showHintFeedback(hint, student_answer);
                 }
@@ -201,7 +201,7 @@ function CrowdsourceHinter(runtime, element, data){
             $('.csh_submitbutton', element).show();
             $.ajax({
                 type: "POST",
-                url: runtime.handlerUrl(element, 'give_hint'),
+                url: runtime.handlerUrl(element, 'add_new_hint'),
                 data: JSON.stringify({"submission": newhint, "answer": answerdata}),
                 success: function(result){
                         $.ajax({
@@ -218,8 +218,8 @@ function CrowdsourceHinter(runtime, element, data){
     })
 
     $(element).on('click', '.csh_rate_hint', function(){
-        if ($(this).attr('data-rate') == "flag"){
-            alert("This hint has been flagged for review.");
+        if ($(this).attr('data-rate') == "report"){
+            alert("This hint has been reported for review.");
         }
         hint = $('.csh_HintsToUse', element).attr('hint_received');
         student_answer = $('.csh_HintsToUse', element).attr('student_answer');
@@ -233,10 +233,10 @@ function CrowdsourceHinter(runtime, element, data){
     });
 
     $(element).on('click', '.csh_staff_rate', function(){
-    //Staff ratings are the removal or unflagging of flagged hints from the database. The attribute 'data-rate' is used
-    //to determine whether to unflag or delete the hint.
+    //Staff ratings are the removal or unreporting of reported hints from the database. The attribute 'data-rate' is used
+    //to determine whether to unreport or delete the hint.
         hint = $(this).parent().find(".csh_hint").text();
-        student_answer = "Flagged";
+        student_answer = "Reported";
         Logger.log('crowd_hinter.staff_rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
         $.ajax({
             type: "POST",
