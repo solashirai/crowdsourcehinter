@@ -5,13 +5,10 @@ import pkg_resources
 import random
 import json
 import copy
-from copy import deepcopy
 
 from xblock.core import XBlock
 from xblock.fields import Scope, Dict, List, Boolean, String
 from xblock.fragment import Fragment
-
-from eventtracking import tracker
 
 log = logging.getLogger(__name__)
 
@@ -20,14 +17,14 @@ class CrowdsourceHinter(XBlock):
     This is the Crowd Sourced Hinter XBlock. This Xblock seeks to provide students with hints
     that specifically address their mistake. Additionally, the hints that this Xblock shows
     are created by the students themselves. This doc string will probably be edited later.
-    """ 
+    """
     # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
     # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
     #
     # Example: {"computerr": {"You misspelled computer, remove the last r.": 5}}
     hint_database = Dict(default={}, scope=Scope.user_state_summary)
     # Database of initial hints, set by the course instructor. If initial hints are set by the instructor, hint_database's contents
-    # will become identical to initial_hints. The datastructure for initial_hints is the same as for hint_databsae, 
+    # will become identical to initial_hints. The datastructure for initial_hints is the same as for hint_databsae,
     # {"incorrect_answer": {"hint": rating}}
     initial_hints = Dict(default={}, scope=Scope.content)
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
@@ -60,7 +57,7 @@ class CrowdsourceHinter(XBlock):
     # This string determines whether or not to show only the best (highest rated) hint to a student
     # When set to 'True' only the best hint will be shown to the student.
     # Details on operation when set to 'False' are to be finalized.
-    show_best = Boolean(default = True, scope=Scope.user_state_summary)
+    show_best = Boolean(default=True, scope=Scope.user_state_summary)
     # This String represents the xblock element for which the hinter is running. It is necessary to manually
     # set this value in the XML file under the format "hinting_element": "i4x://edX/DemoX/problem/Text_Input" .
     # Setting the element in the XML file is critical for the hinter to work.
@@ -68,8 +65,8 @@ class CrowdsourceHinter(XBlock):
 
     def student_view(self, context=None):
         """
-        This view renders the hint view to the students. The HTML has the hints templated 
-        in, and most of the remaining functionality is in the JavaScript. 
+        This view renders the hint view to the students. The HTML has the hints templated
+        in, and most of the remaining functionality is in the JavaScript.
         """
         html = self.resource_string("static/html/crowdsourcehinter.html")
         frag = Fragment(html)
@@ -191,7 +188,7 @@ class CrowdsourceHinter(XBlock):
 
         Args:
           answer: This is equal to answer from get_hint, the answer the student submitted
-        
+
         Returns 0 if no hints to show exist
         """
         isreported = []
@@ -238,21 +235,21 @@ class CrowdsourceHinter(XBlock):
                                 if str(hints) == reported_hints:
                                     feedback_data[str(hints)] = str("Reported")
         if len(self.WrongAnswers) == 0:
-            return
+            return feedback_data
         else:
             for index in range(0, len(self.Used)):
                 # each index is a hint that was used, in order of usage
                 if str(self.Used[index]) in self.hint_database[self.WrongAnswers[index]]:
                     # add new key (hint) to feedback_data with a value (incorrect answer)
                     feedback_data[str(self.Used[index])] = str(self.WrongAnswers[index])
-                    self.WrongAnswers=[]
-                    self.Used=[]
+                    self.WrongAnswers = []
+                    self.Used = []
                     return feedback_data
                 else:
                     # if the student's answer had no hints (or all the hints were reported and unavailable) return None
                     feedback_data[None] = str(self.WrongAnswers[index])
-                    self.WrongAnswers=[]
-                    self.Used=[]
+                    self.WrongAnswers = []
+                    self.Used = []
                     return feedback_data
         self.WrongAnswers=[]
         self.Used=[]
@@ -307,7 +304,7 @@ class CrowdsourceHinter(XBlock):
         data_rating = data['student_rating']
         data_hint = data['hint']
         if data['student_rating'] == 'unreport':
-            for reporteded_hints in self.Reported:
+            for reported_hints in self.Reported:
                 if reported_hints == data_hint:
                     self.Reported.pop(data_hint, None)
                     return {'rating': 'unreported'}
@@ -315,7 +312,7 @@ class CrowdsourceHinter(XBlock):
             for reported_hints in self.Reported:
                 if data_hint == reported_hints:
                     self.hint_database[self.Reported[data_hint]].pop(data_hint, None)
-                    self.Reported.pop(data_hint, None)       
+                    self.Reported.pop(data_hint, None)
                     return {'rating': 'removed'}
         if data['student_rating'] == 'report':
             # add hint to Reported dictionary

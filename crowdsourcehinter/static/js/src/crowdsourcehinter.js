@@ -193,8 +193,8 @@ function CrowdsourceHinter(runtime, element, data){
     })
 
     $(element).on('click', '.csh_submit_new', function(){
-    //Click event to submit a new hint for an answer. 
-        if($(this).parent().parent().find('.csh_student_text_input').val() != null){
+    //Click event to submit a new hint for an answer.
+        if($(this).parent().parent().find('.csh_student_text_input').val().length > 0){
             var answerdata = unescape($(this).attr('answer'));
             var newhint = unescape($('.csh_student_text_input').val());
             Logger.log('crowd_hinter.submit_new.click.event', {"student_answer": answerdata, "new_hint_submission": newhint});
@@ -227,8 +227,7 @@ function CrowdsourceHinter(runtime, element, data){
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "hint": hint, "student_answer": student_answer}),
-            success: console.log($(this).attr('data-rate'))
+            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "hint": hint, "student_answer": student_answer})
         });
     });
 
