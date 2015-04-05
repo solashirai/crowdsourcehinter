@@ -1,15 +1,14 @@
-
 function CrowdsourceHinter(runtime, element, data){
-    //executeHinter is used to disable the hinter after switching units in an edX course
-    //If the code is not made to stop running, the hinter will act up after switching from and back to
-    //a certain unit.
+    //switching units back to a previous question will make a second hinter start up.
+    //executeHinter is used to disable the hinter after switching units in an edX course.
     var executeHinter = true;
     $(".crowdsourcehinter_block", element).hide();
 
     if(executeHinter){
     var isShowingHintFeedback = false;
     var hinting_element;
-    var isStaff = false;
+    var isStaff;
+    var voted = false;
     $(".csh_HintsToUse", element).text("");
 
     function stopScript(){
@@ -45,26 +44,9 @@ function CrowdsourceHinter(runtime, element, data){
             //send empty data for ajax call because not having a data field causes error
             $.ajax({
                 type: "POST",
-                url: runtime.handlerUrl(element, 'is_user_staff'),
+                url: runtime.handlerUrl(element, 'get_feedback'),
                 data: JSON.stringify({}),
-                success: function(result) {
-                    if (result['is_user_staff']) {
-                        isStaff = true;
-                        $.ajax({
-                            type: "POST",
-                            url: runtime.handlerUrl(element, 'get_feedback'),
-                            data: JSON.stringify({"isStaff":"true"}),
-                            success: getFeedback
-                        });
-                    } else {
-                        $.ajax({
-                            type: "POST",
-                            url: runtime.handlerUrl(element, 'get_feedback'),
-                            data: JSON.stringify({"isStaff":"false"}),
-                            success: getFeedback
-                        });
-                    }
-                }
+                success: getFeedback
             });
         }  
     }
@@ -114,8 +96,9 @@ function CrowdsourceHinter(runtime, element, data){
     }
 
     function setStudentAnswers(student_answers){
-    //Append divs for each answer the student submitted before correctly answering the question.
-    //showHintFeedback appends new hints into these divs.
+    //Append new divisions into html for each answer the student submitted before correctly 
+    //answering the question. showHintFeedback appends new hints into these divs.
+    //When the hinter is set to show best, only one div will be created
         var html = "";
         var template = $('#show_answer_feedback').html();
         var data = {
@@ -128,7 +111,7 @@ function CrowdsourceHinter(runtime, element, data){
     function getFeedback(result){
     //Set up the student feedback stage. Each student answer and all answer-specific hints for that answer are shown
     //to the student, as well as an option to create a new hint for an answer.
-        if(isStaff){
+        if(data.isStaff){
             $('.crowdsourcehinter_block', element).attr('class', 'crowdsourcehinter_block_is_staff');
             $.each(result, function(index, value) {
                 if(value == "Reported") {
@@ -169,9 +152,9 @@ function CrowdsourceHinter(runtime, element, data){
             isShowingHintFeedback = true;
         }
     }
-    
+
     $(element).on('click', '.csh_student_hint_creation', function(){
-    //Click event for the creation of a new hint. This button will bring up the text input.
+    //create text input area for contributing a new hint
         $('.csh_student_hint_creation', element).each(function(){
             $(this).show();
         });
@@ -193,24 +176,16 @@ function CrowdsourceHinter(runtime, element, data){
     })
 
     $(element).on('click', '.csh_submit_new', function(){
-    //Click event to submit a new hint for an answer.
+    //add the newly created hint to the hinter's pool of hints
         if($(this).parent().parent().find('.csh_student_text_input').val().length > 0){
             var answerdata = unescape($(this).attr('answer'));
             var newhint = unescape($('.csh_student_text_input').val());
-            Logger.log('crowd_hinter.submit_new.click.event', {"student_answer": answerdata, "new_hint_submission": newhint});
             $('.csh_submitbutton', element).show();
             $.ajax({
                 type: "POST",
                 url: runtime.handlerUrl(element, 'add_new_hint'),
                 data: JSON.stringify({"submission": newhint, "answer": answerdata}),
-                success: function(result){
-                        $.ajax({
-                            type: "POST",
-                            url: runtime.handlerUrl(element, 'get_ratings'),
-                            data: JSON.stringify({"student_answer": answerdata, "hint": newhint}),
-                            success: showHintFeedback(newhint, answerdata)
-                        });
-                    }
+                success: Logger.log('crowd_hinter.submit_new.click.event', {"student_answer": answerdata, "new_hint_submission": newhint})
             });
             $(this).parent().parent().find('.csh_student_text_input').remove();
             $(this).remove();
@@ -218,22 +193,35 @@ function CrowdsourceHinter(runtime, element, data){
     })
 
     $(element).on('click', '.csh_rate_hint', function(){
+    //send info to hinter indicating whether the hint was upvoted, downvoted, or reported
+    if(!voted || $(this).attr('data-rate')=="report"){
         if ($(this).attr('data-rate') == "report"){
             alert("This hint has been reported for review.");
         }
         hint = $('.csh_HintsToUse', element).attr('hint_received');
         student_answer = $('.csh_HintsToUse', element).attr('student_answer');
-        Logger.log('crowd_hinter.rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
-            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "hint": hint, "student_answer": student_answer})
+            data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "hint": hint, "student_answer": student_answer}),
+            success: Logger.log('crowd_hinter.rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')})
         });
+        voted = true;
+        }
     });
 
+    function removeFeedback(){
+    //remove a hint from the staff feedback area after a staff member has
+    //returned the hint to the hint pool or removed it permanently
+        $('.csh_hint_value', element).each(function(){
+            if($(this).attr('value') == hint){
+                $(this).remove();
+            }
+        });
+    }
+
     $(element).on('click', '.csh_staff_rate', function(){
-    //Staff ratings are the removal or unreporting of reported hints from the database. The attribute 'data-rate' is used
-    //to determine whether to unreport or delete the hint.
+    //Staff "rating" removes or returns a reported hint from/to the hinter's pool of hints
         hint = $(this).parent().find(".csh_hint").text();
         student_answer = "Reported";
         Logger.log('crowd_hinter.staff_rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": $(this).attr('data-rate')});
@@ -241,13 +229,8 @@ function CrowdsourceHinter(runtime, element, data){
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
             data: JSON.stringify({"student_rating": $(this).attr('data-rate'), "hint": hint, "student_answer": student_answer}),
-            success: function (result){
-                    $('.csh_hint_value', element).each(function(){
-                        if($(this).attr('value') == hint){
-                            $(this).remove();
-                        }
-                    });
-            }
+            success: removeFeedback()
         });
     })
+
 }}
