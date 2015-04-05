@@ -63,19 +63,6 @@ class CrowdsourceHinter(XBlock):
     # Setting the element in the XML file is critical for the hinter to work.
     Element = String(default="", scope=Scope.content)
 
-    def student_view(self, context=None):
-        """
-        This view renders the hint view to the students. The HTML has the hints templated
-        in, and most of the remaining functionality is in the JavaScript.
-        """
-        html = self.resource_string("static/html/crowdsourcehinter.html")
-        frag = Fragment(html)
-        frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
-        frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
-        frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
-        frag.initialize_js('CrowdsourceHinter', {'hinting_element': self.Element})
-        return frag
-
     def studio_view(self, context=None):
         """
         This function defines a view for editing the XBlock when embedding it in a course. It will allow
@@ -105,15 +92,18 @@ class CrowdsourceHinter(XBlock):
         """
         return self.xmodule_runtime.user_is_staff
 
-    @XBlock.json_handler
-    def is_user_staff(self, _data, _suffix=''):
+    def student_view(self, context=None):
         """
-        Return whether the user is staff.
-        Returns:
-        is_user_staff: indicator for whether the user is staff
+        This view renders the hint view to the students. The HTML has the hints templated
+        in, and most of the remaining functionality is in the JavaScript.
         """
-        result = {'is_user_staff': self.get_user_is_staff()}
-        return result
+        html = self.resource_string("static/html/crowdsourcehinter.html")
+        frag = Fragment(html)
+        frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
+        frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
+        frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
+        frag.initialize_js('CrowdsourceHinter', {'hinting_element': self.Element, 'isStaff': self.Element})
+        return frag
 
     @XBlock.json_handler
     def get_hint(self, data, suffix=''):
@@ -226,7 +216,7 @@ class CrowdsourceHinter(XBlock):
         # that were not used. The keys are the used hints, the values are the
         # corresponding incorrect answer
         feedback_data = {}
-        if data['isStaff'] == 'true':
+        if self.get_user_is_staff():
             if len(self.Reported) != 0:
                 for answer_keys in self.hint_database:
                     if str(len(self.hint_database[str(answer_keys)])) != str(0):
@@ -254,14 +244,6 @@ class CrowdsourceHinter(XBlock):
         self.WrongAnswers=[]
         self.Used=[]
         return feedback_data
-
-    def no_hints(self, index):
-        """
-        This function is used when no hints exist for an answer. The feedback_data within
-        get_feedback is set to "there are no hints for" + " " + str(self.WrongAnswers[index])
-        """
-        self.WrongAnswers.append(str(self.WrongAnswers[index]))
-        self.Used.append(str("There are no hints for" + " " + str(self.WrongAnswers[index])))
 
     @XBlock.json_handler
     def get_ratings(self, data, suffix=''):
