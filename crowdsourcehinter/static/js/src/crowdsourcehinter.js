@@ -6,8 +6,6 @@ function CrowdsourceHinter(runtime, element, data){
 
     if(executeHinter){
     var isShowingHintFeedback = false;
-    var hinting_element;
-    var isStaff;
     var voted = false;
     $(".csh_HintsToUse", element).text("");
 
