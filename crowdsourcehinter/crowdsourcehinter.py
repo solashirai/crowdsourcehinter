@@ -102,7 +102,7 @@ class CrowdsourceHinter(XBlock):
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
         frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
-        frag.initialize_js('CrowdsourceHinter', {'hinting_element': self.Element, 'isStaff': self.Element})
+        frag.initialize_js('CrowdsourceHinter', {'hinting_element': self.Element, 'isStaff': self.xmodule_runtime.user_is_staff})
         return frag
 
     @XBlock.json_handler
@@ -115,7 +115,7 @@ class CrowdsourceHinter(XBlock):
           data['submittedanswer']: The string of text that the student submits for a problem.
 
         returns:
-          'HintsToUse': the highest rated hint for an incorrect answer
+          'Hints': the highest rated hint for an incorrect answer
                         or another random hint for an incorrect answer
                         or 'Sorry, there are no more hints for this answer.' if no more hints exist
         """
@@ -146,12 +146,12 @@ class CrowdsourceHinter(XBlock):
                 # currently set by default to True
                 if best_hint not in self.Reported.keys():
                     self.Used.append(best_hint)
-                    return {'HintsToUse': best_hint, "StudentAnswer": answer}
+                    return {'Hints': best_hint, "StudentAnswer": answer}
             if best_hint not in self.Used:
                 # choose highest rated hint for the incorrect answer
                 if best_hint not in self.Reported.keys():
                     self.Used.append(best_hint)
-                    return {'HintsToUse': best_hint, "StudentAnswer": answer}
+                    return {'Hints': best_hint, "StudentAnswer": answer}
             # choose another random hint for the answer.
             temporary_hints_list = []
             for hint_keys in self.hint_database[str(answer)]:
@@ -160,16 +160,16 @@ class CrowdsourceHinter(XBlock):
                         temporary_hints_list.append(str(hint_keys))
                         not_used = random.choice(temporary_hints_list)
                         self.Used.append(not_used)
-                        return {'HintsToUse': not_used, "StudentAnswer": answer}
+                        return {'Hints': not_used, "StudentAnswer": answer}
         # find generic hints for the student if no specific hints exist
         if len(self.generic_hints) != 0:
             not_used = random.choice(self.generic_hints)
             self.Used.append(not_used)
-            return {'HintsToUse': not_used, "StudentAnswer": answer}
+            return {'Hints': not_used, "StudentAnswer": answer}
         else:
             # if there are no more hints left in either the database or defaults
             self.Used.append(str("There are no hints for" + " " + answer))
-            return {'HintsToUse': "Sorry, there are no hints for this answer.", "StudentAnswer": answer}
+            return {'Hints': "Sorry, there are no hints for this answer.", "StudentAnswer": answer}
 
     def find_hints(self, answer):
         """
