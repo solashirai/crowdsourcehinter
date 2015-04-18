@@ -1,7 +1,7 @@
-<script type='x-tmpl/mustache' id='show_hint_feedback'>
-    <div class='csh_hint_value' value="{{hintvalue}}">
+<script type='x-tmpl/mustache' id='show_hint_contribution'>
+    <div class='csh_hint_value' value="{{hintText}}">
         <div class='csh_hint_data'>
-            <div class="csh_hint"><b>{{hint}}</b></div>
+            <div class="csh_hint"><b>{{hintText}}</b></div>
         </div>
         <div class='csh_rating_data'>
             <div role="button" class="csh_rate_hint" data-rate="upvote">
@@ -17,9 +17,9 @@
     </div>
 </script>
 
-<script type="x-tmpl/mustache" id="show_reported_feedback">
-    <div class="csh_hint_value" value ="{{hint}}">
-        <div class="csh_hint">{{hint}}</div>
+<script type="x-tmpl/mustache" id="show_reported_moderation">
+    <div class="csh_hint_value" value ="{{reportedHintText}}">
+        <div class="csh_hint">{{reportedHintText}}</div>
         <div role="button" class="csh_staff_rate" data-rate="unreport" aria-label="unreport">
             <u><b>Return hint for use in the hinter</b></u>
         </div>
@@ -30,7 +30,7 @@
     </div>
 </script>
 
-<script type="x-tmpl/mustache" id="student_hint_creation">
+<script type="x-tmpl/mustache" id="hint_text_input">
     <p>
         <input type="text" name="studentinput" class="csh_student_text_input">
     </p>
@@ -44,10 +44,10 @@
     </div>
 </script>
 
-<script type="x-tmpl/mustache" id="show_answer_feedback">
+<script type="x-tmpl/mustache" id="show_student_submission">
     <div class="csh_student_answer">
         <h class="csh_answer_text" answer={{answer}}>
-        <i> Improve hints for this question by leaving feedback on this hint or contributing your own! </i> <br>
+        <i> Improve hints for this question by rating hints as helpful/unhelpful or contributing your own! </i> <br>
         <i> Your original answer was: {{answer}} </i></h>
     </div>
 </script>
@@ -62,9 +62,9 @@
 <div class="crowdsourcehinter_block">
 
 <div class='csh_hint_reveal'>
-    <div class='csh_Hints' student_answer = '' hint_received=''>
+    <div class='csh_hint_text' student_answer = '' hint_received=''>
     </div>
-    <div class='csh_HintQuickFeedback'>
+    <div class='csh_hint_rating_on_incorrect'>
         <div role="button" class="csh_rate_hint" data-rate="upvote" title="This hint was helpful!">
             <b>+</b>
         </div>
@@ -81,10 +81,7 @@
 <div class="crowdsourcehinter_block">
 
     <section class="csh_correct"></section>
-<p>
-<span class='Thankyou'></span>
-</p>
-<div class="csh_feedback">
+<div class="csh_student_submission">
 <div class="csh_reported_hints">
     <span>moderate reported hints</span>
 </div>
