@@ -22,7 +22,7 @@
   flex-direction: column;
 }
 
-.csh_HintQuickFeedback{
+.csh_hint_rating_on_incorrect{
   display: flex;
   flex-direction: row;
   justify-content: flex-end;

@@ -115,7 +115,7 @@ class CrowdsourceHinter(XBlock):
           data['submittedanswer']: The string of text that the student submits for a problem.
 
         returns:
-          'Hints': the highest rated hint for an incorrect answer
+          'bestHint': the highest rated hint for an incorrect answer
                         or another random hint for an incorrect answer
                         or 'Sorry, there are no more hints for this answer.' if no more hints exist
         """
@@ -146,12 +146,12 @@ class CrowdsourceHinter(XBlock):
                 # currently set by default to True
                 if best_hint not in self.Reported.keys():
                     self.Used.append(best_hint)
-                    return {'Hints': best_hint, "StudentAnswer": answer}
+                    return {'BestHint': best_hint, "StudentAnswer": answer}
             if best_hint not in self.Used:
                 # choose highest rated hint for the incorrect answer
                 if best_hint not in self.Reported.keys():
                     self.Used.append(best_hint)
-                    return {'Hints': best_hint, "StudentAnswer": answer}
+                    return {'BestHint': best_hint, "StudentAnswer": answer}
             # choose another random hint for the answer.
             temporary_hints_list = []
             for hint_keys in self.hint_database[str(answer)]:
@@ -160,12 +160,12 @@ class CrowdsourceHinter(XBlock):
                         temporary_hints_list.append(str(hint_keys))
                         not_used = random.choice(temporary_hints_list)
                         self.Used.append(not_used)
-                        return {'Hints': not_used, "StudentAnswer": answer}
+                        return {'BestHint': not_used, "StudentAnswer": answer}
         # find generic hints for the student if no specific hints exist
         if len(self.generic_hints) != 0:
             not_used = random.choice(self.generic_hints)
             self.Used.append(not_used)
-            return {'Hints': not_used, "StudentAnswer": answer}
+            return {'BestHint': not_used, "StudentAnswer": answer}
         else:
             # if there are no more hints left in either the database or defaults
             self.Used.append(str("There are no hints for" + " " + answer))
