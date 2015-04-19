@@ -39,7 +39,7 @@
   align-self: flex-end;
 }
 
-.csh_rate_hint {
+.csh_rate_hint, .csh_report_hint, .csh_rate_hint_completed {
   margin-right: 15px;
   margin-top: 5px;
   align-self: flex-end;
@@ -59,12 +59,12 @@ background-clip: padding-box;
 font-size: 0.8125em;
 }
 
-div[data-rate="upvote"] {
+.csh_rate_hint[data-rate="upvote"] {
     color: green;
     font-weight: bold;
 }
 
-div[data-rate="downvote"] {
+.csh_rate_hint[data-rate="downvote"] {
     color: red;
     font-weight: bold;
 }
@@ -86,6 +86,7 @@ div[data-rate="downvote"] {
 }
 
 .csh_rate_hint{ cursor: pointer }
+.csh_report_hint{ cursor: pointer }
 .csh_staff_rate{ cursor: pointer }
 .csh_rate_hint{ color: #948f8f; }
 
