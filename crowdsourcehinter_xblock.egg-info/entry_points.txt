@@ -1,3 +1,0 @@
-[xblock.v1]
-crowdsourcehinter = crowdsourcehinter:CrowdsourceHinter
-
