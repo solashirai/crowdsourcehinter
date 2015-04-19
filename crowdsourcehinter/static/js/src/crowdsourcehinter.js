@@ -1,7 +1,6 @@
 function CrowdsourceHinter(runtime, element, data){
 
     var onHinterPage = true; //We don't do hinter logic if we're on a differ tab in a sequential.
-    var voted = false;
     
     $(".crowdsourcehinter_block", element).hide();
 
