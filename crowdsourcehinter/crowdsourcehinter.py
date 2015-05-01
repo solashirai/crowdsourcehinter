@@ -28,10 +28,10 @@ class CrowdsourceHinter(XBlock):
     # {"incorrect_answer": {"hint": rating}}
     initial_hints = Dict(default={}, scope=Scope.content)
     # This is a list of incorrect answer submissions made by the student. this list is mostly used for
-    # feedback, to find which incorrect answer's hint a student voted on.
+    # when the student starts rating hints, to find which incorrect answer's hint a student voted on.
     #
     # Example: ["personal computer", "PC", "computerr"]
-    WrongAnswers = List([], scope=Scope.user_state)
+    incorrect_answers = List([], scope=Scope.user_state)
     # A dictionary of generic_hints. default hints will be shown to students when there are no matches with the
     # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
     # particular incorrect answer)
@@ -43,21 +43,13 @@ class CrowdsourceHinter(XBlock):
     # multiple times)
     #
     # Example: ["You misspelled computer, remove the last r."]
-    Used = List([], scope=Scope.user_state)
-    # This list is used to prevent students from voting multiple times on the same hint during the feedback stage.
-    # i believe this will also prevent students from voting again on a particular hint if they were to return to
-    # a particular problem later
-    Voted = List(default=[], scope=Scope.user_state)
+    used = List([], scope=Scope.user_state)
     # This is a dictionary of hints that have been reported. the values represent the incorrect answer submission, and the
     # keys are the hints the corresponding hints. hints with identical text for differing answers will all not show up for the
     # student.
     #
     # Example: {"desk": "You're completely wrong, the answer is supposed to be computer."}
-    Reported = Dict(default={}, scope=Scope.user_state_summary)
-    # This string determines whether or not to show only the best (highest rated) hint to a student
-    # When set to 'True' only the best hint will be shown to the student.
-    # Details on operation when set to 'False' are to be finalized.
-    show_best = Boolean(default=True, scope=Scope.user_state_summary)
+    reported_hints = Dict(default={}, scope=Scope.user_state_summary)
     # This String represents the xblock element for which the hinter is running. It is necessary to manually
     # set this value in the XML file under the format "hinting_element": "i4x://edX/DemoX/problem/Text_Input" .
     # Setting the element in the XML file is critical for the hinter to work.
@@ -139,42 +131,29 @@ class CrowdsourceHinter(XBlock):
                 answer = answer[eqplace:]
         remaining_hints = str(self.find_hints(answer))
         if remaining_hints != str(0):
-            best_hint = max(self.hint_database[str(answer)].iteritems(), key=operator.itemgetter(1))[0]
-            if self.show_best:
-                # if set to show best, only the best hint will be shown. Different hints will not be shown
-                # for multiple submissions/hint requests
-                # currently set by default to True
-                if best_hint not in self.Reported.keys():
-                    self.Used.append(best_hint)
-                    return {'BestHint': best_hint, "StudentAnswer": answer}
-            if best_hint not in self.Used:
-                # choose highest rated hint for the incorrect answer
-                if best_hint not in self.Reported.keys():
-                    self.Used.append(best_hint)
-                    return {'BestHint': best_hint, "StudentAnswer": answer}
-            # choose another random hint for the answer.
-            temporary_hints_list = []
-            for hint_keys in self.hint_database[str(answer)]:
-                if hint_keys not in self.Used:
-                    if hint_keys not in self.Reported:
-                        temporary_hints_list.append(str(hint_keys))
-                        not_used = random.choice(temporary_hints_list)
-                        self.Used.append(not_used)
-                        return {'BestHint': not_used, "StudentAnswer": answer}
+            for hint in self.hint_database[str(answer)]:
+                print hint, self.reported_hints.keys()
+                print str(self.reported_hints)
+                if hint not in self.reported_hints.keys():
+                    #if best_hint hasn't been set yet or the rating of hints is greater than the rating of best_hint
+                    if (best_hint == "" or self.hint_database[str(answer)][hint] > self.hint_database[str(answer)][str(best_hint)]):
+                        best_hint = hint
+            self.used.append(best_hint)
+            return {'BestHint': best_hint, "StudentAnswer": answer}
         # find generic hints for the student if no specific hints exist
         if len(self.generic_hints) != 0:
-            not_used = random.choice(self.generic_hints)
-            self.Used.append(not_used)
-            return {'BestHint': not_used, "StudentAnswer": answer}
+            generic_hint = random.choice(self.generic_hints)
+            self.used.append(generic_hint)
+            return {'BestHint': generic_hint, "StudentAnswer": answer}
         else:
-            # if there are no more hints left in either the database or defaults
-            self.Used.append(str("There are no hints for" + " " + answer))
+            # if there are no hints in either the database or generic hints
+            self.used.append(str("There are no hints for" + " " + answer))
             return {'Hints': "Sorry, there are no hints for this answer.", "StudentAnswer": answer}
 
     def find_hints(self, answer):
         """
-        This function is used to find all appropriate hints that would be provided for
-        an incorrect answer.
+        This function is used to check that an incorrect answer has available hints to show.
+        It will also add the incorrect answer test to self.incorrect_answers.
 
         Args:
           answer: This is equal to answer from get_hint, the answer the student submitted
@@ -182,90 +161,60 @@ class CrowdsourceHinter(XBlock):
         Returns 0 if no hints to show exist
         """
         isreported = []
-        isused = 0
-        self.WrongAnswers.append(str(answer)) # add the student's input to the temporary list
+        self.incorrect_answers.append(str(answer)) # add the student's input to the temporary list
         if str(answer) not in self.hint_database:
             # add incorrect answer to hint_database if no precedent exists
             self.hint_database[str(answer)] = {}
             return str(0)
         for hint_keys in self.hint_database[str(answer)]:
-            for reported_keys in self.Reported:
+            for reported_keys in self.reported_hints:
                 if hint_keys == reported_keys:
                     isreported.append(hint_keys)
-            if str(hint_keys) in self.Used:
-                if self.show_best is False:
-                    isused += 1
-        if (len(self.hint_database[str(answer)]) - len(isreported) - isused) > 0:
+        if (len(self.hint_database[str(answer)]) - len(isreported)) > 0:
             return str(1)
         else:
             return str(0)
 
     @XBlock.json_handler
-    def get_feedback(self, data, suffix=''):
+    def get_used_hint_answer_data(self, data, suffix=''):
         """
-        This function is used to facilitate student feedback to hints. Specifically this function
-        is used to send necessary data to JS about incorrect answer submissions and hints.
+        This function helps to facilitate student rating of hints and contribution of new hints. 
+        Specifically this function is used to send necessary data to JS about incorrect answer
+        submissions and hints. It also will return hints that have been reported, although this
+        is only for Staff.
 
         Returns:
-          feedback_data: This dicitonary contains all incorrect answers that a student submitted
-                         for the question, all the hints the student recieved, as well as two
-                         more random hints that exist for an incorrect answer in the hint_database
+          used_hint_answer_text: This dicitonary contains reported hints/answers (if the user is staff) and the
+                         first hint/answer pair that the student submitted for a problem.
         """
-        # feedback_data is a dictionary of hints (or lack thereof) used for a
+        # used_hint_answer_text is a dictionary of hints (or lack thereof) used for a
         # specific answer, as well as 2 other random hints that exist for each answer
         # that were not used. The keys are the used hints, the values are the
         # corresponding incorrect answer
-        feedback_data = {}
+        used_hint_answer_text = {}
         if self.get_user_is_staff():
-            if len(self.Reported) != 0:
-                for answer_keys in self.hint_database:
-                    if str(len(self.hint_database[str(answer_keys)])) != str(0):
-                        for hints in self.hint_database[str(answer_keys)]:
-                            for reported_hints in self.Reported:
-                                if str(hints) == reported_hints:
-                                    feedback_data[str(hints)] = str("Reported")
-        if len(self.WrongAnswers) == 0:
-            return feedback_data
+            for index in range(0, len(self.reported_hints)):
+                used_hint_answer_text[str(self.reported_hints[i])] = str("reported")
+        if len(self.incorrect_answers) == 0:
+            return used_hint_answer_text
         else:
-            for index in range(0, len(self.Used)):
+            for index in range(0, len(self.used)):
                 # each index is a hint that was used, in order of usage
-                if str(self.Used[index]) in self.hint_database[self.WrongAnswers[index]]:
-                    # add new key (hint) to feedback_data with a value (incorrect answer)
-                    feedback_data[str(self.Used[index])] = str(self.WrongAnswers[index])
-                    self.WrongAnswers = []
-                    self.Used = []
-                    return feedback_data
+                if str(self.used[index]) in self.hint_database[self.incorrect_answers[index]]:
+                    # add new key (hint) to used_hint_answer_text with a value (incorrect answer)
+                    used_hint_answer_text[str(self.used[index])] = str(self.incorrect_answers[index])
+                    self.incorrect_answers = []
+                    self.used = []
+                    return used_hint_answer_text
                 else:
                     # if the student's answer had no hints (or all the hints were reported and unavailable) return None
-                    feedback_data[None] = str(self.WrongAnswers[index])
-                    self.WrongAnswers = []
-                    self.Used = []
-                    return feedback_data
-        self.WrongAnswers=[]
-        self.Used=[]
-        return feedback_data
-
-    @XBlock.json_handler
-    def get_ratings(self, data, suffix=''):
-        """
-        This function is used to return the ratings of hints during hint feedback.
-
-        data['student_answer'] is the answer for the hint being displayed
-        data['hint'] is the hint being shown to the student
-
-        returns:
-            hint_rating: the rating of the hint as well as data on what the hint in question is
-        """
-        hint_rating = {}
-        if data['student_answer'] == 'Reported':
-            hint_rating['rating'] = 0
-            hint_rating['student_ansxwer'] = 'Reported'
-            hint_rating['hint'] = data['hint']
-            return hint_rating
-        hint_rating['rating'] = self.hint_database[data['student_answer']][data['hint']]
-        hint_rating['student_answer'] = data['student_answer']
-        hint_rating['hint'] = data['hint']
-        return hint_rating
+                    used_hint_answer_text[None] = str(self.incorrect_answers[index])
+                    self.incorrect_answers = []
+                    self.used = []
+                    return used_hint_answer_text
+        self.incorrect_answers=[]
+        self.used=[]
+        return used_hint_answer_text
 
     @XBlock.json_handler
     def rate_hint(self, data, suffix=''):
@@ -275,40 +224,31 @@ class CrowdsourceHinter(XBlock):
         Hint ratings in hint_database are updated and the resulting hint rating (or reported status) is returned to JS.
 
         Args:
-          data['student_answer']: The incorrect answer that corresponds to the hint that is being voted on
-          data['hint']: The hint that is being voted on
+          data['student_answer']: The incorrect answer that corresponds to the hint that is being rated
+          data['hint']: The hint that is being rated
           data['student_rating']: The rating chosen by the student.
-
-        Returns:
-          "rating": The rating of the hint.
         """
         answer_data = data['student_answer']
         data_rating = data['student_rating']
         data_hint = data['hint']
+        print data_rating, answer_data
         if data['student_rating'] == 'unreport':
-            for reported_hints in self.Reported:
+            for reported_hints in self.reported_hints:
                 if reported_hints == data_hint:
-                    self.Reported.pop(data_hint, None)
+                    self.reported_hints.pop(data_hint, None)
                     return {'rating': 'unreported'}
         if data['student_rating'] == 'remove':
-            for reported_hints in self.Reported:
+            for reported_hints in self.reported_hints:
                 if data_hint == reported_hints:
-                    self.hint_database[self.Reported[data_hint]].pop(data_hint, None)
-                    self.Reported.pop(data_hint, None)
+                    self.hint_database[self.reported_hints[data_hint]].pop(data_hint, None)
+                    self.reported_hints.pop(data_hint, None)
                     return {'rating': 'removed'}
         if data['student_rating'] == 'report':
             # add hint to Reported dictionary
-            self.Reported[str(data_hint)] = answer_data
+            self.reported_hints[str(data_hint)] = answer_data
             return {"rating": 'reported', 'hint': data_hint}
-        if str(data_hint) not in self.Voted:
-            self.Voted.append(str(data_hint)) # add data to Voted to prevent multiple votes
-            rating = self.change_rating(data_hint, data_rating, answer_data) # change hint rating
-            if str(rating) == str(0):
-                return {"rating": str(0), 'hint': data_hint}
-            else:
-                return {"rating": str(rating), 'hint': data_hint}
-        else:
-            return {"rating": str('voted'), 'hint': data_hint}
+        rating = self.change_rating(data_hint, data_rating, answer_data) # change hint rating
+        return {"rating": str(rating), 'hint': data_hint}
 
     def change_rating(self, data_hint, data_rating, answer_data):
         """
@@ -358,7 +298,7 @@ class CrowdsourceHinter(XBlock):
         This function serves to return the dictionary of reported hints to JS. This is intended for use in
         the studio_view, which is under construction at the moment
         """
-        return self.Reported
+        return self.reported_hints
 
     @staticmethod
     def workbench_scenarios():

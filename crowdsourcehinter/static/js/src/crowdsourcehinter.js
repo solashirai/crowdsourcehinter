@@ -37,21 +37,21 @@ function CrowdsourceHinter(runtime, element, data){
     }
 
     /**
-     * Start student hint contribution. This will allow students to contribute new hints
+     * Start student hint rating/contribution. This will allow students to contribute new hints
      * to the hinter as well as vote on the helpfulness of the first hint they received
      * for the current problem. This function is called after the student answers
      * the question correctly.
      */
-    function startHintContribution(){
+    function startHintRating(){
         $('.csh_correct', element).show();
         $(".csh_hint_reveal", element).hide();
         if($('.csh_hint_creation', element)){
         //send empty data for ajax call because not having a data field causes error
             $.ajax({
                 type: "POST",
-                url: runtime.handlerUrl(element, 'get_feedback'),
+                url: runtime.handlerUrl(element, 'get_used_hint_answer_data'),
                 data: JSON.stringify({}),
-                success: setHintContributionDivs
+                success: setHintRatingUX
             });
         }
     }
@@ -60,6 +60,7 @@ function CrowdsourceHinter(runtime, element, data){
      * Check whether or not the question was correctly answered by the student.
      * The current method of checking the correctness of the answer is very brittle
      * since we simply look for a string within the problemGradedEventData.
+     * HACK
      * @param problemGradedEventData is the data from problem_graded event.
      */
     function checkIsAnswerCorrect(problemGradedEventData){
@@ -80,7 +81,7 @@ function CrowdsourceHinter(runtime, element, data){
         //search method of correctness of problem is brittle due to checking for a class within
         //the problem block.
         if (checkIsAnswerCorrect(data)){
-            startHintContribution();
+            startHintRating();
         } else { //if the submitted answer is incorrect
             getHint(data);
         }
@@ -98,15 +99,15 @@ function CrowdsourceHinter(runtime, element, data){
     }
 
     /**
-     * Called by setHintContributionDivs to append hints into divs created by
+     * Called by setHintRatingUX to append hints into divs created by
      * showStudentSubmissoinHistory, after the student answered the question correctly.
      * Feedback on hints at this stage consists of upvote/downvote/report buttons.
      * @param hint is the first hint that was shown to the student
      * @param student_answer is the first incorrect answer submitted by the student
      */
-    function showStudentHintContribution(hint, student_answer){
-        var hintContributionTemplate = $(Mustache.render($('#show_hint_contribution').html(), {hintText: hint}));
-        $('.csh_answer_text', element).append(hintContributionTemplate);
+    function showStudentHintRatingUX(hint, student_answer){
+        var hintRatingUXTemplate = $(Mustache.render($('#show_hint_rating_ux').html(), {hintText: hint}));
+        $('.csh_answer_text', element).append(hintRatingUXTemplate);
         var hintCreationTemplate = $(Mustache.render($('#add_hint_creation').html(), {}));
         $('.csh_answer_text', element).append(hintCreationTemplate);
     }
@@ -125,8 +126,8 @@ function CrowdsourceHinter(runtime, element, data){
 
     /**
      * Append new divisions into html for each answer the student submitted before correctly 
-     * answering the question. showStudentHintContribution appends new hints into these divs.
-     * When the hinter is set to show best, only one div will be created.
+     * answering the question. showStudentHintRatingUX appends new hints into these divs.
+     *
      * @param student_answers is the text of the student's incorrect answer
      */
     function showStudentSubmissionHistory(student_answer){
@@ -138,11 +139,11 @@ function CrowdsourceHinter(runtime, element, data){
      * Set up student/staff voting on hints and contribution of new hints. The original incorrect answer and the
      * the corresponding hint shown to the student is displayed. Students can upvote/downvote/report
      * the hint or contribute a new hint for their incorrect answer.
-     * Only one incorrect answer and hint will be shown when the hinter is set to show best.
+     *
      * @param result is a dictionary of incorrect answers and hints, with the index being the hint and the value
      * being the incorrect answer
      */
-    function setHintContributionDivs(result){
+    function setHintRatingUX(result){
         if(data.isStaff){ //allow staff to see and remove/return reported hints to/from the hint pool for a problem
             $('.crowdsourcehinter_block', element).attr('class', 'crowdsourcehinter_block_is_staff');
             $.each(result, function(index, value) {
@@ -164,7 +165,7 @@ function CrowdsourceHinter(runtime, element, data){
                     var hintCreationTemplate = $(Mustache.render($('#add_hint_creation').html(), {}));
                     $('.csh_student_answer', element).append(hintCreationTemplate);
                 } else {
-                    showStudentHintContribution(hint, student_answer);
+                    showStudentHintRatingUX(hint, student_answer);
                 }
             }
         });
@@ -175,7 +176,7 @@ function CrowdsourceHinter(runtime, element, data){
      * is triggered by clicking the "contribute a new hint" button.
      * @param createTextInputButtonHTML is the "contribute a new hint" button that was clicked
      */
-    function create_text_input(){ return function(createTextInputButtonHTML){
+    function createHintContributionTextInput(){ return function(createTextInputButtonHTML){
         $('.csh_student_hint_creation', element).each(function(){
             $(createTextInputButtonHTML.currentTarget).show();
         });
@@ -187,11 +188,11 @@ function CrowdsourceHinter(runtime, element, data){
         var hintTextInputTemplate = $(Mustache.render($('#hint_text_input').html(), {student_answer: student_answer}));
         $('.csh_answer_text', element).append(hintTextInputTemplate);
     }}
-    $(element).on('click', '.csh_student_hint_creation', create_text_input($(this)));
+    $(element).on('click', '.csh_student_hint_creation', createHintContributionTextInput($(this)));
 
     /**
      * Submit a new hint created by the student to the hint pool. Hint text is in
-     * the text input area created by create_text_input. Contributed hints are specific to 
+     * the text input area created by createHintContributionTextInput. Contributed hints are specific to 
      * incorrect answers. Triggered by clicking the "submit hint" button.
      * @param submitHintButtonHTML is the "submit hint" button clicked
      */
@@ -258,7 +259,6 @@ function CrowdsourceHinter(runtime, element, data){
      */
     function removeReportedHint(){
         Logger.log('crowd_hinter.staff_rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": rating});
-        //TODO: change if statement, just find .csh_hint_value with attribute of hint
         $(".csh_hint_value[value='" + hint + "']", element).remove();
     }
 
