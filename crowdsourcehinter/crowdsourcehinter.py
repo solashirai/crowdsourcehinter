@@ -132,8 +132,6 @@ class CrowdsourceHinter(XBlock):
         remaining_hints = str(self.find_hints(answer))
         if remaining_hints != str(0):
             for hint in self.hint_database[str(answer)]:
-                print hint, self.reported_hints.keys()
-                print str(self.reported_hints)
                 if hint not in self.reported_hints.keys():
                     #if best_hint hasn't been set yet or the rating of hints is greater than the rating of best_hint
                     if (best_hint == "" or self.hint_database[str(answer)][hint] > self.hint_database[str(answer)][str(best_hint)]):
@@ -231,7 +229,6 @@ class CrowdsourceHinter(XBlock):
         answer_data = data['student_answer']
         data_rating = data['student_rating']
         data_hint = data['hint']
-        print data_rating, answer_data
         if data['student_rating'] == 'unreport':
             for reported_hints in self.reported_hints:
                 if reported_hints == data_hint:
@@ -265,6 +262,8 @@ class CrowdsourceHinter(XBlock):
           The rating associated with the hint is returned. This rating is identical
           to what would be found under self.hint_database[answer_string[hint_string]]
         """
+        if any(data_hint in generic_hints for generic_hints in self.generic_hints):
+            return
         if data_rating == 'upvote':
             self.hint_database[str(answer_data)][str(data_hint)] += 1
         else:

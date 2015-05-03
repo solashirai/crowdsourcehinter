@@ -1,7 +1,7 @@
 <script type='x-tmpl/mustache' id='show_hint_rating_ux'>
     <div class='csh_hint_value' value="{{hintText}}">
         <div class='csh_hint_data'>
-            <div class="csh_hint"><b>{{hintText}}</b></div>
+            <div class="csh_hint">Your original hint was: <b>{{hintText}}</b></div>
         </div>
         <div class='csh_rating_data'>
             <div role="button" class="csh_rate_hint" data-rate="upvote">
@@ -62,14 +62,17 @@
 <div class="crowdsourcehinter_block">
 
 <div class='csh_hint_reveal'>
-    <div class='csh_hint_text' student_answer = '' hint_received=''>
+    <div class='csh_hint_text' student_answer = '' hint_received='' rating=''>
     </div>
     <div class='csh_hint_rating_on_incorrect'>
+        <div class="csh_rate_hint_text">
+            Rate this hint:
+        </div>
         <div role="button" class="csh_rate_hint" data-rate="upvote" title="This hint was helpful!">
-            <b>+</b>
+            <b>Helpful</b>
         </div>
         <div role="button" class="csh_rate_hint" data-rate="downvote" title="This hint was not very helpful.">
-            <b>-</b>
+            <b>Unhelpful</b>
         </div>
         <div role="button" class="csh_report_hint" title="Report this hint">
             <b>⚑</b>

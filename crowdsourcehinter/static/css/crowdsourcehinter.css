@@ -39,7 +39,7 @@
   align-self: flex-end;
 }
 
-.csh_rate_hint, .csh_report_hint, .csh_rate_hint_completed {
+.csh_rate_hint, .csh_report_hint, .csh_rate_hint_completed, .csh_rate_hint_text {
   margin-right: 15px;
   margin-top: 5px;
   align-self: flex-end;
@@ -58,6 +58,15 @@ div[data-rate="report"]{
 background-clip: padding-box;
 font-size: 0.8125em;
 }
+
+.csh_hint_text[rating="upvote"] {
+    color: green;
+}
+
+.csh_hint_text[rating="downvote"] {
+    color: red;
+}
+
 
 .csh_rate_hint[data-rate="upvote"] {
     color: green;
