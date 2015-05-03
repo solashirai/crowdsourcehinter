@@ -95,6 +95,8 @@ function CrowdsourceHinter(runtime, element, data){
         $('.csh_hint_text', element).attr('student_answer', result.StudentAnswer);
         $('.csh_hint_text', element).attr('hint_received', result.BestHint);
         $('.csh_hint_text', element).text("Hint: " + result.BestHint);
+        $('.csh_rate_hint_completed', element).attr('class', 'csh_rate_hint');
+        $('.csh_hint_text', element).attr('rating', '');
         Logger.log('crowd_hinter.showHint', {"student_answer": result.StudentAnswer, "hint_received": result.Hints});
     }
 
@@ -224,6 +226,7 @@ function CrowdsourceHinter(runtime, element, data){
      */
     function rate_hint(){ return function(rateHintButtonHTML){
         rating = rateHintButtonHTML.currentTarget.attributes['data-rate'].value;
+        $('.csh_hint_text', element).attr('rating', rating);
         hint = $('.csh_hint_text', element).attr('hint_received');
         student_answer = $('.csh_hint_text', element).attr('student_answer');
         $.ajax({
