@@ -53,6 +53,9 @@ class CrowdsourceHinter(XBlock):
     # This String represents the xblock element for which the hinter is running. It is necessary to manually
     # set this value in the XML file under the format "hinting_element": "i4x://edX/DemoX/problem/Text_Input" .
     # Setting the element in the XML file is critical for the hinter to work.
+    #
+    # TODO: probably should change the name from Element (problem_element? hinting_element?). Trying to
+    # just change the name didn't seem to operate properly, check carefully what is changed
     Element = String(default="", scope=Scope.content)
 
     def studio_view(self, context=None):
@@ -62,12 +65,27 @@ class CrowdsourceHinter(XBlock):
         work.
         """
         html = self.resource_string("static/html/crowdsourcehinterstudio.html")
-        frag = Fragment(html.format(self=self))
+        frag = Fragment(html.format(initial_hints = self.initial_hints, generic_hints = self.generic_hints, Element = self.Element))
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
-        frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
-        frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
-        frag.initialize_js('CrowdsourceHinter')
+        frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter_studio.js"))
+        frag.initialize_js('CrowdsourceHinterStudio', {'initial': str(self.initial_hints), 'generic': str(self.generic_hints), 'element': str(self.Element)})
         return frag
+
+    @XBlock.json_handler
+    def set_initial_settings(self, data, suffix=''):
+        """
+        Set intial hints, generic hints, and problem element from the studio view.
+        """
+        self.initial_hints = ast.literal_eval(str(data['initial_hints']))
+        self.generic_hints = ast.literal_eval(str(data['generic_hints']))
+        self.Element = str(data['element'])
+        print data['generic_hints']
+        print str(self.generic_hints)
+        print data['initial_hints']
+        print str(self.initial_hints)
+        print str(data['element'])
+        print ast.literal_eval(str(data['initial_hints']))
+        return
 
     def resource_string(self, path):
         """
@@ -113,6 +131,7 @@ class CrowdsourceHinter(XBlock):
         """
         # populate hint_database with hints from initial_hints if there are no hints in hint_database.
         # this probably will occur only on the very first run of a unit containing this block.
+        print self.hint_database
         if not bool(self.hint_database):
             self.hint_database = copy.copy(self.initial_hints)
         answer = str(data["submittedanswer"])
@@ -123,7 +142,9 @@ class CrowdsourceHinter(XBlock):
         # the string returned by the event problem_graded is very messy and is different
         # for each problem, but after all of the numbers/letters there is an equal sign, after which the
         # student's input is shown. I use the function below to remove everything before the first equal
-        # sign and only take the student's actual input. This is not very clean.
+        # sign and only take the student's actual input.
+        # 
+        # TODO: figure out better way to directly get text of student's answer
         if "=" in answer:
             if found_equal_sign == 0:
                 found_equal_sign = 1
