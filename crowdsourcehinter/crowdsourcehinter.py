@@ -79,12 +79,6 @@ class CrowdsourceHinter(XBlock):
         self.initial_hints = ast.literal_eval(str(data['initial_hints']))
         self.generic_hints = ast.literal_eval(str(data['generic_hints']))
         self.Element = str(data['element'])
-        print data['generic_hints']
-        print str(self.generic_hints)
-        print data['initial_hints']
-        print str(self.initial_hints)
-        print str(data['element'])
-        print ast.literal_eval(str(data['initial_hints']))
         return
 
     def resource_string(self, path):
@@ -131,7 +125,6 @@ class CrowdsourceHinter(XBlock):
         """
         # populate hint_database with hints from initial_hints if there are no hints in hint_database.
         # this probably will occur only on the very first run of a unit containing this block.
-        print self.hint_database
         if not bool(self.hint_database):
             self.hint_database = copy.copy(self.initial_hints)
         answer = str(data["submittedanswer"])
