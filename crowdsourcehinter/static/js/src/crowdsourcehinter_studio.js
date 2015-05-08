@@ -23,7 +23,7 @@ function CrowdsourceHinterStudio(runtime, element, data){
             url: runtime.handlerUrl(element, 'set_initial_settings'),
             data: JSON.stringify({"initial_hints": initial, "generic_hints": generic, "element": hinting_element}),
             success: function(){
-                console.log("success");
+                Logger.log('crowd_hinter.staff_edit_hinter', {"generic_hints": initial, "initial_hint": generic, "element": hinting_element});
             }
         });
     }}
