@@ -1,10 +1,10 @@
 function CrowdsourceHinterStudio(runtime, element, data){
-/**
+
     //:TODO for self, figure out why Mustache isn't working (anonymous funciton (what?) Mustache Not Defined (why?))
     //Initialize html with current generic hints, initial hints, and problem element
     //var showSettingsUX = $(Mustache.render($('#show_settings_UX').html(), {generic: data.generic, initial: data.initial,  problem_element: data.problem_element}));
     //$('.crowdsourcehinter_edit_block', element).append(showSettingsUX);
-**/
+
     //set text area values to be what is currently in the hinter. to be replaced by above code.
     $('.csh_initial_hints', element).val(data.initial);
     $('.csh_generic_hints', element).val(data.generic);
@@ -22,8 +22,13 @@ function CrowdsourceHinterStudio(runtime, element, data){
             type: "POST",
             url: runtime.handlerUrl(element, 'set_initial_settings'),
             data: JSON.stringify({"initial_hints": initial, "generic_hints": generic, "element": hinting_element}),
-            success: function(){
-                Logger.log('crowd_hinter.staff_edit_hinter', {"generic_hints": initial, "initial_hint": generic, "element": hinting_element});
+            success: function(result){
+                if(result.success){
+                    $('.csh_check_success', element).text('hints successfully added to the database');
+                } else {
+                    $('.csh_check_success', element).text('there was a problem adding your hints to the database. check the format on your hints.');
+                }
+                Logger.log('crowd_hinter.staff_edit_hinter', {"generic_hints": initial, "initial_hint": generic, "element": hinting_element, "successfully_set_hints": result.success});
             }
         });
     }}

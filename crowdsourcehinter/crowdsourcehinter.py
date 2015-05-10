@@ -65,8 +65,9 @@ class CrowdsourceHinter(XBlock):
         work.
         """
         html = self.resource_string("static/html/crowdsourcehinterstudio.html")
-        frag = Fragment(html.format(initial_hints = self.initial_hints, generic_hints = self.generic_hints, Element = self.Element))
+        frag = Fragment(html)
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
+        frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter_studio.js"))
         frag.initialize_js('CrowdsourceHinterStudio', {'initial': str(self.initial_hints), 'generic': str(self.generic_hints), 'element': str(self.Element)})
         return frag
@@ -76,10 +77,34 @@ class CrowdsourceHinter(XBlock):
         """
         Set intial hints, generic hints, and problem element from the studio view.
         """
-        self.initial_hints = ast.literal_eval(str(data['initial_hints']))
-        self.generic_hints = ast.literal_eval(str(data['generic_hints']))
-        self.Element = str(data['element'])
-        return
+        initial = ast.literal_eval(str(data['initial_hints']))
+        generic = ast.literal_eval(str(data['generic_hints']))
+        if self.check_valid_settings(initial, generic):
+            self.initial_hints = initial
+            self.generic_hints = generic
+            self.Element = str(data['element'])
+            return {'success': True}
+        return {'success': False}
+
+    def check_valid_settings(self, initial, generic):
+        """
+        Check the settings being applied to the hinter by the staff to make sure they are
+        in the correct format.
+
+        Args:
+            initial: the hints attempted to be set for self.initial_hints
+            generic: the hints attempted to be set for self.generic_hints
+
+        returns:
+            True if generic is a list and initial is a dict and contains proper
+            answer-hint-rating format
+        """
+        if(type(generic) is list and type(initial) is dict):
+            for answer in initial:
+                if (type(initial[answer]) is not dict):
+                   return False
+            return True
+        return False
 
     def resource_string(self, path):
         """
