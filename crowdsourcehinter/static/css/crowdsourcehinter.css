@@ -19,13 +19,14 @@
 
 .csh_hint_reveal{
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .csh_hint_rating_on_incorrect{
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .csh_hint_data{
@@ -40,9 +41,8 @@
 }
 
 .csh_rate_hint, .csh_report_hint, .csh_rate_hint_completed, .csh_rate_hint_text {
-  margin-right: 15px;
-  margin-top: 5px;
   align-self: flex-end;
+  margin-left: 10px;
 }
 
 div[data-rate="report"]{
