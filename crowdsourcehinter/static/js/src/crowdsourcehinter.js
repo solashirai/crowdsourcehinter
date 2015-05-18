@@ -187,7 +187,6 @@ function CrowdsourceHinter(runtime, element, data){
         $('.csh_submit_new', element).remove();
         $(createTextInputButtonHTML.currentTarget).hide();
         student_answer = $('.csh_answer_text', element).attr('answer');
-        console.log(student_answer);
         var hintTextInputTemplate = $(Mustache.render($('#hint_text_input').html(), {student_answer: student_answer}));
         $('.csh_answer_text', element).append(hintTextInputTemplate);
     }}

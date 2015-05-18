@@ -144,9 +144,10 @@ class CrowdsourceHinter(XBlock):
           data['submittedanswer']: The string of text that the student submits for a problem.
 
         returns:
-          'bestHint': the highest rated hint for an incorrect answer
+          'BestHint': the highest rated hint for an incorrect answer
                         or another random hint for an incorrect answer
                         or 'Sorry, there are no more hints for this answer.' if no more hints exist
+          'StudentAnswer': the student's incorrect answer
         """
         # populate hint_database with hints from initial_hints if there are no hints in hint_database.
         # this probably will occur only on the very first run of a unit containing this block.
@@ -185,7 +186,7 @@ class CrowdsourceHinter(XBlock):
         else:
             # if there are no hints in either the database or generic hints
             self.used.append(str("There are no hints for" + " " + answer))
-            return {'Hints': "Sorry, there are no hints for this answer.", "StudentAnswer": answer}
+            return {'BestHint': "Sorry, there are no hints for this answer.", "StudentAnswer": answer}
 
     def find_hints(self, answer):
         """
@@ -264,6 +265,10 @@ class CrowdsourceHinter(XBlock):
           data['student_answer']: The incorrect answer that corresponds to the hint that is being rated
           data['hint']: The hint that is being rated
           data['student_rating']: The rating chosen by the student.
+
+        Returns:
+          'rating': the new rating of the hint, or the string 'reported' if the hint was reported
+          'hint': the hint that had its rating changed
         """
         answer_data = data['student_answer']
         data_rating = data['student_rating']
@@ -305,8 +310,10 @@ class CrowdsourceHinter(XBlock):
             return
         if data_rating == 'upvote':
             self.hint_database[str(answer_data)][str(data_hint)] += 1
+            return self.hint_database[str(answer_data)][str(data_hint)]
         else:
             self.hint_database[str(answer_data)][str(data_hint)] -= 1
+            return self.hint_database[str(answer_data)][str(data_hint)]
 
     @XBlock.json_handler
     def add_new_hint(self, data, suffix=''):
