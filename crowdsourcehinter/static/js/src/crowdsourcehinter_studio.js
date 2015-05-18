@@ -28,7 +28,7 @@ function CrowdsourceHinterStudio(runtime, element, data){
                 } else {
                     $('.csh_check_success', element).text('there was a problem adding your hints to the database. check the format on your hints.');
                 }
-                Logger.log('crowd_hinter.staff_edit_hinter', {"generic_hints": initial, "initial_hint": generic, "element": hinting_element, "successfully_set_hints": result.success});
+                Logger.log('crowd_hinter.staff_edit_hinter', {"generic_hints": generic, "initial_hint": initial, "element": hinting_element, "successfully_set_hints": result.success});
             }
         });
     }}
