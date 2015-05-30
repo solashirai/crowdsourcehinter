@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 class CrowdsourceHinter(XBlock):
     """
-    This is the Crowd Sourced Hinter XBlock. This Xblock seeks to provide students with hints
+    This is the Crowdsource Hinter XBlock. This Xblock seeks to provide students with hints
     that specifically address their mistake. Additionally, the hints that this Xblock shows
     are created by the students themselves. This doc string will probably be edited later.
     """
