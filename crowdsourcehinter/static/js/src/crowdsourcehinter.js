@@ -198,7 +198,7 @@ function CrowdsourceHinter(runtime, element, data){
      * incorrect answers. Triggered by clicking the "submit hint" button.
      * @param submitHintButtonHTML is the "submit hint" button clicked
      */
-    function submit_new_hint(){ return function(submitHintButtonHTML){
+    function submitNewHint(){ return function(submitHintButtonHTML){
     //add the newly created hint to the hinter's pool of hints
         if($('.csh_student_text_input', element).val().length > 0){
             var studentAnswer = unescape(submitHintButtonHTML.currentTarget.attributes['answer'].value);
@@ -209,14 +209,14 @@ function CrowdsourceHinter(runtime, element, data){
                 url: runtime.handlerUrl(element, 'add_new_hint'),
                 data: JSON.stringify({"submission": newHint, "answer": studentAnswer}),
                 success: function() {
-                    Logger.log('crowd_hinter.submit_new_hint', {"student_answer": studentAnswer, "new_hint_submission": newHint})
+                    Logger.log('crowd_hinter.submitNewHint', {"student_answer": studentAnswer, "new_hint_submission": newHint})
                 }
             });
             $('.csh_student_text_input', element).remove();
             $(submitHintButtonHTML.currentTarget).remove();
         }
     }}
-    $(element).on('click', '.csh_submit_new', submit_new_hint($(this)));
+    $(element).on('click', '.csh_submit_new', submitNewHint($(this)));
 
     /**
      * Send vote data to modify a hint's rating (or mark it as reported). Triggered by
@@ -224,7 +224,7 @@ function CrowdsourceHinter(runtime, element, data){
      * the student correctly submits an answer).
      * @param rateHintButtonHTML is the rate_hint button clicked (upvote/downvote/report)
      */
-    function rate_hint(){ return function(rateHintButtonHTML){
+    function rateHint(){ return function(rateHintButtonHTML){
         rating = rateHintButtonHTML.currentTarget.attributes['data-rate'].value;
         $('.csh_hint_text', element).attr('rating', rating);
         hint = $('.csh_hint_text', element).attr('hint_received');
@@ -234,14 +234,14 @@ function CrowdsourceHinter(runtime, element, data){
             url: runtime.handlerUrl(element, 'rate_hint'),
             data: JSON.stringify({"student_rating": rating, "hint": hint, "student_answer": student_answer}),
             success: function() {
-                Logger.log('crowd_hinter.rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": rating})
+                Logger.log('crowd_hinter.rateHint', {"hint": hint, "student_answer": student_answer, "rating": rating})
                 $('.csh_rate_hint', element).attr('class', 'csh_rate_hint_completed');
             }
         });
     }}
-    $(element).on('click', '.csh_rate_hint', rate_hint($(this)));
+    $(element).on('click', '.csh_rate_hint', rateHint($(this)));
 
-    function report_hint(){ return function(reportHintButtonHTML){
+    function reportHint(){ return function(reportHintButtonHTML){
         hint = $('.csh_hint_text', element).attr('hint_received');
         student_answer = $('.csh_hint_text', element).attr('student_answer');
         $.ajax({
@@ -249,19 +249,19 @@ function CrowdsourceHinter(runtime, element, data){
             url: runtime.handlerUrl(element, 'rate_hint'),
             data: JSON.stringify({"student_rating": "report", "hint": hint, "student_answer": student_answer}),
             success: function() {
-                    Logger.log('crowd_hinter.report_hint.click.event', {"hint": hint, "student_answer": student_answer})
+                    Logger.log('crowd_hinter.reportHint', {"hint": hint, "student_answer": student_answer})
                 }
         });
     }}
-    $(element).on('click', '.csh_report_hint', report_hint($(this)));
+    $(element).on('click', '.csh_report_hint', reportHint($(this)));
 
     /**
      * Remove a reported hint from the reported moderation area (for staff only). Hints
      * are removed from the moderation area regardless of whether they are to be permanently removed
-     * from the hint pool or not. Called by staff_rate_hint.
+     * from the hint pool or not. Called by staffRateHint.
      */
     function removeReportedHint(){
-        Logger.log('crowd_hinter.staff_rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": rating});
+        Logger.log('crowd_hinter.staffRateHint', {"hint": hint, "student_answer": student_answer, "rating": rating});
         $(".csh_hint_value[value='" + hint + "']", element).remove();
     }
 
@@ -270,11 +270,11 @@ function CrowdsourceHinter(runtime, element, data){
      * hint pool or not. Triggered by clicking a staff_rate button.
      * @param staffRateHintButtonHTML is the csh_staff_rate button that was clicked
      */
-    function staff_rate_hint(){ return function(staffRateHintButtonHTML){
+    function staffRateHint(){ return function(staffRateHintButtonHTML){
         hint = $(staffRateHintButtonHTML.currentTarget).parent().find(".csh_hint").text();
         rating = staffRateHintButtonHTML.currentTarget.attributes['data-rate'].value
         student_answer = "Reported";
-        Logger.log('crowd_hinter.staff_rate_hint.click.event', {"hint": hint, "student_answer": student_answer, "rating": rating});
+        Logger.log('crowd_hinter.staff_rate_hint', {"hint": hint, "student_answer": student_answer, "rating": rating});
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
@@ -282,6 +282,6 @@ function CrowdsourceHinter(runtime, element, data){
             success: removeReportedHint()
         });
     }}
-    $(element).on('click', '.csh_staff_rate', staff_rate_hint($(this)));
+    $(element).on('click', '.csh_staff_rate', staffRateHint($(this)));
 
 }
