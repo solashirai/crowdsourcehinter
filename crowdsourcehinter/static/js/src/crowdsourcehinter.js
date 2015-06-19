@@ -85,6 +85,10 @@ function CrowdsourceHinter(runtime, element, data){
             getHint(data);
         }
     }}
+    //IMPORTANT
+    //Comment out the listener for "problem_check" and uncomment "problem_graded" on the lavash devstack release.
+    //problem_check is used in the birch release to detect answer submission
+    //Logger.listen('problem_check', null, onStudentSubmission());
     Logger.listen('problem_graded', data.hinting_element, onStudentSubmission());
 
     /**
