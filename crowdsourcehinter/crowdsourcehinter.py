@@ -36,7 +36,7 @@ class CrowdsourceHinter(XBlock):
     # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
     # particular incorrect answer)
     #
-    # Example: ["Make sure to check your answer for simple mistakes, like spelling or spaces!"]
+    # Example: ["Make sure to check your answer for simple mistakes like typos!"]
     generic_hints = List(default=[], scope=Scope.content)
     # List of which hints have been shown to the student
     # this list is used to prevent the same hint from showing up to a student (if they submit the same incorrect answers
@@ -106,6 +106,10 @@ class CrowdsourceHinter(XBlock):
             return True
         return False
 
+    @XBlock.json_handler
+    def auto_set_problem_element(self, data, suffix=''):
+        self.Element = str(data["hintingElement"])
+
     def resource_string(self, path):
         """
         This function is used to get the path of static resources.
@@ -146,9 +150,10 @@ class CrowdsourceHinter(XBlock):
         returns:
           'BestHint': the highest rated hint for an incorrect answer
                         or another random hint for an incorrect answer
-                        or 'Sorry, there are no more hints for this answer.' if no more hints exist
+                        or 'Sorry, there are no hints for this answer.' if no hints exist
           'StudentAnswer': the student's incorrect answer
         """
+
         # populate hint_database with hints from initial_hints if there are no hints in hint_database.
         # this probably will occur only on the very first run of a unit containing this block.
         if not bool(self.hint_database):
@@ -273,6 +278,8 @@ class CrowdsourceHinter(XBlock):
         answer_data = data['student_answer']
         data_rating = data['student_rating']
         data_hint = data['hint']
+        if data_hint == 'Sorry, there are no hints for this answer.':
+            return {"rating": None, 'hint': data_hint}
         if data['student_rating'] == 'unreport':
             for reported_hints in self.reported_hints:
                 if reported_hints == data_hint:
