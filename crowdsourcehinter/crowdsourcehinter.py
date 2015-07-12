@@ -106,10 +106,6 @@ class CrowdsourceHinter(XBlock):
             return True
         return False
 
-    @XBlock.json_handler
-    def auto_set_problem_element(self, data, suffix=''):
-        self.Element = str(data["hintingElement"])
-
     def resource_string(self, path):
         """
         This function is used to get the path of static resources.
