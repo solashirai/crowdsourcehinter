@@ -1,8 +1,6 @@
 function CrowdsourceHinter(runtime, element, data){
 
     var onHinterPage = true; //We don't do hinter logic if we're on a differ tab in a sequential.
-
-    var problemElement = '';
     
     $(".crowdsourcehinter_block", element).hide();
 
@@ -93,6 +91,7 @@ function CrowdsourceHinter(runtime, element, data){
      * problem block if no hinting element has been manually entered.
      */
     if(data.hinting_element == undefined || data.hinting_element == ''){
+        //contains workaround because the data-usage-id shows up with ";_" in place of "/" in lms
         hintingElement = ($('.xblock[data-block-type="problem"]').first().attr('data-usage-id')).replace(/;_/g, '/');
     } else {
         hintingElement = data.hinting_element;
