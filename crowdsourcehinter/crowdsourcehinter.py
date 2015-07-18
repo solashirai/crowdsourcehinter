@@ -232,8 +232,10 @@ class CrowdsourceHinter(XBlock):
         # corresponding incorrect answer
         used_hint_answer_text = {}
         if self.get_user_is_staff():
-            for index in range(0, len(self.reported_hints)):
-                used_hint_answer_text[str(self.reported_hints[i])] = str("reported")
+            print len(self.reported_hints)
+            print str(self.reported_hints)
+            for key in self.reported_hints:
+                used_hint_answer_text[key] = str("Reported")
         if len(self.incorrect_answers) == 0:
             return used_hint_answer_text
         else:

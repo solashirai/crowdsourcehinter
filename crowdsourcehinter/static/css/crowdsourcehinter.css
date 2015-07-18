@@ -10,7 +10,7 @@
 
 .csh_hint_value{
   display: flex;
-  margin-left: 10px;
+  /* margin-left: 10px; */
   flex-direction: column;
 }
 
@@ -50,6 +50,23 @@
 div[data-rate="report"]{
     font-weight: bold;
 }
+
+.csh_hint_text[rating="upvote"]{
+  color: green;
+}
+
+.csh_hint_text[rating="downvote"]{
+  color: red;
+}
+
+.csh_hint[rating="upvote"]{
+  color: green;
+}
+
+.csh_hint[rating="downvote"]{
+  color: red;
+}
+
 
 .csh_student_hint_creation {
   height: 40px;
