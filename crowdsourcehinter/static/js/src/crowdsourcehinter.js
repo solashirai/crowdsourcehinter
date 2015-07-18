@@ -239,6 +239,7 @@ function CrowdsourceHinter(runtime, element, data){
     function rateHint(){ return function(rateHintButtonHTML){
         rating = rateHintButtonHTML.currentTarget.attributes['data-rate'].value;
         $('.csh_hint_text', element).attr('rating', rating);
+        $('.csh_hint', element).attr('rating', rating);
         hint = $('.csh_hint_text', element).attr('hint_received');
         student_answer = $('.csh_hint_text', element).attr('student_answer');
         $.ajax({
@@ -256,6 +257,7 @@ function CrowdsourceHinter(runtime, element, data){
     function reportHint(){ return function(reportHintButtonHTML){
         hint = $('.csh_hint_text', element).attr('hint_received');
         student_answer = $('.csh_hint_text', element).attr('student_answer');
+        $('.csh_hint_text', element).text('This hint has been reported for review.');
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
