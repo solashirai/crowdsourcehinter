@@ -200,7 +200,7 @@ function CrowdsourceHinter(runtime, element, data){
         $(createTextInputButtonHTML.currentTarget).hide();
         student_answer = $('.csh_answer_text', element).attr('answer');
         var hintTextInputTemplate = $(Mustache.render($('#hint_text_input').html(), {student_answer: student_answer}));
-        $('.csh_answer_text', element).append(hintTextInputTemplate);
+        $('.csh_hint_value', element).append(hintTextInputTemplate);
     }}
     $(element).on('click', '.csh_student_hint_creation', createHintContributionTextInput($(this)));
 
@@ -221,11 +221,12 @@ function CrowdsourceHinter(runtime, element, data){
                 url: runtime.handlerUrl(element, 'add_new_hint'),
                 data: JSON.stringify({"submission": newHint, "answer": studentAnswer}),
                 success: function() {
+                    $('.csh_student_text_input', element).attr('style', 'display: none;');
+                    $(submitHintButtonHTML.currentTarget).attr('style', 'display: none;');
+                    $('.csh_hint_value', element).append("Thankyou!");
                     Logger.log('crowd_hinter.submitNewHint', {"student_answer": studentAnswer, "new_hint_submission": newHint})
                 }
             });
-            $('.csh_student_text_input', element).remove();
-            $(submitHintButtonHTML.currentTarget).remove();
         }
     }}
     $(element).on('click', '.csh_submit_new', submitNewHint($(this)));
@@ -297,5 +298,13 @@ function CrowdsourceHinter(runtime, element, data){
         });
     }}
     $(element).on('click', '.csh_staff_rate', staffRateHint($(this)));
+
+    $(element).on('click', '.csh_reveal_info', function(){
+        if($('.csh_user_info', element).attr('style') == "display: none;"){
+            $('.csh_user_info', element).attr('style', "display: block;")
+        }else{
+            $('.csh_user_info', element).attr('style', "display: none;")
+        }
+    })
 
 }
