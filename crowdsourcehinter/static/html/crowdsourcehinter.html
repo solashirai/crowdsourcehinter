@@ -40,15 +40,17 @@
 </script>
 
 <script type="x-tmpl/mustache" id="show_no_hints">
-    <div class="csh_hint_value">Submit a hint for this incorrect answer to help future students!
+    <div class="csh_hint_value"> This specific mistake doesn't appear to have any hints yet. You can contribute a hint to help other students who make the same mistake in the future.
     </div>
 </script>
 
 <script type="x-tmpl/mustache" id="show_student_submission">
     <div class="csh_student_answer">
         <h class="csh_answer_text" answer={{answer}}>
-        <i> Please give us feedback or submit a new hint to improve hints for this question! </i> <br>
-        Your original answer was: {{answer}}</h>
+        <div role="button" class="csh_reveal_info">Help us improve hints for this problem </div>
+        <div class="csh_user_info" style="display: none;"> <br> Submitting an incorrect answer for this problem provides you with a hint specific to the mistake that you made - these hints are made by other students who made the same mistake as you did. Help to make the hints for this problem better by rating the hint that you received, or if you might have better advice to give other students, submit a new hint! <br> If you choose to submit a new hint, keep in mind that the hints are specific to one incorrect answer; specific advice (perhaps on some aspect of the problem that you overlooked) is more helpful than generic advice.</div>
+        <br>
+        Your original answer was: <b>{{answer}}</b></h>
     </div>
 </script>
 
@@ -66,7 +68,7 @@
     </div>
     <div class='csh_hint_rating_on_incorrect'>
         <div class="csh_rate_hint_text">
-            Rate this hint: 
+            This hint was: 
         </div>
         <div role="button" class="csh_rate_hint" data-rate="upvote" title="This hint was helpful!">
             <b> Helpful </b>
