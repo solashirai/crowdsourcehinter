@@ -8,6 +8,15 @@
   padding-bottom: 2px;
 }
 
+.csh_reveal_info{
+  color: blue;
+}
+
+.csh_reveal_info:hover{
+  color: blue;
+  text-decoration: underline;
+}
+
 .csh_hint_value{
   display: flex;
   /* margin-left: 10px; */
@@ -118,6 +127,10 @@ div[data-rate="report"]{
     visibility: visible;
 }
 
+.csh_user_info{
+  padding-left: 22px ;
+  text-indent: -22px ;
+}
 .csh_rating{
     margin-right: 5px;
 }
@@ -126,6 +139,8 @@ div[data-rate="report"]{
 .csh_report_hint{ cursor: pointer }
 .csh_staff_rate{ cursor: pointer }
 .csh_rate_hint{ color: #948f8f; }
+
+.csh_reveal_info{ cursor: pointer }
 
 .csh_hintsarea {
   display: flex;
