@@ -1,20 +1,3 @@
-<!--
-<script type='x-tmpl/mustache' id='show_settings_UX'>
-    <p>
-        Generic Hints: <input type="text" class="csh_generic_hints" value = "{{generic}}">
-    </p>
-    <p>
-        Initial Hints: <input type="text" class="csh_initial_hints" value = "{{initial}}">
-    </p>
-    <p>
-        Problem Element: <input type="text" class="csh_hinting_element" value = "{{hinting_element}}">
-    </p>
-    <p>
-       <input type="button" class="csh_apply_settings" value="Apply Settings"> 
-    </p>
-</script>
--->
-
 <div class="crowdsourcehinter_edit_block">
     <p>
         Generic hints should be in the form of a python list. e.x. ['generic hint text']
@@ -23,7 +6,7 @@
         Generic Hints: <textarea type="text" class="csh_generic_hints" value = "{{generic}}"/>
     </p>
     <p>
-        Initial hints should be a python dictionary, with further dictionaries for each key. The format should be as follows:  { "incorrect answer example": {"hint text" : rating}, "incorrect answer example 2": {"hint text": rating} } New hints that are student made will start off with a rating of 0, so set your hint's rating accordingly.
+        Initial hints should be a python dictionary, with keys representing anticipated incorrect answers and values being hints. e.x {"incorrect answer example 1": "hint for incorrect answer 1"}. The rating of initial hints defaults to 0.
     </p>
     <p>
         Initial Hints: <textarea type="text" class="csh_initial_hints" value = "{{initial}}"/>
