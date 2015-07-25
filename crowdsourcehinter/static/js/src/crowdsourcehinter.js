@@ -200,7 +200,7 @@ function CrowdsourceHinter(runtime, element, data){
         $(createTextInputButtonHTML.currentTarget).hide();
         student_answer = $('.csh_answer_text', element).attr('answer');
         var hintTextInputTemplate = $(Mustache.render($('#hint_text_input').html(), {student_answer: student_answer}));
-        $('.csh_hint_value', element).append(hintTextInputTemplate);
+        $('.csh_student_answer', element).append(hintTextInputTemplate); //TODO: change csh_hint_value, messes up for staff
     }}
     $(element).on('click', '.csh_student_hint_creation', createHintContributionTextInput($(this)));
 
@@ -223,7 +223,7 @@ function CrowdsourceHinter(runtime, element, data){
                 success: function() {
                     $('.csh_student_text_input', element).attr('style', 'display: none;');
                     $(submitHintButtonHTML.currentTarget).attr('style', 'display: none;');
-                    $('.csh_hint_value', element).append("Thankyou!");
+                    $('.csh_hint_value', element).append("<br>Thankyou!");
                     Logger.log('crowd_hinter.submitNewHint', {"student_answer": studentAnswer, "new_hint_submission": newHint})
                 }
             });
@@ -259,6 +259,7 @@ function CrowdsourceHinter(runtime, element, data){
         hint = $('.csh_hint_text', element).attr('hint_received');
         student_answer = $('.csh_hint_text', element).attr('student_answer');
         $('.csh_hint_text', element).text('This hint has been reported for review.');
+        $('.csh_hint', element).text('This hint has been reported for review.');
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
