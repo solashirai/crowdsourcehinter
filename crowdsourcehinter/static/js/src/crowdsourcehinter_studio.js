@@ -1,10 +1,5 @@
 function CrowdsourceHinterStudio(runtime, element, data){
 
-    //:TODO for self, figure out why Mustache isn't working (anonymous funciton (what?) Mustache Not Defined (why?))
-    //Initialize html with current generic hints, initial hints, and problem element
-    //var showSettingsUX = $(Mustache.render($('#show_settings_UX').html(), {generic: data.generic, initial: data.initial,  problem_element: data.problem_element}));
-    //$('.crowdsourcehinter_edit_block', element).append(showSettingsUX);
-
     //set text area values to be what is currently in the hinter. to be replaced by above code.
     $('.csh_initial_hints', element).val(data.initial);
     $('.csh_generic_hints', element).val(data.generic);
