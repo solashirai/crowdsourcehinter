@@ -12,6 +12,7 @@ from xblock.fragment import Fragment
 
 log = logging.getLogger(__name__)
 
+
 class CrowdsourceHinter(XBlock):
     """
     This is the Crowdsource Hinter XBlock. This Xblock seeks to provide students with hints
@@ -80,7 +81,7 @@ class CrowdsourceHinter(XBlock):
         """
         initial = ast.literal_eval(str(data['initial_hints']))
         generic = ast.literal_eval(str(data['generic_hints']))
-        if(type(generic) is list and type(initial) is dict):
+        if type(generic) is list and type(initial) is dict:
             self.initial_hints = initial
             self.generic_hints = generic
             self.Element = str(data['element'])
@@ -135,9 +136,10 @@ class CrowdsourceHinter(XBlock):
                 self.hint_database[answers] = {}
             if self.initial_hints[answers] not in self.hint_database[answers]:
                 self.hint_database[answers].update({self.initial_hints[answers]: 0})
-            #self.hint_database = copy.copy(self.initial_hints)
         answer = str(data["submittedanswer"])
-        answer = answer.lower() # for analyzing the student input string I make it lower case.
+        # put the student's answer to lower case so that differences in capitalization don't make
+        # different groups of hints. this is sloppy and the execution should probably be changed.
+        answer = answer.lower()
         found_equal_sign = 0
         remaining_hints = int(0)
         best_hint = ""
@@ -145,7 +147,7 @@ class CrowdsourceHinter(XBlock):
         # for each problem, but after all of the numbers/letters there is an equal sign, after which the
         # student's input is shown. I use the function below to remove everything before the first equal
         # sign and only take the student's actual input.
-        # 
+        #
         # TODO: figure out better way to directly get text of student's answer
         if "=" in answer:
             if found_equal_sign == 0:
@@ -156,8 +158,8 @@ class CrowdsourceHinter(XBlock):
         if remaining_hints != str(0):
             for hint in self.hint_database[str(answer)]:
                 if hint not in self.reported_hints.keys():
-                    #if best_hint hasn't been set yet or the rating of hints is greater than the rating of best_hint
-                    if (best_hint == "" or self.hint_database[str(answer)][hint] > self.hint_database[str(answer)][str(best_hint)]):
+                    # if best_hint hasn't been set yet or the rating of hints is greater than the rating of best_hint
+                    if best_hint == "" or self.hint_database[str(answer)][hint] > self.hint_database[str(answer)][str(best_hint)]:
                         best_hint = hint
             self.used.append(best_hint)
             return {'BestHint': best_hint, "StudentAnswer": answer}
@@ -180,7 +182,7 @@ class CrowdsourceHinter(XBlock):
         Returns 0 if no hints to show exist
         """
         isreported = []
-        self.incorrect_answers.append(str(answer)) # add the student's input to the temporary list
+        self.incorrect_answers.append(str(answer))
         if str(answer) not in self.hint_database:
             # add incorrect answer to hint_database if no precedent exists
             self.hint_database[str(answer)] = {}
@@ -197,7 +199,7 @@ class CrowdsourceHinter(XBlock):
     @XBlock.json_handler
     def get_used_hint_answer_data(self, data, suffix=''):
         """
-        This function helps to facilitate student rating of hints and contribution of new hints. 
+        This function helps to facilitate student rating of hints and contribution of new hints.
         Specifically this function is used to send necessary data to JS about incorrect answer
         submissions and hints. It also will return hints that have been reported, although this
         is only for Staff.
@@ -230,8 +232,8 @@ class CrowdsourceHinter(XBlock):
                     self.incorrect_answers = []
                     self.used = []
                     return used_hint_answer_text
-        self.incorrect_answers=[]
-        self.used=[]
+        self.incorrect_answers = []
+        self.used = []
         return used_hint_answer_text
 
     @XBlock.json_handler
@@ -267,7 +269,7 @@ class CrowdsourceHinter(XBlock):
             # add hint to Reported dictionary
             self.reported_hints[str(data_hint)] = answer_data
             return {"rating": 'reported', 'hint': data_hint}
-        rating = self.change_rating(data_hint, data_rating, answer_data) # change hint rating
+        rating = self.change_rating(data_hint, data_rating, answer_data)
         return {"rating": str(rating), 'hint': data_hint}
 
     def change_rating(self, data_hint, data_rating, answer_data):
@@ -326,14 +328,14 @@ class CrowdsourceHinter(XBlock):
         """A canned scenario for display in the workbench."""
         return [
             ("CrowdsourceHinter",
-            """
-                <verticaldemo>
-                    <crowdsourcehinter>
-                        {"generic_hints": "Make sure to check for basic mistakes like typos", "initial_hints": {"michiganp": "remove the p at the end.", "michigann": "too many Ns on there."}, "hinting_element": "i4x://edX/DemoX/problem/Text_Input"}
-                    </crowdsourcehinter>
-                 </verticaldemo>
-            """
-            ),
+                """
+                    <verticaldemo>
+                        <crowdsourcehinter>
+                            {"generic_hints": "Make sure to check for basic mistakes like typos", "initial_hints": {"michiganp": "remove the p at the end.", "michigann": "too many Ns on there."}, "hinting_element": "i4x://edX/DemoX/problem/Text_Input"}
+                        </crowdsourcehinter>
+                     </verticaldemo>
+                """
+            )
         ]
 
     @classmethod
