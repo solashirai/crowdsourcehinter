@@ -1,0 +1,24 @@
+<div class="crowdsourcehinter_edit_block">
+    <p>
+        Generic hints should be in the form of a python list. e.x. ['generic hint text']
+    </p>
+    <p>
+        Generic Hints: <textarea type="text" class="csh_generic_hints" value = "{{generic}}"/>
+    </p>
+    <p>
+        Initial hints should be a python dictionary, with keys representing anticipated incorrect answers and values being hints. e.x {"incorrect answer example 1": "hint for incorrect answer 1"}. The rating of initial hints defaults to 0.
+    </p>
+    <p>
+        Initial Hints: <textarea type="text" class="csh_initial_hints" value = "{{initial}}"/>
+    </p>
+    <p>
+        This is the element of the problem for which the hinter is working. This is the "data-usage-id" of the problem block. It should look something like i4x://edX/DemoX/problem/f958789435cf47218ff32f0d600f1184
+    </p>
+    <p>
+        Problem Element: <textarea type="text" class="csh_hinting_element" value = "{{hinting_element}}"/>
+    </p>
+    <p>
+       <input type="button" class="csh_apply_settings" value="Apply Settings"> 
+    </p>
+    <div class='csh_check_success'/>
+</div>
