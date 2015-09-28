@@ -6,12 +6,14 @@ import random
 import json
 import copy
 
+import HTMLParser
+
 from xblock.core import XBlock
 from xblock.fields import Scope, Dict, List, Boolean, String
 from xblock.fragment import Fragment
 
 log = logging.getLogger(__name__)
-
+html_parser = HTMLParser.HTMLParser()
 
 class CrowdsourceHinter(XBlock):
     """
@@ -139,6 +141,19 @@ class CrowdsourceHinter(XBlock):
         frag.initialize_js('CrowdsourceHinter', {'hinting_element': self.Element, 'isStaff': self.xmodule_runtime.user_is_staff})
         return frag
 
+    def extract_student_answers(self, answers):
+        """
+        We find out what the student submitted by listening to a
+        client-side event. This event is a little bit messy. This 
+        function cleans up the event into a dictionary mapping
+        input IDs to answers submitted.
+        """
+        # First, we split this into the submission
+        answers = [a.split('=') for a in answers.split("&")]
+        # Next, we decode the HTML escapes
+        answers = [(a[0], html_parser.unescape(a[1])) for a in answers]
+        return dict(answers)
+
     @XBlock.json_handler
     def get_hint(self, data, suffix=''):
         """
@@ -168,31 +183,20 @@ class CrowdsourceHinter(XBlock):
                 self.hint_database[answers] = {}
             if self.initial_hints[answers] not in self.hint_database[answers]:
                 self.hint_database[answers].update({self.initial_hints[answers]: 0})
-        answer = str(data["submittedanswer"])
+
+        answer = self.extract_student_answers(data["submittedanswer"])
+        # HACK: For now, we assume just one submission, a string, and
+        # case insensitive
+        #
+        # TODO: We should replace this with a generic canonicalization
+        # function
+        answer = answer.values()[0].lower()
 
         # Put the student's answer to lower case so that differences
         # in capitalization don't make different groups of
-        # hints. TODO: We should replace this with a generic
-        # canonicalization function.
-        answer = answer.lower()
-        found_equal_sign = 0  # TODO: What is this? This should move below the comment below, so it is clear.
+        # hints. TODO: We should replace this with a .
         remaining_hints = int(0)  # TODO: This is confused
         best_hint = ""  # TODO: What is this?
-
-        # The string returned by the event problem_graded is very
-        # messy and is different for each problem, but after all of
-        # the numbers/letters there is an equal sign, after which the
-        # student's input is shown. I use the function below to remove
-        # everything before the first equal sign and only take the
-        # student's actual input.
-
-        # TODO: figure out better way to directly get text of student's answer
-        # TODO: Break this out into a function
-        if "=" in answer:
-            if found_equal_sign == 0:
-                found_equal_sign = 1
-                eqplace = answer.index("=") + 1
-                answer = answer[eqplace:]
         remaining_hints = str(self.find_hints(answer))
         if remaining_hints != str(0):
             for hint in self.hint_database[str(answer)]:
