@@ -31,7 +31,7 @@ function CrowdsourceHinter(runtime, element, data){
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'get_hint'),
-            data: JSON.stringify({"submittedanswer": unescape(problemGradedEvent[0])}),
+            data: JSON.stringify({"submittedanswer": problemGradedEvent[0]}),
             success: showHint
         });
     }
