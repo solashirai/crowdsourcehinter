@@ -26,8 +26,7 @@ class CrowdsourceHinter(XBlock):
     # Each key (incorrect answer) has a corresponding dictionary (in
     # which hints are keys and the hints' ratings are the values).
     # For example:
-    #   {"computerr": {"You misspelled computer, remove the last r.": 5}}
-    # TODO: We should store upvotes and downvotes independently.
+    #   {"computerr": {"You misspelled computer, remove the last r.": {'upvotes':5, 'downvotes':3}}}
     hint_database = Dict(default={}, scope=Scope.user_state_summary)
 
     # Database of initial hints, set by the course
@@ -112,10 +111,14 @@ class CrowdsourceHinter(XBlock):
         studio view.
 
         The Studio view is not yet complete.
+
+        TODO: How do we make this handler Studio-specific? We don't
+        want students being able to call this.
         """
         initial_hints = json.loads(data['initial_hints'])
         generic_hints = json.loads(data['generic_hints'])
 
+        # Validate input
         if not isinstance(generic_hints, list):
             return {'success': False,
                     'error': 'Generic hints should be a list.'}
@@ -341,10 +344,10 @@ class CrowdsourceHinter(XBlock):
         if any(data_hint in generic_hints for generic_hints in self.generic_hints):
             return
         if data_rating == 'upvote':
-            self.hint_database[str(answer_data)][str(data_hint)] += 1
+            self.hint_database[str(answer_data)][str(data_hint)]['upvotes'] += 1
             return self.hint_database[str(answer_data)][str(data_hint)]
         else:
-            self.hint_database[str(answer_data)][str(data_hint)] -= 1
+            self.hint_database[str(answer_data)][str(data_hint)]['downvotes'] += 1
             return self.hint_database[str(answer_data)][str(data_hint)]
 
     @XBlock.json_handler
@@ -352,21 +355,21 @@ class CrowdsourceHinter(XBlock):
         """
         This function adds a new hint submitted by the student into the hint_database.
         Args:
-          data['submission']: This is the text of the new hint that the student has submitted.
+          data['new_hint_submission']: This is the text of the new hint that the student has submitted.
           data['answer']: This is the incorrect answer for which the student is submitting a new hint.
         """
-        submission = data['submission']
+        submission = data['new_hint_submission']
         answer = data['answer']
+
+        # If we don't have the hint already, add it
         if str(submission) not in self.hint_database[str(answer)]:
-            self.hint_database[str(answer)].update({submission: 0})
-            return
-        else:
-            # if the hint exists already, simply upvote the previously entered hint
-            if str(submission) in self.generic_hints:
-                return
-            else:
-                self.hint_database[str(answer)][str(submission)] += 1
-                return
+            self.hint_database[str(answer)].update({submission: {'upvotes':0, 'downvotes':0}})
+            return {'success':True,
+                    'result': 'Hint added'}
+        
+        self.hint_database[str(answer)][str(submission)]['upvotes'] += 1
+        return {'success':True,
+                'result': 'We already had this hint. We gave it an upvote'}
 
     @XBlock.json_handler
     def studiodata(self, data, suffix=''):

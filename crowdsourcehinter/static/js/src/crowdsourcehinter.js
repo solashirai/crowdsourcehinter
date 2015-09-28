@@ -219,7 +219,7 @@ function CrowdsourceHinter(runtime, element, data){
             $.ajax({
                 type: "POST",
                 url: runtime.handlerUrl(element, 'add_new_hint'),
-                data: JSON.stringify({"submission": newHint, "answer": studentAnswer}),
+                data: JSON.stringify({"new_hint_submission": newHint, "answer": studentAnswer}),
                 success: function() {
                     $('.csh_student_text_input', element).attr('style', 'display: none;');
                     $(submitHintButtonHTML.currentTarget).attr('style', 'display: none;');
