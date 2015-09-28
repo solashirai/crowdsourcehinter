@@ -1,4 +1,3 @@
-import ast
 import logging
 import operator
 import pkg_resources
@@ -95,7 +94,8 @@ class CrowdsourceHinter(XBlock):
         it in a course. It will allow one to define, for example,
         which problem the hinter is for.
 
-        It is currently a dummy function -- we still need to build an authoring view.
+        It is currently incomplete -- we still need to finish building the
+        authoring view.
         """
         html = self.resource_string("static/html/crowdsourcehinterstudio.html")
         frag = Fragment(html)
@@ -110,23 +110,24 @@ class CrowdsourceHinter(XBlock):
         """
         Set intial hints, generic hints, and problem element from the
         studio view.
+
+        The Studio view is not yet complete.
         """
-        # TODO: json.loads, or better yet, yaml.
-        # ast.literal_eval follows Python syntax, which is not what we want.
-        initial = ast.literal_eval(str(data['initial_hints']))
-        generic = ast.literal_eval(str(data['generic_hints']))
-        # TODO: Break into validation and then setting:
-        # if type(generic) is not list or type(initial) is not dict:
-        #   return {'success': False}
-        # As a matter of style, we're better off using instanceof than
-        # comparing type.
-        # ...
-        if type(generic) is list and type(initial) is dict:
-            self.initial_hints = initial
-            self.generic_hints = generic
+        initial_hints = json.loads(data['initial_hints'])
+        generic_hints = json.loads(data['generic_hints'])
+
+        if not isinstance(generic_hints, list):
+            return {'success': False,
+                    'error': 'Generic hints should be a list.'}
+        if not isinstance(initial_hints, dict):
+            return {'success': False,
+                    'error' : 'Initial hints should be a dict.'}
+
+        self.initial_hints = initial_hints
+        self.generic_hints = generic_hints
+        if len(str(data['element'])) > 1:
             self.Element = str(data['element'])
-            return {'success': True}
-        return {'success': False}
+        return {'success': True}
 
     def student_view(self, context=None):
         """
@@ -396,7 +397,7 @@ class CrowdsourceHinter(XBlock):
         A minimal working test for parse_xml
         """
         block = runtime.construct_xblock_from_class(cls, keys)
-        xmlText = ast.literal_eval(str(node.text))
+        xmlText = json.loads(node.text)
         if xmlText:
             block.generic_hints.append(str(xmlText["generic_hints"]))
             block.initial_hints = copy.copy(xmlText["initial_hints"])
