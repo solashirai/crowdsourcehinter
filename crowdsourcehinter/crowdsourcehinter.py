@@ -145,19 +145,6 @@ class CrowdsourceHinter(XBlock):
         frag.initialize_js('CrowdsourceHinter', {'hinting_element': self.Element, 'isStaff': self.xmodule_runtime.user_is_staff})
         return frag
 
-    def extract_student_answers(self, answers):
-        """
-        We find out what the student submitted by listening to a
-        client-side event. This event is a little bit messy. This 
-        function cleans up the event into a dictionary mapping
-        input IDs to answers submitted.
-        """
-        # First, we split this into the submission
-        answers = [a.split('=') for a in answers.split("&")]
-        # Next, we decode the HTML escapes
-        answers = [(a[0], html_parser.unescape(a[1])) for a in answers]
-        return dict(answers)
-
     @XBlock.json_handler
     def get_hint(self, data, suffix=''):
         """
@@ -406,6 +393,20 @@ class CrowdsourceHinter(XBlock):
             block.initial_hints = copy.copy(xmlText["initial_hints"])
             block.Element = str(xmlText["hinting_element"])
         return block
+
+    ## Code below is done
+    def extract_student_answers(self, answers):
+        """
+        We find out what the student submitted by listening to a
+        client-side event. This event is a little bit messy. This
+        function cleans up the event into a dictionary mapping
+        input IDs to answers submitted.
+        """
+        # First, we split this into the submission
+        answers = [a.split('=') for a in answers.split("&")]
+        # Next, we decode the HTML escapes
+        answers = [(a[0], html_parser.unescape(a[1])) for a in answers]
+        return dict(answers)
 
     # Generic functions/workarounds for XBlock API limitations and incompletions.
     def resource_string(self, path):
