@@ -56,10 +56,6 @@
   margin-left: 10px;
 }
 
-div[data-rate="report"]{
-    font-weight: bold;
-}
-
 .csh_hint_text[rating="upvote"]{
   color: green;
 }

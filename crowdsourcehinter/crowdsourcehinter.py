@@ -1,4 +1,3 @@
-import ast
 import logging
 import operator
 import pkg_resources
@@ -6,65 +5,96 @@ import random
 import json
 import copy
 
+import HTMLParser
+
 from xblock.core import XBlock
 from xblock.fields import Scope, Dict, List, Boolean, String
 from xblock.fragment import Fragment
 
 log = logging.getLogger(__name__)
-
+html_parser = HTMLParser.HTMLParser()
 
 class CrowdsourceHinter(XBlock):
     """
-    This is the Crowdsource Hinter XBlock. This Xblock seeks to provide students with hints
-    that specifically address their mistake. Additionally, the hints that this Xblock shows
-    are created by the students themselves. This doc string will probably be edited later.
+    This is the Crowdsource Hinter XBlock. This Xblock provides
+    students with hints that specifically address their
+    mistake. The hints are crowdsourced from the students.
     """
-    # Database of hints. hints are stored as such: {"incorrect_answer": {"hint": rating}}. each key (incorrect answer)
-    # has a corresponding dictionary (in which hints are keys and the hints' ratings are the values).
-    #
-    # Example: {"computerr": {"You misspelled computer, remove the last r.": 5}}
+
+    # Database of hints. hints are stored:
+    #   {"incorrect_answer": {"hint": rating}}.
+    # Each key (incorrect answer) has a corresponding dictionary (in
+    # which hints are keys and the hints' ratings are the values).
+    # For example:
+    #   {"computerr": {"You misspelled computer, remove the last r.": 5}}
+    # TODO: We should store upvotes and downvotes independently.
     hint_database = Dict(default={}, scope=Scope.user_state_summary)
-    # Database of initial hints, set by the course instructor. hint_database will receive the hints inputted
-    # in initial_hints. Initial hints have a default rating of 0.
+
+    # Database of initial hints, set by the course
+    # instructor. hint_database will receive the hints inputted in
+    # initial_hints. Initial hints have a default rating of 0.
     #
-    # Example: {"Jeorge Washington": "You spelled his first name wrong."}
+    # For example:
+    #  {"Jeorge Washington": "You spelled his first name wrong."}
     initial_hints = Dict(default={}, scope=Scope.content)
-    # This is a list of incorrect answer submissions made by the student. this list is mostly used for
-    # when the student starts rating hints, to find which incorrect answer's hint a student voted on.
+
+    # This is a list of incorrect answer submissions made by the
+    # student. this list is used when the student starts rating hints,
+    # to find which incorrect answer's hint a student voted on.
     #
-    # Example: ["personal computer", "PC", "computerr"]
+    # For example:
+    #  ["personal computer", "PC", "computerr"]
     incorrect_answers = List([], scope=Scope.user_state)
-    # A dictionary of generic_hints. default hints will be shown to students when there are no matches with the
-    # student's incorrect answer within the hint_database dictionary (i.e. no students have made hints for the
-    # particular incorrect answer)
+
+    # A dictionary of generic_hints. default hints will be shown to
+    # students when there are no matches with the student's incorrect
+    # answer within the hint_database dictionary (i.e. no students
+    # have made hints for the particular incorrect answer)
     #
-    # Example: ["Make sure to check your answer for simple mistakes like typos!"]
+    # For example:
+    #  ["Make sure to check your answer for simple mistakes like typos!"]
     generic_hints = List(default=[], scope=Scope.content)
-    # List of which hints have been shown to the student
-    # this list is used to prevent the same hint from showing up to a student (if they submit the same incorrect answers
-    # multiple times)
+
+    # This is a list hints have been shown to the student. We'd like
+    # to avoid showing the same hint from showing up to a student (if
+    # they submit the same incorrect answers multiple times), and we
+    # may like to know this after the students submits a correct
+    # answer (if we want to e.g. vet hints)
     #
-    # Example: ["You misspelled computer, remove the last r."]
+    # For example:
+    #   ["You misspelled computer, remove the last r."]
     used = List([], scope=Scope.user_state)
-    # This is a dictionary of hints that have been reported. the values represent the incorrect answer submission, and the
-    # keys are the hints the corresponding hints. hints with identical text for differing answers will all not show up for the
-    # student.
+
+    # This is a dictionary of hints that have been flagged or reported
+    # as malicious (spam, profanity, give-aways, etc.). The values
+    # represent incorrect answer submissions. The keys are the hints
+    # the corresponding hints. hints with identical text for differing
+    # answers will all not show up for the student.
     #
-    # Example: {"desk": "You're completely wrong, the answer is supposed to be computer."}
+    # For example:
+    #  {"desk": "You're completely wrong, the answer is supposed to be computer."}
+    # TODO: It's not clear how this data structure will manage multiple
+    # reported hints for the same wrong answer.
     reported_hints = Dict(default={}, scope=Scope.user_state_summary)
-    # This String represents the xblock element for which the hinter is running. It is necessary to manually
-    # set this value in the XML file under the format "hinting_element": "i4x://edX/DemoX/problem/Text_Input" .
-    # Setting the element in the XML file is critical for the hinter to work.
+
+    # This String represents the xblock element for which the hinter
+    # is delivering hints. It is necessary to manually set this value
+    # in the XML file under the format "hinting_element":
+    # "i4x://edX/DemoX/problem/Text_Input"
     #
-    # TODO: probably should change the name from Element (problem_element? hinting_element?). Trying to
-    # just change the name didn't seem to operate properly, check carefully what is changed
+    # TODO: probably should change the name from Element
+    # (problem_element? hinting_element?). Trying to just change the
+    # name didn't seem to operate properly, check carefully what is
+    # changed
     Element = String(default="", scope=Scope.content)
 
     def studio_view(self, context=None):
         """
-        This function defines a view for editing the XBlock when embedding it in a course. It will allow
-        one to define, for example, which problem the hinter is for. It is unfinished and does not currently
-        work.
+        This function defines a view for editing the XBlock when embedding
+        it in a course. It will allow one to define, for example,
+        which problem the hinter is for.
+        It is currently incomplete -- we still need to finish building the
+        authoring view.
         """
         html = self.resource_string("static/html/crowdsourcehinterstudio.html")
         frag = Fragment(html)
@@ -77,31 +107,25 @@ class CrowdsourceHinter(XBlock):
     @XBlock.json_handler
     def set_initial_settings(self, data, suffix=''):
         """
-        Set intial hints, generic hints, and problem element from the studio view.
+        Set intial hints, generic hints, and problem element from the
+        studio view.
+        The Studio view is not yet complete.
         """
-        initial = ast.literal_eval(str(data['initial_hints']))
-        generic = ast.literal_eval(str(data['generic_hints']))
-        if type(generic) is list and type(initial) is dict:
-            self.initial_hints = initial
-            self.generic_hints = generic
+        initial_hints = json.loads(data['initial_hints'])
+        generic_hints = json.loads(data['generic_hints'])
+
+        if not isinstance(generic_hints, list):
+            return {'success': False,
+                    'error': 'Generic hints should be a list.'}
+        if not isinstance(initial_hints, dict):
+            return {'success': False,
+                    'error' : 'Initial hints should be a dict.'}
+
+        self.initial_hints = initial_hints
+        self.generic_hints = generic_hints
+        if len(str(data['element'])) > 1:
             self.Element = str(data['element'])
-            return {'success': True}
-        return {'success': False}
-
-    def resource_string(self, path):
-        """
-        This function is used to get the path of static resources.
-        """
-        data = pkg_resources.resource_string(__name__, path)
-        return data.decode("utf8")
-
-    def get_user_is_staff(self):
-        """
-        Return self.xmodule_runtime.user_is_staff
-        This is not a supported part of the XBlocks API. User data is still
-        being defined. However, It's the only way to get the data right now.
-        """
-        return self.xmodule_runtime.user_is_staff
+        return {'success': True}
 
     def student_view(self, context=None):
         """
@@ -113,14 +137,28 @@ class CrowdsourceHinter(XBlock):
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
         frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
-        frag.initialize_js('CrowdsourceHinter', {'hinting_element': self.Element, 'isStaff': self.xmodule_runtime.user_is_staff})
+        frag.initialize_js('CrowdsourceHinter', {'hinting_element': self.Element, 'isStaff': get_user_is_staff})
         return frag
+
+    def extract_student_answers(self, answers):
+        """
+        We find out what the student submitted by listening to a
+        client-side event. This event is a little bit messy. This 
+        function cleans up the event into a dictionary mapping
+        input IDs to answers submitted.
+        """
+        # First, we split this into the submission
+        answers = [a.split('=') for a in answers.split("&")]
+        # Next, we decode the HTML escapes
+        answers = [(a[0], HTMLparser.unescape(a[1])) for a in answers]
+        return dict(answers)
 
     @XBlock.json_handler
     def get_hint(self, data, suffix=''):
         """
-        Returns hints to students. Hints with the highest rating are shown to students unless the student has already
-        submitted the same incorrect answer previously.
+        Returns hints to students. Hints with the highest rating are shown
+        to students unless the student has already submitted the same
+        incorrect answer previously.
         Args:
           data['submittedanswer']: The string of text that the student submits for a problem.
         returns:
@@ -129,80 +167,78 @@ class CrowdsourceHinter(XBlock):
                         or 'Sorry, there are no hints for this answer.' if no hints exist
           'StudentAnswer': the student's incorrect answer
         """
-        # populate hint_database with hints from initial_hints if there are no hints in hint_database.
-        # this probably will occur only on the very first run of a unit containing this block.
-        for answers in self.initial_hints:
-            if answers not in self.hint_database:
-                self.hint_database[answers] = {}
-            if self.initial_hints[answers] not in self.hint_database[answers]:
-                self.hint_database[answers].update({self.initial_hints[answers]: 0})
-        answer = str(data["submittedanswer"])
-        # put the student's answer to lower case so that differences in capitalization don't make
-        # different groups of hints. this is sloppy and the execution should probably be changed.
-        answer = answer.lower()
-        found_equal_sign = 0
-        remaining_hints = int(0)
-        best_hint = ""
-        # the string returned by the event problem_graded is very messy and is different
-        # for each problem, but after all of the numbers/letters there is an equal sign, after which the
-        # student's input is shown. I use the function below to remove everything before the first equal
-        # sign and only take the student's actual input.
+        # Populate hint_database with hints from initial_hints if
+        # there are no hints in hint_database.  this probably will
+        # occur only on the very first run of a unit containing this
+        # block.
+         if not self.hint_database:
+           self.hints_database = self.initial_hints
+
+        answer = self.extract_student_answers(data["submittedanswer"])
+
+        # HACK: For now, we assume just one submission, a string, and
+        # case insensitive
         #
-        # TODO: figure out better way to directly get text of student's answer
-        if "=" in answer:
-            if found_equal_sign == 0:
-                found_equal_sign = 1
-                eqplace = answer.index("=") + 1
-                answer = answer[eqplace:]
-        remaining_hints = str(self.find_hints(answer))
-        if remaining_hints != str(0):
-            for hint in self.hint_database[str(answer)]:
+        # TODO: We should replace this with a generic canonicalization
+        # function
+        answer = answer.values()[0].lower()
+
+        # Put the student's answer to lower case so that differences
+        # in capitalization don't make different groups of
+        # hints. TODO: We should replace this with a .
+        remaining_hints = 0  # TODO: This is confused
+        best_hint = ""  # TODO: What is this?
+        remaining_hints = self.find_hints(answer)
+        if remaining_hints != 0:
+            for hint in self.hint_database[answer]:
                 if hint not in self.reported_hints.keys():
                     # if best_hint hasn't been set yet or the rating of hints is greater than the rating of best_hint
-                    if best_hint == "" or self.hint_database[str(answer)][hint] > self.hint_database[str(answer)][str(best_hint)]:
+                    if best_hint == "" or self.hint_database[answer][hint] > self.hint_database[answer][best_hint]:
                         best_hint = hint
             self.used.append(best_hint)
             return {'BestHint': best_hint, "StudentAnswer": answer}
         # find generic hints for the student if no specific hints exist
-        if len(self.generic_hints) != 0:
+        if self.generic_hints:
             generic_hint = random.choice(self.generic_hints)
             self.used.append(generic_hint)
             return {'BestHint': generic_hint, "StudentAnswer": answer}
         else:
             # if there are no hints in either the database or generic hints
-            self.used.append(str("There are no hints for" + " " + answer))
+            self.used.append("There are no hints for" + " " + answer)
             return {'BestHint': "Sorry, there are no hints for this answer.", "StudentAnswer": answer}
 
     def find_hints(self, answer):
         """
-        This function is used to check that an incorrect answer has available hints to show.
-        It will also add the incorrect answer test to self.incorrect_answers.
+        This function is used to check that an incorrect answer has
+        available hints to show.  It will also add the incorrect
+        answer test to self.incorrect_answers.
         Args:
           answer: This is equal to answer from get_hint, the answer the student submitted
         Returns 0 if no hints to show exist
         """
         isreported = []
-        self.incorrect_answers.append(str(answer))
-        if str(answer) not in self.hint_database:
+        self.incorrect_answers.append(answer)
+        if answer not in self.hint_database:
             # add incorrect answer to hint_database if no precedent exists
-            self.hint_database[str(answer)] = {}
-            return str(0)
-        for hint_keys in self.hint_database[str(answer)]:
+            self.hint_database[answer] = {}
+            return 0
+        for hint_key in self.hint_database[answer]:
             for reported_keys in self.reported_hints:
-                if hint_keys == reported_keys:
-                    isreported.append(hint_keys)
-        if (len(self.hint_database[str(answer)]) - len(isreported)) > 0:
-            return str(1)
+                if hint_key in self.reported_hints:
+                    isreported.append(hint_key)
+        if (len(self.hint_database[answer]) - len(isreported)) > 0:
+            return 1
         else:
-            return str(0)
+            return 0
 
     @XBlock.json_handler
     def get_used_hint_answer_data(self, data, suffix=''):
         """
-        This function helps to facilitate student rating of hints and contribution of new hints.
-        Specifically this function is used to send necessary data to JS about incorrect answer
-        submissions and hints. It also will return hints that have been reported, although this
-        is only for Staff.
+        This function helps to facilitate student rating of hints and
+        contribution of new hints.  Specifically this function is used
+        to send necessary data to JS about incorrect answer
+        submissions and hints. It also will return hints that have
+        been reported, although this is only for Staff.
         Returns:
           used_hint_answer_text: This dicitonary contains reported hints/answers (if the user is staff) and the
                          first hint/answer pair that the student submitted for a problem.
@@ -214,24 +250,18 @@ class CrowdsourceHinter(XBlock):
         used_hint_answer_text = {}
         if self.get_user_is_staff():
             for key in self.reported_hints:
-                used_hint_answer_text[key] = str("Reported")
+                used_hint_answer_text[key] = "Reported"
         if len(self.incorrect_answers) == 0:
             return used_hint_answer_text
         else:
             for index in range(0, len(self.used)):
                 # each index is a hint that was used, in order of usage
-                if str(self.used[index]) in self.hint_database[self.incorrect_answers[index]]:
+                if self.used[index] in self.hint_database[self.incorrect_answers[index]]:
                     # add new key (hint) to used_hint_answer_text with a value (incorrect answer)
-                    used_hint_answer_text[str(self.used[index])] = str(self.incorrect_answers[index])
-                    self.incorrect_answers = []
-                    self.used = []
-                    return used_hint_answer_text
+                    used_hint_answer_text[self.used[index]] = self.incorrect_answers[index]
                 else:
                     # if the student's answer had no hints (or all the hints were reported and unavailable) return None
-                    used_hint_answer_text[None] = str(self.incorrect_answers[index])
-                    self.incorrect_answers = []
-                    self.used = []
-                    return used_hint_answer_text
+                    used_hint_answer_text[None] = self.incorrect_answers[index]
         self.incorrect_answers = []
         self.used = []
         return used_hint_answer_text
@@ -240,7 +270,8 @@ class CrowdsourceHinter(XBlock):
     def rate_hint(self, data, suffix=''):
         """
         Used to facilitate hint rating by students.
-        Hint ratings in hint_database are updated and the resulting hint rating (or reported status) is returned to JS.
+        Hint ratings in hint_database are updated and the resulting
+        hint rating (or reported status) is returned to JS.
         Args:
           data['student_answer']: The incorrect answer that corresponds to the hint that is being rated
           data['hint']: The hint that is being rated
@@ -256,21 +287,21 @@ class CrowdsourceHinter(XBlock):
             return {"rating": None, 'hint': data_hint}
         if data['student_rating'] == 'unreport':
             for reported_hints in self.reported_hints:
-                if reported_hints == data_hint:
+                if data_hint in self.reported_hints:
                     self.reported_hints.pop(data_hint, None)
                     return {'rating': 'unreported'}
         if data['student_rating'] == 'remove':
             for reported_hints in self.reported_hints:
-                if data_hint == reported_hints:
+                if data_hint in self.reported_hints:
                     self.hint_database[self.reported_hints[data_hint]].pop(data_hint, None)
                     self.reported_hints.pop(data_hint, None)
                     return {'rating': 'removed'}
         if data['student_rating'] == 'report':
             # add hint to Reported dictionary
-            self.reported_hints[str(data_hint)] = answer_data
+            self.reported_hints[data_hint] = answer_data
             return {"rating": 'reported', 'hint': data_hint}
         rating = self.change_rating(data_hint, data_rating, answer_data)
-        return {"rating": str(rating), 'hint': data_hint}
+        return {"rating": rating, 'hint': data_hint}
 
     def change_rating(self, data_hint, data_rating, answer_data):
         """
@@ -288,11 +319,11 @@ class CrowdsourceHinter(XBlock):
         if any(data_hint in generic_hints for generic_hints in self.generic_hints):
             return
         if data_rating == 'upvote':
-            self.hint_database[str(answer_data)][str(data_hint)] += 1
-            return self.hint_database[str(answer_data)][str(data_hint)]
+            delta_rating = 1
         else:
-            self.hint_database[str(answer_data)][str(data_hint)] -= 1
-            return self.hint_database[str(answer_data)][str(data_hint)]
+            delta_rating = -1
+        self.hint_database[answer_data][data_hint] += delta_rating
+        return self.hint_database[answer_data)][data_hint]
 
     @XBlock.json_handler
     def add_new_hint(self, data, suffix=''):
@@ -304,15 +335,15 @@ class CrowdsourceHinter(XBlock):
         """
         submission = data['submission']
         answer = data['answer']
-        if str(submission) not in self.hint_database[str(answer)]:
-            self.hint_database[str(answer)].update({submission: 0})
+        if submission not in self.hint_database[answer]:
+            self.hint_database[answer].update({submission: 0})
             return
         else:
             # if the hint exists already, simply upvote the previously entered hint
-            if str(submission) in self.generic_hints:
+            if submission in self.generic_hints:
                 return
             else:
-                self.hint_database[str(answer)][str(submission)] += 1
+                self.hint_database[answer][submission] += 1
                 return
 
     @XBlock.json_handler
@@ -325,17 +356,17 @@ class CrowdsourceHinter(XBlock):
 
     @staticmethod
     def workbench_scenarios():
-        """A canned scenario for display in the workbench."""
+        """
+        A canned scenario for display in the workbench.
+        """
         return [
             ("CrowdsourceHinter",
-                """
-                    <verticaldemo>
-                        <crowdsourcehinter>
-                            {"generic_hints": "Make sure to check for basic mistakes like typos", "initial_hints": {"michiganp": "remove the p at the end.", "michigann": "too many Ns on there."}, "hinting_element": "i4x://edX/DemoX/problem/Text_Input"}
-                        </crowdsourcehinter>
-                     </verticaldemo>
-                """
-            )
+             """
+             <verticaldemo>
+               <crowdsourcehinter>
+                 {"generic_hints": "Make sure to check for basic mistakes like typos", "initial_hints": {"michiganp": "remove the p at the end.", "michigann": "too many Ns on there."}, "hinting_element": "i4x://edX/DemoX/problem/Text_Input"}
+               </crowdsourcehinter>
+             </verticaldemo>""")
         ]
 
     @classmethod
@@ -344,9 +375,25 @@ class CrowdsourceHinter(XBlock):
         A minimal working test for parse_xml
         """
         block = runtime.construct_xblock_from_class(cls, keys)
-        xmlText = ast.literal_eval(str(node.text))
+        xmlText = json.loads(node.text)
         if xmlText:
             block.generic_hints.append(str(xmlText["generic_hints"]))
             block.initial_hints = copy.copy(xmlText["initial_hints"])
             block.Element = str(xmlText["hinting_element"])
         return block
+
+    # Generic functions/workarounds for XBlock API limitations and incompletions.
+    def resource_string(self, path):
+        """
+        This function is used to get the path of static resources.
+        """
+        data = pkg_resources.resource_string(__name__, path)
+        return data.decode("utf8")
+
+    def get_user_is_staff(self):
+        """
+        Return self.xmodule_runtime.user_is_staff
+        This is not a supported part of the XBlocks API. User data is still
+        being defined. However, it's the only way to get the data right now.
+        """
+        return self.xmodule_runtime.user_is_staff
