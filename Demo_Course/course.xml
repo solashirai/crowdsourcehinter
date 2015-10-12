@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<course advanced_modules="[&quot;crowdsourcehinter&quot;]" course="CSH" display_name="Crowdsourced Hinter Demonstration Course" graded="false" ispublic="false" org="edX" rerandomize="never" show_calculator="false" showanswer="attempted" source_file="null" start="2013-02-05T05:00:00Z" url_name="CSH_Course">
+  <chapter display_name="Crowdsourced Hinter" url_name="csh">
+    <sequential display_name="CSH With Settings" url_name="csh_settings_s">
+      <vertical display_name="CSH With Settings" url_name="csh_settings_v">
+        <problem url_name="michigan_problem_prehint"/>
+        <crowdsourcehinter Element="i4x://edX/CSH_Course/problem/sample_problem"
+			   display_name="Unit"
+			   generic_hints="[&quot;Try checking for spelling mistakes.&quot;]"
+			   initial_hints="{&quot;michigann&quot;: &quot;Your answer has too many Ns.&quot;}"
+			   url_name="Unit_0"
+			   xblock-family="xblock.v1"/>
+      </vertical>
+    </sequential>
+    <sequential display_name="CSH Without Settings" url_name="csh_plain_s">
+      <vertical display_name="CSH Without Settings" url_name="csh_plain_v">
+        <problem url_name="michigan_problem_nohint"/>
+        <crowdsourcehinter display_name="Unit"
+			   url_name="Unit_2"
+			   xblock-family="xblock.v1"/>
+      </vertical>
+    </sequential>
+  </chapter>
+</course>
