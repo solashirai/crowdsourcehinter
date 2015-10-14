@@ -90,14 +90,14 @@ function CrowdsourceHinter(runtime, element, data){
      * Set the target problem for which to listen for the problem_graded event. Set target to first
      * problem block if no hinting element has been manually entered.
      */
-    if(data.hinting_element == undefined || data.hinting_element == ''){
+    if(data.target_problem == undefined || data.target_problem == ''){
         //contains workaround because the data-usage-id shows up with ";_" in place of "/" in lms
-        hintingElement = ($('.xblock[data-block-type="problem"]').first().attr('data-usage-id')).replace(/;_/g, '/');
+        targetProblem = ($('.xblock[data-block-type="problem"]').first().attr('data-usage-id')).replace(/;_/g, '/');
     } else {
-        hintingElement = data.hinting_element;
+        targetProblem = data.target_problem;
     }
 
-    Logger.listen('problem_graded', hintingElement, onStudentSubmission());
+    Logger.listen('problem_graded', targetProblem, onStudentSubmission());
 
     /**
      * Modify csh_hint_text attributes to show hint to the student.
@@ -219,7 +219,7 @@ function CrowdsourceHinter(runtime, element, data){
             $.ajax({
                 type: "POST",
                 url: runtime.handlerUrl(element, 'add_new_hint'),
-                data: JSON.stringify({"submission": newHint, "answer": studentAnswer}),
+                data: JSON.stringify({"new_hint_submission": newHint, "answer": studentAnswer}),
                 success: function() {
                     $('.csh_student_text_input', element).attr('style', 'display: none;');
                     $(submitHintButtonHTML.currentTarget).attr('style', 'display: none;');

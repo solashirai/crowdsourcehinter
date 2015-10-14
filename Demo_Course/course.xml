@@ -4,7 +4,7 @@
     <sequential display_name="CSH With Settings" url_name="csh_settings_s">
       <vertical display_name="CSH With Settings" url_name="csh_settings_v">
         <problem url_name="michigan_problem_prehint"/>
-        <crowdsourcehinter Element="i4x://edX/CSH_Course/problem/sample_problem"
+        <crowdsourcehinter target_problem="i4x://edX/CSH_Course/problem/sample_problem"
 			   display_name="Unit"
 			   generic_hints="[&quot;Try checking for spelling mistakes.&quot;]"
 			   initial_hints="{&quot;michigann&quot;: &quot;Your answer has too many Ns.&quot;}"
