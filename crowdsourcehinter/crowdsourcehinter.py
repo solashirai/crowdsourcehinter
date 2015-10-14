@@ -96,7 +96,11 @@ class CrowdsourceHinter(XBlock):
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
         frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter_studio.js"))
-        frag.initialize_js('CrowdsourceHinterStudio', {'initial': str(self.initial_hints), 'generic': str(self.generic_hints), 'target_problem': str(self.target_problem)})
+        print type(self.initial_hints), type(self.target_problem), type(self.generic_hints), str
+        frag.initialize_js('CrowdsourceHinterStudio',
+                           {'initial': self.initial_hints,
+                            'generic': self.generic_hints,
+                            'target_problem': self.target_problem})
         return frag
 
     @XBlock.json_handler
@@ -123,8 +127,9 @@ class CrowdsourceHinter(XBlock):
 
         self.initial_hints = initial_hints
         self.generic_hints = generic_hints
-        if len(str(data['target_problem'])) > 1:
-            self.target_problem = str(data['target_problem'])
+        print type(data['target_problem'])
+        if len(data['target_problem']) > 1:
+            self.target_problem = data['target_problem']
         return {'success': True}
 
     def student_view(self, context=None):
@@ -154,7 +159,8 @@ class CrowdsourceHinter(XBlock):
                         or another random hint for an incorrect answer
                         or 'Sorry, there are no hints for this answer.' if no hints exist
           'StudentAnswer': the student's incorrect answer
-
+          'HintCategory': Either a string for the type of hint, or False
+              if no hints
         """
         # Populate hint_database with hints from initial_hints if
         # there are no hints in hint_database. This probably will
@@ -179,52 +185,62 @@ class CrowdsourceHinter(XBlock):
         # Put the student's answer to lower case so that differences
         # in capitalization don't make different groups of
         # hints. TODO: We should replace this with a .
-        remaining_hints = int(0)  # TODO: This is confused
         best_hint = ""  # TODO: What is this?
-        remaining_hints = str(self.find_hints(answer))
-        if remaining_hints != str(0):
-            for hint in self.hint_database[str(answer)]:
+
+        if self.hints_available(answer):
+            for hint in self.hint_database[answer]:
                 if hint not in self.reported_hints.keys():
                     # if best_hint hasn't been set yet or the rating of hints is greater than the rating of best_hint
-                    if best_hint == "" or self.hint_database[str(answer)][hint] > self.hint_database[str(answer)][str(best_hint)]:
+                    if best_hint == "" or self.hint_database[answer][hint] > self.hint_database[answer][best_hint]:
                         best_hint = hint
             self.used.append(best_hint)
-            return {'BestHint': best_hint, "StudentAnswer": answer}
+            return {'BestHint': best_hint,
+                    "StudentAnswer": answer,
+                    "HintCategory": "ErrorResponse"}
         # find generic hints for the student if no specific hints exist
         if len(self.generic_hints) != 0:
             generic_hint = random.choice(self.generic_hints)
             self.used.append(generic_hint)
-            return {'BestHint': generic_hint, "StudentAnswer": answer}
+            return {'BestHint': generic_hint,
+                    "StudentAnswer": answer,
+                    "HintCategory": "Generic"}
         else:
             # if there are no hints in either the database or generic hints
-            self.used.append(str("There are no hints for" + " " + answer))
-            return {'BestHint': "Sorry, there are no hints for this answer.", "StudentAnswer": answer}
+            self.used.append("There are no hints for" + " " + answer)
+            return {"BestHint": "Sorry, there are no hints for this answer.",
+                    "StudentAnswer": answer,
+                    "HintCategory": False}
 
-    def find_hints(self, answer):
+    def hints_available(self, answer):
         """
         This function is used to check that an incorrect answer has
         available hints to show.  It will also add the incorrect
         answer test to self.incorrect_answers.
 
         Args:
-          answer: This is equal to answer from get_hint, the answer the student submitted
-        Returns 0 if no hints to show exist
-
+          answer: This is equal to answer from get_hint, the answer 
+            the student submitted
+        Returns:
+           False if there are no hints to show exist. In the future, this
+             may change to another falsey value (e.g. zero or an empty
+             list)
+           True if there are hints to show. In the future, this may change
+             to another truthy value (e.g. the hints themselves, or number
+             of hints, or similar)
         """
         isreported = []
-        self.incorrect_answers.append(str(answer))
-        if str(answer) not in self.hint_database:
+        self.incorrect_answers.append(answer)
+        if answer not in self.hint_database:
             # add incorrect answer to hint_database if no precedent exists
-            self.hint_database[str(answer)] = {}
-            return str(0)
-        for hint_keys in self.hint_database[str(answer)]:
-            for reported_keys in self.reported_hints:
-                if hint_keys == reported_keys:
-                    isreported.append(hint_keys)
-        if (len(self.hint_database[str(answer)]) - len(isreported)) > 0:
-            return str(1)
+            self.hint_database[answer] = {}
+            return False
+        for hint_keys in self.hint_database[answer]:
+            if hint_keys in self.reported_hints:
+                isreported.append(hint_keys)
+        if (len(self.hint_database[answer]) - len(isreported)) > 0:
+            return True
         else:
-            return str(0)
+            return False
 
     @XBlock.json_handler
     def get_used_hint_answer_data(self, data, suffix=''):
@@ -247,21 +263,21 @@ class CrowdsourceHinter(XBlock):
         used_hint_answer_text = {}
         if self.get_user_is_staff():
             for key in self.reported_hints:
-                used_hint_answer_text[key] = str("Reported")
+                used_hint_answer_text[key] = u"Reported"
         if len(self.incorrect_answers) == 0:
             return used_hint_answer_text
         else:
             for index in range(0, len(self.used)):
                 # each index is a hint that was used, in order of usage
-                if str(self.used[index]) in self.hint_database[self.incorrect_answers[index]]:
+                if self.used[index] in self.hint_database[self.incorrect_answers[index]]:
                     # add new key (hint) to used_hint_answer_text with a value (incorrect answer)
-                    used_hint_answer_text[str(self.used[index])] = str(self.incorrect_answers[index])
+                    used_hint_answer_text[self.used[index]] = self.incorrect_answers[index]
                     self.incorrect_answers = []
                     self.used = []
                     return used_hint_answer_text
                 else:
                     # if the student's answer had no hints (or all the hints were reported and unavailable) return None
-                    used_hint_answer_text[None] = str(self.incorrect_answers[index])
+                    used_hint_answer_text[None] = self.incorrect_answers[index]
                     self.incorrect_answers = []
                     self.used = []
                     return used_hint_answer_text
@@ -309,15 +325,15 @@ class CrowdsourceHinter(XBlock):
 
         elif data['student_rating'] == 'report':
             # add hint to Reported dictionary
-            self.reported_hints[str(data_hint)] = answer_data
+            self.reported_hints[data_hint] = answer_data
             return {"rating": 'reported', 'hint': data_hint}
 
         elif data_rating == 'upvote':
-            self.upvote_hint(answer, submission)
+            self.hint_database[answer_data][data_hint]["upvotes"] += 1
             return {'success':True}
 
         elif data_rating == 'downvote':
-            self.downvote_hint(answer, submission)
+            self.hint_database[answer_data][data_hint]["downvotes"] += 1
             return {'success': True}
 
         else:
@@ -350,8 +366,8 @@ class CrowdsourceHinter(XBlock):
         answer = data['answer']
 
         # If we don't have the hint already, add it
-        if str(submission) not in self.hint_database[str(answer)]:
-            self.hint_database[str(answer)].update({submission: {'upvotes':0, 'downvotes':0}})
+        if submission not in self.hint_database[answer]:
+            self.hint_database[answer].update({submission: {'upvotes':0, 'downvotes':0}})
             return {'success':True,
                     'result': 'Hint added'}
         
@@ -393,9 +409,9 @@ class CrowdsourceHinter(XBlock):
         else:
             xmlText = None
         if xmlText:
-            block.generic_hints.append(str(xmlText["generic_hints"]))
+            block.generic_hints.append(xmlText["generic_hints"])
             block.initial_hints = copy.copy(xmlText["initial_hints"])
-            block.target_problem = str(xmlText["target_problem"])
+            block.target_problem = xmlText["target_problem"]
         return block
 
     ## Code below is done
