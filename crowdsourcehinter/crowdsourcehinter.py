@@ -76,16 +76,11 @@ class CrowdsourceHinter(XBlock):
     # reported hints for the same wrong answer.
     reported_hints = Dict(default={}, scope=Scope.user_state_summary)
 
-    # This String represents the xblock element for which the hinter
-    # is delivering hints. It is necessary to manually set this value
-    # in the XML file under the format "hinting_element":
-    # "i4x://edX/DemoX/problem/Text_Input"
-    #
-    # TODO: probably should change the name from Element
-    # (problem_element? hinting_element?). Trying to just change the
-    # name didn't seem to operate properly, check carefully what is
-    # changed
-    Element = String(default="", scope=Scope.content)
+    # This String represents the xblock target problem element for
+    # which the hinter is delivering hints. It is necessary to
+    # manually set this value in the XML file under the format
+    # "target_problem": "i4x://edX/DemoX/problem/Text_Input"
+    target_problem = String(default="", scope=Scope.content)
 
     def studio_view(self, context=None):
         """
@@ -101,7 +96,7 @@ class CrowdsourceHinter(XBlock):
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
         frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter_studio.js"))
-        frag.initialize_js('CrowdsourceHinterStudio', {'initial': str(self.initial_hints), 'generic': str(self.generic_hints), 'element': str(self.Element)})
+        frag.initialize_js('CrowdsourceHinterStudio', {'initial': str(self.initial_hints), 'generic': str(self.generic_hints), 'target_problem': str(self.target_problem)})
         return frag
 
     @XBlock.json_handler
@@ -128,8 +123,8 @@ class CrowdsourceHinter(XBlock):
 
         self.initial_hints = initial_hints
         self.generic_hints = generic_hints
-        if len(str(data['element'])) > 1:
-            self.Element = str(data['element'])
+        if len(str(data['target_problem'])) > 1:
+            self.target_problem = str(data['target_problem'])
         return {'success': True}
 
     def student_view(self, context=None):
@@ -142,7 +137,7 @@ class CrowdsourceHinter(XBlock):
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
         frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
-        frag.initialize_js('CrowdsourceHinter', {'hinting_element': self.Element, 'isStaff': self.xmodule_runtime.user_is_staff})
+        frag.initialize_js('CrowdsourceHinter', {'target_problem': self.target_problem, 'isStaff': self.xmodule_runtime.user_is_staff})
         return frag
 
     @XBlock.json_handler
@@ -162,13 +157,11 @@ class CrowdsourceHinter(XBlock):
 
         """
         # Populate hint_database with hints from initial_hints if
-        # there are no hints in hint_database.  this probably will
+        # there are no hints in hint_database. This probably will
         # occur only on the very first run of a unit containing this
-        # block.
-        # TODO: This more complex than it needs to be. Why isn't as
-        # simple as:
-        # if not self.hint_database:
-        #   self.hints_database = self.initial_hints
+        # block, but the logic is a little bit more complex since
+        # we'd like to be able to add additional hints if instructors
+        # chose to do so.
         for answers in self.initial_hints:
             if answers not in self.hint_database:
                 self.hint_database[answers] = {}
@@ -291,29 +284,44 @@ class CrowdsourceHinter(XBlock):
           'rating': the new rating of the hint, or the string 'reported' if the hint was reported
           'hint': the hint that had its rating changed
 
+        TODO: Break out into independent functions, or make generic in some way
         """
         answer_data = data['student_answer']
         data_rating = data['student_rating']
         data_hint = data['hint']
-        if data_hint == 'Sorry, there are no hints for this answer.':
-            return {"rating": None, 'hint': data_hint}
+
+        # TODO: Figure out how to manage generic hints
+        if any(data_hint in generic_hints for generic_hints in self.generic_hints):
+            return
+
         if data['student_rating'] == 'unreport':
             for reported_hints in self.reported_hints:
                 if reported_hints == data_hint:
                     self.reported_hints.pop(data_hint, None)
                     return {'rating': 'unreported'}
-        if data['student_rating'] == 'remove':
+
+        elif data['student_rating'] == 'remove':
             for reported_hints in self.reported_hints:
                 if data_hint == reported_hints:
                     self.hint_database[self.reported_hints[data_hint]].pop(data_hint, None)
                     self.reported_hints.pop(data_hint, None)
                     return {'rating': 'removed'}
-        if data['student_rating'] == 'report':
+
+        elif data['student_rating'] == 'report':
             # add hint to Reported dictionary
             self.reported_hints[str(data_hint)] = answer_data
             return {"rating": 'reported', 'hint': data_hint}
-        rating = self.change_rating(data_hint, data_rating, answer_data)
-        return {"rating": str(rating), 'hint': data_hint}
+
+        elif data_rating == 'upvote':
+            self.upvote_hint(answer, submission)
+            return {'success':True}
+
+        elif data_rating == 'downvote':
+            self.downvote_hint(answer, submission)
+            return {'success': True}
+
+        else:
+            return {'success':False, 'error': 'Unrecognized operation'}
 
     def change_rating(self, data_hint, data_rating, answer_data):
         """
@@ -328,14 +336,7 @@ class CrowdsourceHinter(XBlock):
           The rating associated with the hint is returned. This rating is identical
           to what would be found under self.hint_database[answer_string[hint_string]]
         """
-        if any(data_hint in generic_hints for generic_hints in self.generic_hints):
-            return
-        if data_rating == 'upvote':
-            self.hint_database[str(answer_data)][str(data_hint)]['upvotes'] += 1
-            return self.hint_database[str(answer_data)][str(data_hint)]
-        else:
-            self.hint_database[str(answer_data)][str(data_hint)]['downvotes'] += 1
-            return self.hint_database[str(answer_data)][str(data_hint)]
+
 
     @XBlock.json_handler
     def add_new_hint(self, data, suffix=''):
@@ -354,7 +355,7 @@ class CrowdsourceHinter(XBlock):
             return {'success':True,
                     'result': 'Hint added'}
         
-        self.hint_database[str(answer)][str(submission)]['upvotes'] += 1
+        self.upvote_hint(answer, submission)
         return {'success':True,
                 'result': 'We already had this hint. We gave it an upvote'}
 
@@ -376,7 +377,7 @@ class CrowdsourceHinter(XBlock):
              """
              <verticaldemo>
                <crowdsourcehinter>
-                 {"generic_hints": "Make sure to check for basic mistakes like typos", "initial_hints": {"michiganp": "remove the p at the end.", "michigann": "too many Ns on there."}, "hinting_element": "i4x://edX/DemoX/problem/Text_Input"}
+                 {"generic_hints": "Make sure to check for basic mistakes like typos", "initial_hints": {"michiganp": "remove the p at the end.", "michigann": "too many Ns on there."}, "target_problem": "i4x://edX/DemoX/problem/Text_Input"}
                </crowdsourcehinter>
              </verticaldemo>""")
         ]
@@ -387,11 +388,14 @@ class CrowdsourceHinter(XBlock):
         A minimal working test for parse_xml
         """
         block = runtime.construct_xblock_from_class(cls, keys)
-        xmlText = json.loads(node.text)
+        if node.text:
+            xmlText = json.loads(node.text)
+        else:
+            xmlText = None
         if xmlText:
             block.generic_hints.append(str(xmlText["generic_hints"]))
             block.initial_hints = copy.copy(xmlText["initial_hints"])
-            block.Element = str(xmlText["hinting_element"])
+            block.target_problem = str(xmlText["target_problem"])
         return block
 
     ## Code below is done
