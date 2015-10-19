@@ -88,7 +88,7 @@ function CrowdsourceHinter(runtime, element, data){
 
     /**
      * Set the target problem for which to listen for the problem_graded event. Set target to first
-     * problem block if no hinting element has been manually entered.
+     * problem block if no target element has been manually entered.
      */
     if(data.target_problem == undefined || data.target_problem == ''){
         //contains workaround because the data-usage-id shows up with ";_" in place of "/" in lms
