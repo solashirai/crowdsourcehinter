@@ -96,10 +96,10 @@ class CrowdsourceHinter(XBlock):
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
         frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter_studio.js"))
-        print type(self.initial_hints), type(self.target_problem), type(self.generic_hints), str
+        print type(self.initial_hints), type(self.target_problem), type(self.generic_hints)
         frag.initialize_js('CrowdsourceHinterStudio',
-                           {'initial': self.initial_hints,
-                            'generic': self.generic_hints,
+                           {'initial': str(self.initial_hints),
+                            'generic': str(self.generic_hints),
                             'target_problem': self.target_problem})
         return frag
 
@@ -126,6 +126,9 @@ class CrowdsourceHinter(XBlock):
                     'error' : 'Initial hints should be a dict.'}
 
         self.initial_hints = initial_hints
+        for answers in self.initial_hints:
+            for hints in self.initial_hints[answers]:
+                self.initial_hints[answers][hints] = {"upvotes": 0, "downvotes": 0}
         self.generic_hints = generic_hints
         print type(data['target_problem'])
         if len(data['target_problem']) > 1:
@@ -187,7 +190,7 @@ class CrowdsourceHinter(XBlock):
             if answers not in self.hint_database:
                 self.hint_database[answers] = {}
             if self.initial_hints[answers] not in self.hint_database[answers]:
-                self.hint_database[answers].update({self.initial_hints[answers]: 0})
+                self.hint_database[answers].update({self.initial_hints[answers]: {"upvotes": 0, "downvotes": 0}})
 
         answer = self.extract_student_answers(data["submittedanswer"])
 
