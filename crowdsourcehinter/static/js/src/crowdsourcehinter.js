@@ -145,7 +145,7 @@ function CrowdsourceHinter(runtime, element, data){
      * @param student_answers is the text of the student's incorrect answer
      */
     function showStudentSubmissionHistory(student_answer){
-        var showStudentSubmissionTemplate = $(Mustache.render($('#show_student_submission').html(), {answer: student_answer}));
+        var showStudentSubmissionTemplate = $(Mustache.render($('#show_student_submission').html(), {answer:student_answer}));
         $('.csh_student_submission', element).append(showStudentSubmissionTemplate);
     }
 
@@ -169,8 +169,8 @@ function CrowdsourceHinter(runtime, element, data){
         }
         $.each(result, function(index, value) {
             if(value != "Reported"){
-                showStudentSubmissionHistory(value);
-                student_answer = encodeURI(value);
+                showStudentSubmissionHistory($.parseJSON(value));
+                student_answer = value;
                 hint = index;
                 //hints return null if no answer-specific hints exist
                 if(hint === "null") {
