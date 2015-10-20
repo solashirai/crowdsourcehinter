@@ -170,7 +170,7 @@ function CrowdsourceHinter(runtime, element, data){
         $.each(result, function(index, value) {
             if(value != "Reported"){
                 showStudentSubmissionHistory(value);
-                student_answer = value;
+                student_answer = encodeURI(value);
                 hint = index;
                 //hints return null if no answer-specific hints exist
                 if(hint === "null") {

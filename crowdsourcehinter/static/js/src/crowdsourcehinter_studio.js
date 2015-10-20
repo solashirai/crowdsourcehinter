@@ -1,6 +1,6 @@
 function CrowdsourceHinterStudio(runtime, element, data){
 
-    //set text area values to be what is currently in the hinter. to be replaced by above code.
+    //set text area values to be what is currently in the hinter
     $('.csh_initial_hints', element).val(data.initial);
     $('.csh_generic_hints', element).val(data.generic);
     $('.csh_target_problem', element).val(data.target_problem);

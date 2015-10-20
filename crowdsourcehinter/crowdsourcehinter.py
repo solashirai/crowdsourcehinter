@@ -5,6 +5,7 @@ import random
 import json
 import copy
 
+import urllib
 import HTMLParser
 
 from xblock.core import XBlock
@@ -96,10 +97,9 @@ class CrowdsourceHinter(XBlock):
         frag.add_javascript_url('//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js')
         frag.add_css(self.resource_string("static/css/crowdsourcehinter.css"))
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter_studio.js"))
-        print type(self.initial_hints), type(self.target_problem), type(self.generic_hints)
         frag.initialize_js('CrowdsourceHinterStudio',
-                           {'initial': str(self.initial_hints),
-                            'generic': str(self.generic_hints),
+                           {'initial': json.dumps(self.initial_hints),
+                            'generic': json.dumps(self.generic_hints),
                             'target_problem': self.target_problem})
         return frag
 
@@ -126,11 +126,7 @@ class CrowdsourceHinter(XBlock):
                     'error' : 'Initial hints should be a dict.'}
 
         self.initial_hints = initial_hints
-        for answers in self.initial_hints:
-            for hints in self.initial_hints[answers]:
-                self.initial_hints[answers][hints] = {"upvotes": 0, "downvotes": 0}
         self.generic_hints = generic_hints
-        print type(data['target_problem'])
         if len(data['target_problem']) > 1:
             self.target_problem = data['target_problem']
         return {'success': True}
@@ -160,7 +156,8 @@ class CrowdsourceHinter(XBlock):
         # First, we split this into the submission
         answers = [a.split('=') for a in answers.split("&")]
         # Next, we decode the HTML escapes
-        answers = [(a[0], html_parser.unescape(a[1])) for a in answers]
+        answers = [(a[0], urllib.unquote_plus(a[1])) for a in answers]
+        print answers
         return dict(answers)
 
     @XBlock.json_handler
@@ -189,8 +186,9 @@ class CrowdsourceHinter(XBlock):
         for answers in self.initial_hints:
             if answers not in self.hint_database:
                 self.hint_database[answers] = {}
-            if self.initial_hints[answers] not in self.hint_database[answers]:
-                self.hint_database[answers].update({self.initial_hints[answers]: {"upvotes": 0, "downvotes": 0}})
+            for hints in self.initial_hints[answers]:
+                if hints not in self.hint_database[answers]:
+                    self.hint_database[answers].update({hints: {"upvotes": 0, "downvotes": 0}})
 
         answer = self.extract_student_answers(data["submittedanswer"])
 
@@ -286,16 +284,16 @@ class CrowdsourceHinter(XBlock):
         if len(self.incorrect_answers) == 0:
             return used_hint_answer_text
         else:
-            for index in range(0, len(self.used)):
-                # each index is a hint that was used, in order of usage
-                if self.used[index] in self.hint_database[self.incorrect_answers[index]]:
-                    # add new key (hint) to used_hint_answer_text with a value (incorrect answer)
-                    used_hint_answer_text[self.used[index]] = self.incorrect_answers[index]
-                else:
-                    # if the student's answer had no hints (or all the hints were reported and unavailable) return None
-                    used_hint_answer_text[None] = self.incorrect_answers[index]
+            # for the time being only the first answer/hint pair will be shown to the studen
+            if self.used[0] in self.hint_database[self.incorrect_answers[0]]:
+                # add new key (hint) to used_hint_answer_text with a value (incorrect answer)
+                used_hint_answer_text[self.used[0]] = self.incorrect_answers[0]
+            else:
+                # if the student's answer had no hints (or all the hints were reported and unavailable) return None
+                used_hint_answer_text[None] = self.incorrect_answers[0]
         self.incorrect_answers = []
         self.used = []
+        print used_hint_answer_text
         return used_hint_answer_text
 
     @XBlock.json_handler
@@ -361,6 +359,7 @@ class CrowdsourceHinter(XBlock):
         """
         submission = data['new_hint_submission']
         answer = data['answer']
+        print answer, submission
 
         # If we don't have the hint already, add it
         if submission not in self.hint_database[answer]:
