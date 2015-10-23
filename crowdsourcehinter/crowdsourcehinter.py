@@ -356,7 +356,7 @@ class CrowdsourceHinter(XBlock):
           data['answer']: This is the incorrect answer for which the student is submitting a new hint.
         """
         submission = data['new_hint_submission']
-        answer = urllib.unquote_plus(data['answer'])
+        answer = data['answer']
 
         # If we don't have the hint already, add it
         if submission not in self.hint_database[answer]:
