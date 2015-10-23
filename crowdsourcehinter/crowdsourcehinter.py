@@ -286,10 +286,10 @@ class CrowdsourceHinter(XBlock):
             # for the time being only the first answer/hint pair will be shown to the studen
             if self.used[0] in self.hint_database[self.incorrect_answers[0]]:
                 # add new key (hint) to used_hint_answer_text with a value (incorrect answer)
-                used_hint_answer_text[json.dumps(self.used[0])] = json.dumps(self.incorrect_answers[0])
+                used_hint_answer_text[self.used[0]] = self.incorrect_answers[0]
             else:
                 # if the student's answer had no hints (or all the hints were reported and unavailable) return None
-                used_hint_answer_text[None] = json.dumps(self.incorrect_answers[0])
+                used_hint_answer_text[None] = self.incorrect_answers[0]
         self.incorrect_answers = []
         self.used = []
         return used_hint_answer_text
@@ -356,7 +356,7 @@ class CrowdsourceHinter(XBlock):
           data['answer']: This is the incorrect answer for which the student is submitting a new hint.
         """
         submission = data['new_hint_submission']
-        answer = data['answer']
+        answer = urllib.unquote_plus(data['answer'])
 
         # If we don't have the hint already, add it
         if submission not in self.hint_database[answer]:
