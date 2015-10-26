@@ -119,7 +119,7 @@ function CrowdsourceHinter(runtime, element, data){
      * @param student_answer is the first incorrect answer submitted by the student
      */
     function showStudentHintRatingUX(hint, student_answer){
-        var hintRatingUXTemplate = $(Mustache.render($('#show_hint_rating_ux').html(), {hintIdentifer: encodeURI(hint), hintText: hint}));
+        var hintRatingUXTemplate = $(Mustache.render($('#show_hint_rating_ux').html(), {hintIdentifier: encodeURI(hint), hintText: hint}));
         $('.csh_answer_text', element).append(hintRatingUXTemplate);
         var hintCreationTemplate = $(Mustache.render($('#add_hint_creation').html(), {}));
         $('.csh_answer_text', element).append(hintCreationTemplate);
@@ -134,7 +134,7 @@ function CrowdsourceHinter(runtime, element, data){
      * @param reportedHint is the reported hint text
      */
     function showReportedModeration(reportedHint){
-        var reportedModerationTemplate = $(Mustache.render($('#show_reported_moderation').html(), {reportedHintIdentifer: encodeURI(reportedHint), reportedHintText: reportedHint}));
+        var reportedModerationTemplate = $(Mustache.render($('#show_reported_moderation').html(), {reportedHintIdentifier: encodeURI(reportedHint), reportedHintText: reportedHint}));
         $('.csh_reported_hints', element).append(reportedModerationTemplate);
     }
 
