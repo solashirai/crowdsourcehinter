@@ -1,7 +1,7 @@
 <script type='x-tmpl/mustache' id='show_hint_rating_ux'>
-    <div class='csh_hint_value' value="{{hintText}}">
+    <div class='csh_hint_value' value="{{hintIdentifier}}">
         <div class='csh_hint_data'>
-            <div class="csh_hint">You received the following hint: <b>{{visual_hintText}}</b></div>
+            <div class="csh_hint">You received the following hint: <b>{{hintText}}</b></div>
         </div>
         <div class='csh_rating_data'>
             <div role="button" class="csh_rate_hint" data-rate="upvote">
@@ -18,8 +18,8 @@
 </script>
 
 <script type="x-tmpl/mustache" id="show_reported_moderation">
-    <div class="csh_hint_value" value ="{{reportedHintText}}">
-        <div class="csh_hint">{{visual_reportedHintText}}</div>
+    <div class="csh_hint_value" value ="{{reportedHintIdentifier}}">
+        <div class="csh_hint">{{reportedHintText}}</div>
         <div role="button" class="csh_staff_rate" data-rate="unreport" aria-label="unreport">
             <u><b>Return hint for use in the hinter</b></u>
         </div>
@@ -46,11 +46,11 @@
 
 <script type="x-tmpl/mustache" id="show_student_submission">
     <div class="csh_student_answer">
-        <h class="csh_answer_text" answer={{answer}}>
+        <h class="csh_answer_text" answer={{answerIdentifier}}>
         <div role="button" class="csh_reveal_info">Help us improve hints for this problem </div>
         <div class="csh_user_info" style="display: none;"> <br> Submitting an incorrect answer for this problem provides you with a hint specific to the mistake that you made - these hints are made by other students who made the same mistake as you did. Help to make the hints for this problem better by rating the hint that you received, or if you might have better advice to give other students, submit a new hint! <br> If you choose to submit a new hint, keep in mind that the hints are specific to one incorrect answer; specific advice (perhaps on some aspect of the problem that you overlooked) is more helpful than generic advice.</div>
         <br>
-        Your original answer was: <b>{{visual_answer}}</b></h>
+        Your original answer was: <b>{{answerText}}</b></h>
     </div>
 </script>
 
