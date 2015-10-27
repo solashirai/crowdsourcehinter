@@ -119,7 +119,7 @@ function CrowdsourceHinter(runtime, element, data){
      * @param student_answer is the first incorrect answer submitted by the student
      */
     function showStudentHintRatingUX(hint, student_answer){
-        var hintRatingUXTemplate = $(Mustache.render($('#show_hint_rating_ux').html(), {hintText: hint}));
+        var hintRatingUXTemplate = $(Mustache.render($('#show_hint_rating_ux').html(), {hintIdentifier: encodeURI(hint), hintText: hint}));
         $('.csh_answer_text', element).append(hintRatingUXTemplate);
         var hintCreationTemplate = $(Mustache.render($('#add_hint_creation').html(), {}));
         $('.csh_answer_text', element).append(hintCreationTemplate);
@@ -134,7 +134,7 @@ function CrowdsourceHinter(runtime, element, data){
      * @param reportedHint is the reported hint text
      */
     function showReportedModeration(reportedHint){
-        var reportedModerationTemplate = $(Mustache.render($('#show_reported_moderation').html(), {reportedHintText: reportedHint}));
+        var reportedModerationTemplate = $(Mustache.render($('#show_reported_moderation').html(), {reportedHintIdentifier: encodeURI(reportedHint), reportedHintText: reportedHint}));
         $('.csh_reported_hints', element).append(reportedModerationTemplate);
     }
 
@@ -145,7 +145,7 @@ function CrowdsourceHinter(runtime, element, data){
      * @param student_answers is the text of the student's incorrect answer
      */
     function showStudentSubmissionHistory(student_answer){
-        var showStudentSubmissionTemplate = $(Mustache.render($('#show_student_submission').html(), {answer:student_answer}));
+        var showStudentSubmissionTemplate = $(Mustache.render($('#show_student_submission').html(), {answerIdentifier: encodeURI(student_answer), answerText: student_answer}));
         $('.csh_student_submission', element).append(showStudentSubmissionTemplate);
     }
 
@@ -169,7 +169,7 @@ function CrowdsourceHinter(runtime, element, data){
         }
         $.each(result, function(index, value) {
             if(value != "Reported"){
-                showStudentSubmissionHistory($.parseJSON(value));
+                showStudentSubmissionHistory(value);
                 student_answer = value;
                 hint = index;
                 //hints return null if no answer-specific hints exist
@@ -213,7 +213,10 @@ function CrowdsourceHinter(runtime, element, data){
     function submitNewHint(){ return function(submitHintButtonHTML){
     //add the newly created hint to the hinter's pool of hints
         if($('.csh_student_text_input', element).val().length > 0){
-            var studentAnswer = unescape(submitHintButtonHTML.currentTarget.attributes['answer'].value);
+            //encodeURI is used on the answer string when it is passed to mustache due to errors that
+            //arise in answers that contain spaces. Since the original answer is not in the encoded form,
+            //we must use the decoded form here.
+            var studentAnswer = decodeURI(submitHintButtonHTML.currentTarget.attributes['answer'].value);
             var newHint = unescape($('.csh_student_text_input').val());
             $('.csh_submitbutton', element).show();
             $.ajax({
@@ -242,7 +245,10 @@ function CrowdsourceHinter(runtime, element, data){
         $('.csh_hint_text', element).attr('rating', rating);
         $('.csh_hint', element).attr('rating', rating);
         hint = $('.csh_hint_text', element).attr('hint_received');
-        student_answer = $('.csh_hint_text', element).attr('student_answer');
+        //encodeURI is used on the answer string when it is passed to mustache due to errors that
+        //arise in answers that contain spaces. Since the original answer is not in the encoded form,
+        //we must use the decoded form here.
+        student_answer = decodeURI($('.csh_hint_text', element).attr('student_answer'));
         $.ajax({
             type: "POST",
             url: runtime.handlerUrl(element, 'rate_hint'),
@@ -257,7 +263,10 @@ function CrowdsourceHinter(runtime, element, data){
 
     function reportHint(){ return function(reportHintButtonHTML){
         hint = $('.csh_hint_text', element).attr('hint_received');
-        student_answer = $('.csh_hint_text', element).attr('student_answer');
+        //encodeURI is used on the answer string when it is passed to mustache due to errors that
+        //arise in answers that contain spaces. Since the original answer is not in the encoded form,
+        //we must use the decoded form here.
+        student_answer = decodeURI($('.csh_hint_text', element).attr('student_answer'));
         $('.csh_hint_text', element).text('This hint has been reported for review.');
         $('.csh_hint', element).text('This hint has been reported for review.');
         $.ajax({
