@@ -143,7 +143,7 @@ class CrowdsourceHinter(XBlock):
         frag.add_javascript(self.resource_string("static/js/src/crowdsourcehinter.js"))
         frag.initialize_js('CrowdsourceHinter',
                            {'target_problem': self.target_problem,
-                            'isStaff': self.xmodule_runtime.user_is_staff})
+                            'isStaff': self.get_user_is_staff()})
         return frag
 
     def extract_student_answers(self, answers):
@@ -384,11 +384,11 @@ class CrowdsourceHinter(XBlock):
         return [
             ("CrowdsourceHinter",
              """
-             <verticaldemo>
+             <vertical_demo>
                <crowdsourcehinter>
                  {"generic_hints": "Make sure to check for basic mistakes like typos", "initial_hints": {"michiganp": "remove the p at the end.", "michigann": "too many Ns on there."}, "target_problem": "i4x://edX/DemoX/problem/Text_Input"}
                </crowdsourcehinter>
-             </verticaldemo>""")
+             </vertical_demo>""")
         ]
 
     @classmethod
@@ -421,4 +421,8 @@ class CrowdsourceHinter(XBlock):
         This is not a supported part of the XBlocks API. User data is still
         being defined. However, it's the only way to get the data right now.
         """
-        return self.xmodule_runtime.user_is_staff
+        xmodule_runtime = getattr(self, "xmodule_runtime", None)
+        if xmodule_runtime:
+            return self.xmodule_runtime.user_is_staff
+        else:
+            return False
