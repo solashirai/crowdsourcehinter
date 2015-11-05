@@ -171,7 +171,7 @@ class CrowdsourceHinter(XBlock):
                 rating_dict = {}
                 for hint in self.hint_database[answer]:
                     rating_dict.update({hint: (self.hint_database[answer][hint]["upvotes"] - self.hint_database[answer][hint]["downvotes"])})
-                self.hint_database[answer].remove(min(rating_dict, rating_dict.get))
+                del self.hint_database[answer][(min(rating_dict, key=rating_dict.get))]
                     
 
     def compare_ratings(self, answer, hint, best):
@@ -179,7 +179,7 @@ class CrowdsourceHinter(XBlock):
         Determine if the rating of a hint is better than the current
         "best" hint. 
         """
-        return (self.hint_database[answer][hint]["upvotes"] - self.hint_database[answer][hint]["downvotes"]) > (self.hint_database[answer][best_hint]["upvotes"] - self.hint_database[answer][best_hint]["downvotes"])
+        return (self.hint_database[answer][hint]["upvotes"] - self.hint_database[answer][hint]["downvotes"]) > (self.hint_database[answer][best]["upvotes"] - self.hint_database[answer][best]["downvotes"])
 
     @XBlock.json_handler
     def get_hint(self, data, suffix=''):
@@ -198,10 +198,6 @@ class CrowdsourceHinter(XBlock):
           'HintCategory': Either a string for the type of hint, or False
               if no hints
         """
-        # We will remove excess hints at this point so that issues
-        # won't arise later due to a hint being removed
-        # (e.x. upvoting a hint that has been removed)
-        self.limit_hint_storage
         # Populate hint_database with hints from initial_hints if
         # there are no hints in hint_database. This probably will
         # occur only on the very first run of a unit containing this
@@ -214,6 +210,13 @@ class CrowdsourceHinter(XBlock):
             for hints in self.initial_hints[answers]:
                 if hints not in self.hint_database[answers]:
                     self.hint_database[answers].update({hints: {"upvotes": 0, "downvotes": 0}})
+
+        # We will remove excess hints at this point so that issues
+        # won't arise later due to a hint being removed
+        # (e.x. upvoting a hint that has been removed)
+        # Initial hints will have the opportunity to be added back
+        # into hint_database if the other hints have bad ratings.
+        self.limit_hint_storage()
 
         answer = self.extract_student_answers(data["submittedanswer"])
 
@@ -232,7 +235,7 @@ class CrowdsourceHinter(XBlock):
         if self.hints_available(answer):
             for hint in self.hint_database[answer]:
                 if hint not in self.reported_hints.keys():
-                    # if best_hint hasn't been set yet or the rating of hints is greater than the rating of best_hint
+                    # if best_hint hasn't been set yet or if a hint's rating is greater than the rating of best_hint
                     if best_hint == "" or self.compare_ratings(answer, hint, best_hint):
                         best_hint = hint
             self.used.append(best_hint)

@@ -6,7 +6,7 @@
         Generic Hints: <textarea type="text" class="csh_generic_hints" value = "{{generic}}"/>
     </p>
     <p>
-        Initial hints should be a python dictionary, in the following format - {"mistake1": {"hint1": {"upvotes": 0, "downvotes": 0}}, "mistake2": {"hint2": {"upvotes": 0, "downvotes": 0}}}. Upvotes and downvotes can be set to desired values for varying results (e.x. set high downvotes to make new student-made hints have priority over your initial hint).
+        Initial hints should be a python dictionary, with incorrect answers as keys and a list of hints as values. e.x. {"mistake1": ["hint1", "hint2"], "mistake2": ["hint"]}.
     </p>
     <p>
         Initial Hints: <textarea type="text" class="csh_initial_hints" value = "{{initial}}"/>
