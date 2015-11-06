@@ -216,6 +216,8 @@ class CrowdsourceHinter(XBlock):
         # (e.x. upvoting a hint that has been removed)
         # Initial hints will have the opportunity to be added back
         # into hint_database if the other hints have bad ratings.
+        # This is a temporary solution, and its location or method
+        # of limitation probably should be improved later.
         self.limit_hint_storage()
 
         answer = self.extract_student_answers(data["submittedanswer"])
