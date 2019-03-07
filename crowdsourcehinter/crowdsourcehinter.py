@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import logging
 import operator
 import pkg_resources
@@ -5,15 +6,15 @@ import random
 import json
 import copy
 
-import urllib
-import HTMLParser
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+import six.moves.html_parser
 
 from xblock.core import XBlock
 from xblock.fields import Scope, Dict, List, Boolean, String
 from xblock.fragment import Fragment
 
 log = logging.getLogger(__name__)
-html_parser = HTMLParser.HTMLParser()
+html_parser = six.moves.html_parser.HTMLParser()
 
 class CrowdsourceHinter(XBlock):
     """
@@ -156,7 +157,7 @@ class CrowdsourceHinter(XBlock):
         # First, we split this into the submission
         answers = [a.split('=') for a in answers.split("&")]
         # Next, we decode the HTML escapes
-        answers = [(a[0], urllib.unquote_plus(a[1])) for a in answers]
+        answers = [(a[0], six.moves.urllib.parse.unquote_plus(a[1])) for a in answers]
         return dict(answers)
 
     def limit_hint_storage(self):
@@ -227,7 +228,7 @@ class CrowdsourceHinter(XBlock):
         #
         # TODO: We should replace this with a generic canonicalization
         # function
-        answer = answer.values()[0].lower()
+        answer = list(answer.values())[0].lower()
 
         # Put the student's answer to lower case so that differences
         # in capitalization don't make different groups of
@@ -236,7 +237,7 @@ class CrowdsourceHinter(XBlock):
 
         if self.hints_available(answer):
             for hint in self.hint_database[answer]:
-                if hint not in self.reported_hints.keys():
+                if hint not in list(self.reported_hints.keys()):
                     # if best_hint hasn't been set yet or if a hint's rating is greater than the rating of best_hint
                     if best_hint == "" or self.compare_ratings(answer, hint, best_hint):
                         best_hint = hint
