@@ -1,0 +1,12 @@
+{
+    "course/Demo_Course": {
+        "advanced_modules": [
+            "crowdsourcehinter"
+        ], 
+        "display_name": "CSH Demonstration Course", 
+        "graded": false, 
+        "rerandomize": "never", 
+        "show_calculator": false, 
+        "showanswer": "attempted", 
+    }
+}

@@ -1,0 +1,91 @@
+<script type='x-tmpl/mustache' id='show_hint_rating_ux'>
+    <div class='csh_hint_value' value="{{hintIdentifier}}">
+        <div class='csh_hint_data'>
+            <div class="csh_hint">You received the following hint: <b>{{hintText}}</b></div>
+        </div>
+        <div class='csh_rating_data'>
+            <div role="button" class="csh_rate_hint" data-rate="upvote">
+                <b>Rate as Helpful</b>
+            </div>
+            <div role="button" class="csh_rate_hint" data-rate="downvote">
+                <b>Rate as Unhelpful</b>
+            </div>
+            <div role="button" class="csh_report_hint" data-icon="report" title="Report this hint.">
+                <b>⚑</b>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="x-tmpl/mustache" id="show_reported_moderation">
+    <div class="csh_hint_value" value ="{{reportedHintIdentifier}}">
+        <div class="csh_hint">{{reportedHintText}}</div>
+        <div role="button" class="csh_staff_rate" data-rate="unreport" aria-label="unreport">
+            <u><b>Return hint for use in the hinter</b></u>
+        </div>
+        <div role="button" class="csh_staff_rate" data-rate="remove" aria-label="remove">
+            <u><b>Permanently remove hint.</b></u>
+        </div> 
+        <div>--------</div>
+    </div>
+</script>
+
+<script type="x-tmpl/mustache" id="hint_text_input">
+    <p>
+        <input type="text" name="studentinput" class="csh_student_text_input">
+    </p>
+    <p>
+       <input answer="{{student_answer}}" type="button" class="csh_submit_new" value="Submit Hint"> 
+    </p>
+</script>
+
+<script type="x-tmpl/mustache" id="show_no_hints">
+    <div class="csh_hint_value"> This specific mistake doesn't appear to have any hints yet. You can contribute a hint to help other students who make the same mistake in the future.
+    </div>
+</script>
+
+<script type="x-tmpl/mustache" id="show_student_submission">
+    <div class="csh_student_answer">
+        <h class="csh_answer_text" answer={{answerIdentifier}}>
+        <div role="button" class="csh_reveal_info">Help us improve hints for this problem </div>
+        <div class="csh_user_info" style="display: none;"> <br> Submitting an incorrect answer for this problem provides you with a hint specific to the mistake that you made - these hints are made by other students who made the same mistake as you did. Help to make the hints for this problem better by rating the hint that you received, or if you might have better advice to give other students, submit a new hint! <br> If you choose to submit a new hint, keep in mind that the hints are specific to one incorrect answer; specific advice (perhaps on some aspect of the problem that you overlooked) is more helpful than generic advice.</div>
+        <br>
+        Your original answer was: <b>{{answerText}}</b></h>
+    </div>
+</script>
+
+<script type="x-tmpl/mustache" id="add_hint_creation">
+    <div>
+        <input type ="button" class="csh_student_hint_creation" value="Contribute a New Hint">
+        </input>
+    </div>
+</script>
+
+<div class="crowdsourcehinter_block">
+
+<div class='csh_hint_reveal'>
+    <div class='csh_hint_text' student_answer = '' hint_received='' rating=''>
+    </div>
+    <div class='csh_hint_rating_on_incorrect'>
+        <div class="csh_rate_hint_text">
+            This hint was: 
+        </div>
+        <div role="button" class="csh_rate_hint" data-rate="upvote" title="This hint was helpful!">
+            <b> Helpful </b>
+        </div>
+        <div role="button" class="csh_rate_hint" data-rate="downvote" title="This hint was not very helpful.">
+            <b> Unhelpful </b>
+        </div>
+        <div role="button" class="csh_report_hint" title="Report this hint">
+            <b> ⚑ </b>
+        </div>
+    </div>
+</div>
+
+    <section class="csh_correct"></section>
+<div class="csh_student_submission">
+<div class="csh_reported_hints">
+    <span>moderate reported hints</span>
+</div>
+</div>
+</div>
